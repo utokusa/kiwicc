@@ -14,6 +14,7 @@
 typedef enum
 {
   TK_RESERVED, // Keywords or punctuators
+  TK_IDENT,    // Identifier
   TK_NUM,      // Integer literals
   TK_EOF,      // End-of-file markers
 } TokenKind;
@@ -34,15 +35,17 @@ struct Token
 // Kind of AST node
 typedef enum
 {
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_MUL, // *
-  ND_DIV, // /
-  ND_NUM, // integer
-  ND_EQ,  // == equal to
-  ND_NE,  // != not equal to
-  ND_LT,  // <  less than
-  ND_LE,  // <= less than or equal to
+  ND_ADD,    // +
+  ND_SUB,    // -
+  ND_MUL,    // *
+  ND_DIV,    // /
+  ND_EQ,     // == equal to
+  ND_NE,     // != not equal to
+  ND_LT,     // <  less than
+  ND_LE,     // <= less than or equal to
+  ND_ASSIGN, // = assignment
+  ND_LVAR,   // local variables
+  ND_NUM,    // integer
 } NodeKind;
 
 // Node of AST
@@ -52,7 +55,8 @@ struct Node
   NodeKind kind;
   Node *lhs;
   Node *rhs;
-  int val; // Use only if kind is ND_NUM
+  int val;    // Use only if kind is ND_NUM
+  int offset; // Use only if kind is ND_LVAR
 };
 
 /*********************************************
@@ -64,6 +68,9 @@ extern Token *token;
 
 // Input program
 extern char *user_input;
+
+// Statement Nodes
+extern Node *code[100];
 
 /*********************************************
 * ...function declarations...
@@ -83,12 +90,19 @@ void error_at(char *loc, char *fmt, ...);
 // Otherwise we return false
 bool consume(char *op);
 
+// If next token is a identifier,
+// we move it forward and return true.
+// Otherwise we return NULL.
+Token *consume_ident();
+
 // If next token is the symbol which we expect,
 // we move it forward.
 // Otherwise report error.
 void expect(char *op);
 
 int expect_number();
+
+bool is_number();
 
 bool at_eof();
 
@@ -97,7 +111,7 @@ Token *tokenize();
 
 // ********** parse.c *************
 
-Node *expr();
+void program();
 
 // ********** codegen.c *************
 

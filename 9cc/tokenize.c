@@ -43,6 +43,18 @@ bool consume(char *op)
   return true;
 }
 
+// If next token is a identifier,
+// we move it forward and return token.
+// Otherwise we return NULL.
+Token *consume_ident()
+{
+  if (token->kind != TK_IDENT)
+    return NULL;
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
+
 // If next token is the symbol which we expect,
 // we move it forward.
 // Otherwise report error.
@@ -51,7 +63,7 @@ void expect(char *op)
   if (token->kind != TK_RESERVED ||
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len))
-    error_at(token->str, "The token is not %c.", op);
+    error_at(token->str, "The token is not %s.", op);
   token = token->next;
 }
 
@@ -106,9 +118,16 @@ Token *tokenize()
     }
     if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
         *p == '(' || *p == ')' ||
-        *p == '<' || *p == '>')
+        *p == '<' || *p == '>' ||
+        *p == '=' || *p == ';')
     {
       cur = new_token(TK_RESERVED, cur, p++, 1);
+      continue;
+    }
+
+    if ('a' <= *p && *p <= 'z')
+    {
+      cur = new_token(TK_IDENT, cur, p++, 1);
       continue;
     }
 

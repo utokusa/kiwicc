@@ -6,6 +6,9 @@ Token *token;
 // Input program
 char *user_input;
 
+// Statements
+Node *code[100];
+
 int main(int argc, char **argv)
 {
   if (argc != 2)
@@ -17,16 +20,34 @@ int main(int argc, char **argv)
   // Tokenize
   user_input = argv[1];
   token = tokenize();
-  Node *node = expr();
+  program();
 
   // Output the assembly code.
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  gen(node);
+  // Prologue
+  // Allocate 26 local variables
+  printf("  push rbp\n");
+  printf("  mov rbp, rsp\n");
+  printf("  sub rsp, 208\n"); // 26 * 8 = 208
 
-  printf("  pop rax\n");
+  {
+    int i = 0;
+    while (code[i])
+    {
+      gen(code[i++]);
+
+      // Pop unnecessary　evaluation result of the expression.
+      printf(" pop rax\n");
+    }
+  }
+
+  // Epilogue
+  // The value of rax is the return value
+  printf("  mov rsp, rbp\n");
+  printf("  pop rbp\n");
   printf("  ret\n");
   return 0;
 }
