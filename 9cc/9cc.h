@@ -56,6 +56,7 @@ typedef enum
   ND_ASSIGN, // = assignment
   ND_LVAR,   // local variables
   ND_NUM,    // integer
+  ND_RETURN, // "return"
 } NodeKind;
 
 // Node of AST

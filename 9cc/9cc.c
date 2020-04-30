@@ -43,7 +43,7 @@ int main(int argc, char **argv)
       gen(code[i++]);
 
       // Pop unnecessary　evaluation result of the expression.
-      printf(" pop rax\n");
+      printf("  pop rax\n");
     }
   }
 

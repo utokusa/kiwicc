@@ -47,5 +47,10 @@ assert 100 'a=1000; b=20; c=a/b; (c + 50) * (10 - 9);'
 assert 5 'num = 1; num * 5;'
 assert 5 'num0 = 1; num1 = num0 > 0; num0 * num1 * 5;'
 assert 10 '_NUM_TEST = 10;'
+assert 10 'return 10;'
+assert 10 'return 10; return 20;'
+assert 5 'num0 = 1; num1 = num0 > 0; return num0 * num1 * 5; return 0;'
+assert 5 'return -(-5);'
+
 
 echo OK

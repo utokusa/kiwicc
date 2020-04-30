@@ -31,6 +31,14 @@ static Node *new_node_num(int val)
   return node;
 }
 
+static Node *new_node_unary(NodeKind kind, Node *expr)
+{
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  node->lhs = expr;
+  return node;
+}
+
 void program()
 {
   int i = 0;
@@ -41,6 +49,13 @@ void program()
 
 Node *stmt()
 {
+  if (consume("return"))
+  {
+    Node *node = new_node_unary(ND_RETURN, expr());
+    expect(";");
+    return node;
+  }
+
   Node *node = expr();
   expect(";");
   return node;
