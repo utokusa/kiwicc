@@ -44,5 +44,8 @@ assert 1 '1 + 2 * 15 / 3 + 2 - 1 > 12 * 100 / 100 - 1;'
 assert 1 'a=1; b=2; b-a;'
 assert 50 'a=1000; b=20; c=a/b;'
 assert 100 'a=1000; b=20; c=a/b; (c + 50) * (10 - 9);'
+assert 5 'num = 1; num * 5;'
+assert 5 'num0 = 1; num1 = num0 > 0; num0 * num1 * 5;'
+assert 10 '_NUM_TEST = 10;'
 
 echo OK

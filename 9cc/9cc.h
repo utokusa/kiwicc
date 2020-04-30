@@ -27,7 +27,17 @@ struct Token
   Token *next;    // Next token
   int val;        // If kind is TK_NUM, its value
   char *str;      // Token string
-  int len;        // length of the token
+  int len;        // Length of the token
+};
+
+// type of local variables
+typedef struct LVar LVar;
+struct LVar
+{
+  LVar *next; // The next local variable or NULL.
+  char *name; // The name of the local variable.
+  int len;    // The length of the local variable.
+  int offset; // The offset from RBP.
 };
 
 // ********** parse.c *************
@@ -72,6 +82,9 @@ extern char *user_input;
 // Statement Nodes
 extern Node *code[100];
 
+// Local variables
+extern LVar *locals;
+
 /*********************************************
 * ...function declarations...
 *********************************************/
@@ -105,6 +118,9 @@ int expect_number();
 bool is_number();
 
 bool at_eof();
+
+// Search variable name. Return NULL if not found.
+LVar *find_lvar(Token *tok);
 
 // convert input 'user_input' to token
 Token *tokenize();

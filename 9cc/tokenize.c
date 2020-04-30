@@ -81,7 +81,37 @@ bool at_eof()
   return token->kind == TK_EOF;
 }
 
-// create new token and set it to the next of tok
+static bool is_alphabet_or_underscore(char c)
+{
+  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+// Return the length of the variable name starting from p.
+static int var_len(char *p)
+{
+  if (!is_alphabet_or_underscore(*p))
+    error("Internal error at var_len : "
+          "*p should be an alphabet or underscore.");
+  int cnt_len = 1;
+  ++p;
+  // When *p is a '\0', the following condition is false
+  while (is_alphabet_or_underscore(*p) || isdigit(*p))
+    ++cnt_len, ++p;
+  return cnt_len;
+}
+
+// Search variable name. Return NULL if not found.
+LVar *find_lvar(Token *tok)
+{
+  for (LVar *var = locals; var; var = var->next)
+  {
+    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+      return var;
+  }
+  return NULL;
+}
+
+// Create new token and set it to the next of tok
 static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
 {
   Token *tok = calloc(1, sizeof(Token));
@@ -92,7 +122,7 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   return tok;
 }
 
-// convert input 'user_input' to token
+// Convert input 'user_input' to token
 Token *tokenize()
 {
   char *p = user_input;
@@ -125,9 +155,11 @@ Token *tokenize()
       continue;
     }
 
-    if ('a' <= *p && *p <= 'z')
+    if (is_alphabet_or_underscore(*p))
     {
-      cur = new_token(TK_IDENT, cur, p++, 1);
+      cur = new_token(TK_IDENT, cur, p, DUMMY_LEN);
+      cur->len = var_len(p);
+      p += cur->len;
       continue;
     }
 

@@ -9,6 +9,9 @@ char *user_input;
 // Statements
 Node *code[100];
 
+// Local Variables
+LVar *locals;
+
 int main(int argc, char **argv)
 {
   if (argc != 2)
