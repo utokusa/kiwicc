@@ -55,5 +55,8 @@ assert 1 'v0=1;v1=1;v2=1;v3=1;v4=1;v5=1;v6=1;v7=1;v8=1;v9=1;v10=1;return v0;'
 assert 10 'if (1) return 10; return 5;'
 assert 5 'if (0) return 10; else return 5;'
 assert 5 'a = 5; b = 1; if (b - a < 0) return a * b; else return 0;'
+assert 100 'a=10; if (a == 0) return 0; else if (a == 10) return 100; return 1;'
+assert 1 'a=10; if(a==0)return 0;else if(a==10)return 1; else return 3;'
+assert 3 'a=10; if(a==0)return 0;else if(a==1)return 1; else return 3;'
 
 echo OK
