@@ -62,5 +62,12 @@ assert 9 'a=10; a = a - 1; return a;'
 assert 2 'a=10; while(a > 2) a = a - 1; return a;'
 assert 1 'a=10; while(a > 3) a = a - 3; return a;'
 assert 5 'a=10; while(a > 0) if (a == 5) return a; else a = a - 1; return 100;'
+assert 10 'a=0; sum=0; for (a=0;a<5;a=a+1) sum = sum+a; return sum;'
+assert 10 'sum=0; for (a=0;a<5;a=a+1) sum = sum+a; return sum;'
+assert 0 'for (;;) return 0;'
+assert 10 'for (a=0;a<5;) a = a + 10; return a;'
+assert 10 'for (a=0;;a=a+1) if (a >= 10) return a; return 0;'
+assert 10 'a=0; for (;a<10;a=a+1) a; return a;'
+assert 10 'a=0; for (;;a=a+1) if (a >= 10) return a; return 0;'
 
 echo OK

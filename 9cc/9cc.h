@@ -58,6 +58,7 @@ typedef enum
   ND_NUM,    // integer
   ND_IF,     // "if"
   ND_WHILE,  // "while"
+  ND_FOR,    // "for"
   ND_RETURN, // "return"
 } NodeKind;
 
@@ -70,10 +71,12 @@ struct Node
   Node *lhs;
   Node *rhs;
 
-  // "if" or "while" statement
+  // "if", "while" or "for" statement
   Node *cond;
   Node *then;
   Node *els;
+  Node *init;
+  Node *inc;
 
   int val;    // Use only if kind is ND_NUM
   int offset; // Use only if kind is ND_LVAR
