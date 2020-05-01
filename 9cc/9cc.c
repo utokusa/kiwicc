@@ -31,10 +31,13 @@ int main(int argc, char **argv)
   printf("main:\n");
 
   // Prologue
-  // Allocate 26 local variables
+  // Allocate local variables
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
-  printf("  sub rsp, 208\n"); // 26 * 8 = 208
+  int stack_size = 0;
+  if (locals)
+    stack_size = locals->offset;
+  printf("  sub rsp, %d\n", stack_size);
 
   {
     int i = 0;

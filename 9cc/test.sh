@@ -51,6 +51,6 @@ assert 10 'return 10;'
 assert 10 'return 10; return 20;'
 assert 5 'num0 = 1; num1 = num0 > 0; return num0 * num1 * 5; return 0;'
 assert 5 'return -(-5);'
-
+assert 1 'v0=1;v1=1;v2=1;v3=1;v4=1;v5=1;v6=1;v7=1;v8=1;v9=1;v10=1;return v0;'
 
 echo OK
