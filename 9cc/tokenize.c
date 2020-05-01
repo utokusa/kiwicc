@@ -81,6 +81,17 @@ bool at_eof()
   return token->kind == TK_EOF;
 }
 
+// Search variable name. Return NULL if not found.
+LVar *find_lvar(Token *tok)
+{
+  for (LVar *var = locals; var; var = var->next)
+  {
+    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+      return var;
+  }
+  return NULL;
+}
+
 static bool startswith(char *tgt, char *ref)
 {
   return strncmp(tgt, ref, strlen(ref)) == 0;
@@ -110,14 +121,26 @@ static int var_len(char *p)
   return cnt_len;
 }
 
-// Search variable name. Return NULL if not found.
-LVar *find_lvar(Token *tok)
+// Check if p starts with a reserved keyword
+static char *starts_with_reserved(char *p)
 {
-  for (LVar *var = locals; var; var = var->next)
+  // Keywords
+  static char *kw[] = {"return", "if", "else"};
+  for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)
   {
-    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
-      return var;
+    int len = strlen(kw[i]);
+    if (startswith(p, kw[i]) && !is_alnum(len))
+      return kw[i];
   }
+
+  // Multi-letter symbols
+  static char *ops[] = {"==", "!=", "<=", ">="};
+  for (int i = 0; i < sizeof(ops) / sizeof(*ops); ++i)
+  {
+    if (startswith(p, ops[i]))
+      return ops[i];
+  }
+
   return NULL;
 }
 
@@ -149,28 +172,23 @@ Token *tokenize()
       continue;
     }
 
-    // symbols
-    if (strncmp(p, "==", 2) == 0 || strncmp(p, "!=", 2) == 0 ||
-        strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0)
+    // Keywords or multi-letter symbols
+    char *kw = starts_with_reserved(p);
+    if (kw)
     {
-      cur = new_token(TK_RESERVED, cur, p, 2);
-      p += 2;
+      int len = strlen(kw);
+      cur = new_token(TK_RESERVED, cur, p, len);
+      p += len;
       continue;
     }
+
+    // Single-letter symbols
     if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
         *p == '(' || *p == ')' ||
         *p == '<' || *p == '>' ||
         *p == '=' || *p == ';')
     {
       cur = new_token(TK_RESERVED, cur, p++, 1);
-      continue;
-    }
-
-    // keywords
-    if (startswith(p, "return") && !is_alnum(p[6]))
-    {
-      cur = new_token(TK_RESERVED, cur, p, 6);
-      p += 6;
       continue;
     }
 
