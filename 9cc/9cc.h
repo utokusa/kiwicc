@@ -57,6 +57,7 @@ typedef enum
   ND_LVAR,   // local variables
   ND_NUM,    // integer
   ND_IF,     // "if"
+  ND_WHILE,  // "while"
   ND_RETURN, // "return"
 } NodeKind;
 
@@ -69,7 +70,7 @@ struct Node
   Node *lhs;
   Node *rhs;
 
-  // "if" statement ->
+  // "if" or "while" statement
   Node *cond;
   Node *then;
   Node *els;

@@ -58,5 +58,9 @@ assert 5 'a = 5; b = 1; if (b - a < 0) return a * b; else return 0;'
 assert 100 'a=10; if (a == 0) return 0; else if (a == 10) return 100; return 1;'
 assert 1 'a=10; if(a==0)return 0;else if(a==10)return 1; else return 3;'
 assert 3 'a=10; if(a==0)return 0;else if(a==1)return 1; else return 3;'
+assert 9 'a=10; a = a - 1; return a;'
+assert 2 'a=10; while(a > 2) a = a - 1; return a;'
+assert 1 'a=10; while(a > 3) a = a - 3; return a;'
+assert 5 'a=10; while(a > 0) if (a == 5) return a; else a = a - 1; return 100;'
 
 echo OK
