@@ -39,6 +39,7 @@ static Node *new_node_unary(NodeKind kind, Node *expr)
   return node;
 }
 
+// program = stmt*
 void program()
 {
   int i = 0;
@@ -47,6 +48,8 @@ void program()
   code[i] = NULL;
 }
 
+// stmt = expr ";"
+//      | "return expr" ";"
 Node *stmt()
 {
   if (consume("return"))
@@ -61,11 +64,13 @@ Node *stmt()
   return node;
 }
 
+// expr = assign
 Node *expr()
 {
   return assign();
 }
 
+// assign = eauality ("=" assign)?
 Node *assign()
 {
   Node *node = equality();
@@ -74,6 +79,7 @@ Node *assign()
   return node;
 }
 
+// eauality = relationam ("==" relationall | "!=" relational)*
 static Node *equality()
 {
   Node *node = relational();
@@ -89,6 +95,7 @@ static Node *equality()
   }
 }
 
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 static Node *relational()
 {
   Node *node = add();
@@ -108,6 +115,7 @@ static Node *relational()
   }
 }
 
+// add = mul ("+" mul | "-" mul)*
 static Node *add()
 {
   Node *node = mul();
@@ -123,6 +131,7 @@ static Node *add()
   }
 }
 
+// mul = unary ("*" unary | "/" unary)*
 static Node *mul()
 {
   Node *node = unary();
@@ -138,6 +147,7 @@ static Node *mul()
   }
 }
 
+// unary = ("+" | "-")? primary
 static Node *unary()
 {
   if (consume("+"))
@@ -147,6 +157,7 @@ static Node *unary()
   return primary();
 }
 
+// primary = num | ident | "(" expr ")"
 static Node *primary()
 {
   if (consume("("))
