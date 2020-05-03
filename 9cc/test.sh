@@ -5,6 +5,7 @@ int ret5() {return 5;}
 int add(int x, int y) {return x+y;}
 int sub(int x, int y) {return x-y;}
 int add6(int a, int b, int c, int d, int e, int f) {return a+b+c+d+e+f;}
+int retx(int x) {return x;}
 EOF
 
 assert() {
@@ -24,6 +25,8 @@ assert() {
   fi
 }
 
+assert 5 'x=5; return retx(x);'
+assert 5 'return retx(5);'
 assert 10 'return add6(1,1,1,1,1,5);'
 assert 6 'return sub(10, 4);'
 assert 3 'return add(1, 2);'
