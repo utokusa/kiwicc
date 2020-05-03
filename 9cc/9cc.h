@@ -59,6 +59,7 @@ typedef enum
   ND_IF,     // "if"
   ND_WHILE,  // "while"
   ND_FOR,    // "for"
+  ND_BLOCK,  // {...} block
   ND_RETURN, // "return"
 } NodeKind;
 
@@ -77,6 +78,9 @@ struct Node
   Node *els;
   Node *init;
   Node *inc;
+
+  // {...} block
+  Node *block;
 
   int val;    // Use only if kind is ND_NUM
   int offset; // Use only if kind is ND_LVAR
