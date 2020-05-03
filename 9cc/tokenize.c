@@ -185,8 +185,8 @@ Token *tokenize()
     // Single-letter symbols
     if (*p == '+' || *p == '-' || *p == '*' || *p == '/' ||
         *p == '(' || *p == ')' || *p == '{' || *p == '}' ||
-        *p == '<' || *p == '>' ||
-        *p == '=' || *p == ';')
+        *p == '<' || *p == '>' || *p == '=' || *p == ';' ||
+        *p == ',')
     {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;

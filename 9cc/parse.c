@@ -231,7 +231,7 @@ static Node *unary()
 }
 
 // primary = num
-//         | ident ("(" ")")?
+//         | ident ( "("    ((expr ",")*  expr)?    ")" )?
 //         | "(" expr ")"
 static Node *primary()
 {
@@ -250,7 +250,19 @@ static Node *primary()
     {
       Node *node = new_node(ND_FUNCALL);
       node->funcname = strndup(tok->str, tok->len);
-      expect(")");
+      if (!consume(")"))
+      {
+        // Function call arguments
+        Node *cur = node;
+        cur->arg = expr();
+        cur = cur->arg;
+        while (consume(","))
+        {
+          cur->arg = expr();
+          cur = cur->arg;
+        }
+        expect(")");
+      }
       return node;
     }
 

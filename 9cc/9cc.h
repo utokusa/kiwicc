@@ -85,6 +85,7 @@ struct Node
 
   // Function call
   char *funcname;
+  Node *arg;
 
   int val;    // Use only if kind is ND_NUM
   int offset; // Use only if kind is ND_LVAR

@@ -2,6 +2,9 @@
 cat <<EOF | cc -xc -c -o tmp2.o -
 int ret3() {return 3;}
 int ret5() {return 5;}
+int add(int x, int y) {return x+y;}
+int sub(int x, int y) {return x-y;}
+int add6(int a, int b, int c, int d, int e, int f) {return a+b+c+d+e+f;}
 EOF
 
 assert() {
@@ -83,5 +86,8 @@ assert 2 'a=0; if(a==0){a=2;} return a;'
 assert 8 'a=0; if(a==0){a=2; a=a*2; a=a*2;} return a;'
 assert 3 'return ret3();'
 assert 5 'return ret5();'
+assert 3 'return add(1, 2);'
+assert 6 'return sub(10, 4);'
+assert 10 'return add6(1,1,1,1,1,5);'
 
 echo OK

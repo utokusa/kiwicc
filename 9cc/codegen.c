@@ -5,6 +5,7 @@
 *********************************************/
 
 static int labelseq = 1;
+static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 static void gen_lval(Node *node)
 {
@@ -116,9 +117,20 @@ void gen(Node *node)
     printf("  ret\n");
     return;
   case ND_FUNCALL:
+  {
+    // So far we only support up to 6 arguments.
+    int nargs = 0;
+    for (Node *arg = node->arg; arg && nargs < 6; arg = arg->arg)
+    {
+      gen(arg);
+      nargs++;
+    }
+    for (int i = nargs - 1; i >= 0; --i)
+      printf("  pop %s\n", argreg[i]);
     printf("  call %s\n", node->funcname);
     printf("  push rax\n");
     return;
+  }
   }
 
   gen(node->lhs);
