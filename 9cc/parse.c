@@ -230,7 +230,9 @@ static Node *unary()
   return primary();
 }
 
-// primary = num | ident | "(" expr ")"
+// primary = num
+//         | ident ("(" ")")?
+//         | "(" expr ")"
 static Node *primary()
 {
   if (consume("("))
@@ -243,6 +245,16 @@ static Node *primary()
   Token *tok = consume_ident();
   if (tok)
   {
+    // Function call
+    if (consume("("))
+    {
+      Node *node = new_node(ND_FUNCALL);
+      node->funcname = strndup(tok->str, tok->len);
+      expect(")");
+      return node;
+    }
+
+    // Local variable
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);

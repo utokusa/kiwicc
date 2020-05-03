@@ -45,22 +45,23 @@ struct LVar
 // Kind of AST node
 typedef enum
 {
-  ND_ADD,    // +
-  ND_SUB,    // -
-  ND_MUL,    // *
-  ND_DIV,    // /
-  ND_EQ,     // == equal to
-  ND_NE,     // != not equal to
-  ND_LT,     // <  less than
-  ND_LE,     // <= less than or equal to
-  ND_ASSIGN, // = assignment
-  ND_LVAR,   // local variables
-  ND_NUM,    // integer
-  ND_IF,     // "if"
-  ND_WHILE,  // "while"
-  ND_FOR,    // "for"
-  ND_BLOCK,  // {...} block
-  ND_RETURN, // "return"
+  ND_ADD,     // +
+  ND_SUB,     // -
+  ND_MUL,     // *
+  ND_DIV,     // /
+  ND_EQ,      // == equal to
+  ND_NE,      // != not equal to
+  ND_LT,      // <  less than
+  ND_LE,      // <= less than or equal to
+  ND_ASSIGN,  // = assignment
+  ND_LVAR,    // local variables
+  ND_NUM,     // integer
+  ND_IF,      // "if"
+  ND_WHILE,   // "while"
+  ND_FOR,     // "for"
+  ND_BLOCK,   // {...} block
+  ND_RETURN,  // "return"
+  ND_FUNCALL, // function call
 } NodeKind;
 
 // Node of AST
@@ -81,6 +82,9 @@ struct Node
 
   // {...} block
   Node *block;
+
+  // Function call
+  char *funcname;
 
   int val;    // Use only if kind is ND_NUM
   int offset; // Use only if kind is ND_LVAR
