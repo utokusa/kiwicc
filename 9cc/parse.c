@@ -101,6 +101,7 @@ Node *stmt()
       node->init = expr();
       expect(";");
     }
+    // For "for (a; b; c) {...}" we regard b as true if b is empty.
     node->cond = new_node_num(1);
     if (!consume(";"))
     {
