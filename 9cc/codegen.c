@@ -99,7 +99,7 @@ void gen(Node *node)
   }
   case ND_BLOCK:
   {
-    for (Node *cur = node->block; cur; cur = cur->block)
+    for (Node *cur = node->block; cur; cur = cur->next)
     {
       gen(cur);
       printf("  pop rax\n");

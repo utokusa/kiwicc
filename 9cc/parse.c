@@ -137,16 +137,20 @@ Node *stmt()
   if (consume("{"))
   {
     Node *node = new_node(ND_BLOCK);
-    Node *cur = node;
+    Node head = {};
+    Node *cur = &head;
     for (;;)
     {
       if (!consume("}"))
       {
-        cur->block = stmt();
-        cur = cur->block;
+        cur->next = stmt();
+        cur = cur->next;
       }
       else
+      {
+        node->block = head.next;
         return node;
+      }
     }
   }
 
