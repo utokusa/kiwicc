@@ -275,14 +275,16 @@ static Node *primary()
       if (!consume(")"))
       {
         // Function call arguments
-        Node *cur = node;
-        cur->arg = expr();
-        cur = cur->arg;
+        Node head = {};
+        Node *cur = &head;
+        cur->next = expr();
+        cur = cur->next;
         while (consume(","))
         {
-          cur->arg = expr();
-          cur = cur->arg;
+          cur->next = expr();
+          cur = cur->next;
         }
+        node->arg = head.next;
         expect(")");
       }
       return node;

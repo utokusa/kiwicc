@@ -120,7 +120,7 @@ void gen(Node *node)
   {
     // So far we only support up to 6 arguments.
     int nargs = 0;
-    for (Node *arg = node->arg; arg && nargs < 6; arg = arg->arg)
+    for (Node *arg = node->arg; arg && nargs < 6; arg = arg->next)
     {
       gen(arg);
       nargs++;
