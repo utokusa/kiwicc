@@ -122,9 +122,6 @@ extern Token *token;
 // Input program
 extern char *user_input;
 
-// Local variables
-extern VarList *locals;
-
 /*********************************************
 * ...function declarations...
 *********************************************/

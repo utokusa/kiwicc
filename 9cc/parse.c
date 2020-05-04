@@ -4,6 +4,9 @@
 * ...parser...
 *********************************************/
 
+// Local variables
+static VarList *locals;
+
 static Function *function();
 static Node *stmt();
 static Node *expr();

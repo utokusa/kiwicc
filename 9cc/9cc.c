@@ -6,9 +6,6 @@ Token *token;
 // Input program
 char *user_input;
 
-// Local Variables
-VarList *locals;
-
 int main(int argc, char **argv)
 {
   if (argc != 2)
