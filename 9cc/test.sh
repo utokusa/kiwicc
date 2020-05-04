@@ -94,5 +94,9 @@ assert 5 'main() { return retx(5); }'
 assert 5 'main() { x=5; return retx(x); }'
 assert 123 'ret123(){return 123;} main(){return ret123();}'
 assert 123 'main(){return ret123();} ret123(){return 123;} '
+assert 123 'main(){return retval(123);} retval(x){return x;} '
+assert 7 'main() { return add2(3,4); } add2(x,y) {return x+y;}'
+assert 1 'main() { return sub2(4,3); } sub2(x,y) {return x-y;}'
+assert 55 'main() { return fib(9); } fib(x) { if (x <= 1) return 1; return fib(x-1)+fib(x-2); }'
 
 echo OK

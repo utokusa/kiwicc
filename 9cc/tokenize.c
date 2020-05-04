@@ -46,13 +46,14 @@ bool consume(char *op)
 // If next token is a identifier,
 // we move it forward and return token.
 // Otherwise we return NULL.
-Token *consume_ident()
+char *consume_ident()
 {
   if (token->kind != TK_IDENT)
     return NULL;
   Token *tok = token;
   token = token->next;
-  return tok;
+  char *name = strndup(tok->str, tok->len);
+  return name;
 }
 
 // If next token is the symbol which we expect,
@@ -91,17 +92,6 @@ char *expect_ident()
 bool at_eof()
 {
   return token->kind == TK_EOF;
-}
-
-// Search variable name. Return NULL if not found.
-LVar *find_lvar(Token *tok)
-{
-  for (LVar *var = locals; var; var = var->next)
-  {
-    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
-      return var;
-  }
-  return NULL;
 }
 
 static bool startswith(char *tgt, char *ref)

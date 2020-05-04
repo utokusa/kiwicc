@@ -7,7 +7,7 @@ Token *token;
 char *user_input;
 
 // Local Variables
-LVar *locals;
+VarList *locals;
 
 int main(int argc, char **argv)
 {

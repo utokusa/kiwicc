@@ -30,14 +30,21 @@ struct Token
   int len;        // Length of the token
 };
 
-// type of local variables
+// Type of local variables
 typedef struct LVar LVar;
 struct LVar
 {
-  LVar *next; // The next local variable or NULL.
   char *name; // The name of the local variable.
   int len;    // The length of the local variable.
   int offset; // The offset from RBP.
+};
+
+// Linked list for Lvar
+typedef struct VarList VarList;
+struct VarList
+{
+  VarList *next;
+  LVar *lvar;
 };
 
 // ********** parse.c *************
@@ -100,7 +107,8 @@ struct Function
   Function *next;
   char *name;
   Node *node;
-  LVar *locals;
+  VarList *locals;
+  VarList *params;
   int stack_size;
 };
 
@@ -115,7 +123,7 @@ extern Token *token;
 extern char *user_input;
 
 // Local variables
-extern LVar *locals;
+extern VarList *locals;
 
 /*********************************************
 * ...function declarations...
@@ -138,7 +146,7 @@ bool consume(char *op);
 // If next token is a identifier,
 // we move it forward and return true.
 // Otherwise we return NULL.
-Token *consume_ident();
+char *consume_ident();
 
 // If next token is the symbol which we expect,
 // we move it forward.
@@ -155,9 +163,6 @@ char *expect_ident();
 bool is_number();
 
 bool at_eof();
-
-// Search variable name. Return NULL if not found.
-LVar *find_lvar(Token *tok);
 
 // convert input 'user_input' to token
 Token *tokenize();

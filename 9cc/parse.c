@@ -47,17 +47,32 @@ static Node *new_node_binary(NodeKind kind, Node *lhs, Node *rhs)
   return node;
 }
 
-LVar *new_lvar(Token *tok)
+// Search variable name. Return NULL if not found.
+LVar *find_lvar(char *name)
+{
+  for (VarList *var = locals; var; var = var->next)
+  {
+    LVar *lvar = var->lvar;
+    if (lvar->len == strlen(name) && !memcmp(name, lvar->name, lvar->len))
+      return lvar;
+  }
+  return NULL;
+}
+
+static LVar *new_lvar(char *name)
 {
   LVar *lvar = calloc(1, sizeof(LVar));
-  lvar->next = locals;
-  lvar->name = tok->str;
-  lvar->len = tok->len;
+  lvar->name = name;
+  lvar->len = strlen(name);
   if (locals)
-    lvar->offset = locals->offset + 8;
+    lvar->offset = locals->lvar->offset + 8;
   else
-    lvar->offset = 0;
-  locals = lvar;
+    lvar->offset = 8;
+  VarList *vl = calloc(1, sizeof(VarList));
+  vl->lvar = lvar;
+  vl->next = locals;
+  locals = vl;
+  return lvar;
 }
 
 // program = function*
@@ -74,14 +89,36 @@ Function *program()
   return head.next;
 }
 
-// function = ident "(" ")" "{" stmt* "}"
+static VarList *read_func_params()
+{
+  if (consume(")"))
+    return NULL;
+
+  VarList head = {};
+  head.next = calloc(1, sizeof(VarList));
+  head.next->lvar = new_lvar(expect_ident());
+  VarList *cur = head.next;
+  while (consume(","))
+  {
+    cur->next = calloc(1, sizeof(VarList));
+    cur->next->lvar = new_lvar(expect_ident());
+    cur = cur->next;
+  }
+  expect(")");
+
+  return head.next;
+}
+
+// function = ident "(" params? ")" "{" stmt* "}"
+// params = (expr ",")*  expr
 static Function *function()
 {
   locals = NULL;
 
-  char *name = expect_ident();
+  Function *fn = calloc(1, sizeof(Function));
+  fn->name = expect_ident();
   expect("(");
-  expect(")");
+  fn->params = read_func_params();
   expect("{");
 
   Node head = {};
@@ -91,13 +128,10 @@ static Function *function()
     cur->next = stmt();
     cur = cur->next;
   }
-
-  Function *fn = calloc(1, sizeof(Function));
-  fn->name = name;
   fn->node = head.next;
   fn->locals = locals;
   if (locals)
-    fn->stack_size = locals->offset;
+    fn->stack_size = locals->lvar->offset;
   else
     fn->stack_size = 0;
   return fn;
@@ -284,8 +318,9 @@ static Node *unary()
 }
 
 // primary = num
-//         | ident ( "("    ((expr ",")*  expr)?    ")" )?
+//         | ident ( "(" args? ")" )?
 //         | "(" expr ")"
+// args = (expr ",")*  expr
 static Node *primary()
 {
   if (consume("("))
@@ -295,14 +330,14 @@ static Node *primary()
     return node;
   }
 
-  Token *tok = consume_ident();
-  if (tok)
+  char *identname = consume_ident();
+  if (identname)
   {
     // Function call
     if (consume("("))
     {
       Node *node = new_node(ND_FUNCALL);
-      node->funcname = strndup(tok->str, tok->len);
+      node->funcname = identname;
       if (!consume(")"))
       {
         // Function call arguments
@@ -323,9 +358,9 @@ static Node *primary()
 
     // Local variable
     Node *node = new_node(ND_LVAR);
-    LVar *lvar = find_lvar(tok);
+    LVar *lvar = find_lvar(identname);
     if (!lvar)
-      lvar = new_lvar(tok);
+      lvar = new_lvar(identname);
     node->offset = lvar->offset;
     return node;
   }
