@@ -101,11 +101,7 @@ static void gen(Node *node)
   case ND_BLOCK:
   {
     for (Node *cur = node->block; cur; cur = cur->next)
-    {
       gen(cur);
-      printf("  pop rax\n");
-    }
-    printf("  push rax\n");
     return;
   }
   case ND_RETURN:
@@ -212,11 +208,7 @@ void codegen(Function *prog)
 
     // Generate statements
     for (Node *node = fn->node; node; node = node->next)
-    {
       gen(node);
-      // Pop unnecessary　evaluation result of the expression.
-      printf("  pop rax\n");
-    }
 
     // Epilogue
     // The value of rax is the return value
