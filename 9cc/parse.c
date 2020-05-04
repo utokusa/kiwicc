@@ -62,10 +62,14 @@ LVar *new_lvar(Token *tok)
 // program = stmt*
 void program()
 {
-  int i = 0;
+  Node head = {};
+  Node *cur = &head;
   while (!at_eof())
-    code[i++] = stmt();
-  code[i] = NULL;
+  {
+    cur->next = stmt();
+    cur = cur->next;
+  }
+  code = head.next;
 }
 
 // stmt = expr ";"

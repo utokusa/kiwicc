@@ -7,7 +7,7 @@ Token *token;
 char *user_input;
 
 // Statements
-Node *code[100];
+Node *code;
 
 // Local Variables
 LVar *locals;
@@ -40,11 +40,9 @@ int main(int argc, char **argv)
   printf("  sub rsp, %d\n", stack_size);
 
   {
-    int i = 0;
-    while (code[i])
+    for (Node *cur = code; cur; cur = cur->next)
     {
-      gen(code[i++]);
-
+      gen(cur);
       // Pop unnecessary　evaluation result of the expression.
       printf("  pop rax\n");
     }

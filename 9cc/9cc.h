@@ -73,6 +73,8 @@ struct Node
   Node *lhs;
   Node *rhs;
 
+  Node *next;
+
   // "if", "while" or "for" statement
   Node *cond;
   Node *then;
@@ -102,7 +104,7 @@ extern Token *token;
 extern char *user_input;
 
 // Statement Nodes
-extern Node *code[100];
+extern Node *code;
 
 // Local variables
 extern LVar *locals;
