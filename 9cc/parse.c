@@ -46,6 +46,19 @@ static Node *new_node_binary(NodeKind kind, Node *lhs, Node *rhs)
   return node;
 }
 
+LVar *new_lvar(Token *tok)
+{
+  LVar *lvar = calloc(1, sizeof(LVar));
+  lvar->next = locals;
+  lvar->name = tok->str;
+  lvar->len = tok->len;
+  if (locals)
+    lvar->offset = locals->offset + 8;
+  else
+    lvar->offset = 0;
+  locals = lvar;
+}
+
 // program = stmt*
 void program()
 {
@@ -268,26 +281,11 @@ static Node *primary()
     }
 
     // Local variable
-    Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
+    Node *node = new_node(ND_LVAR);
     LVar *lvar = find_lvar(tok);
-    if (lvar)
-    {
-      node->offset = lvar->offset;
-    }
-    else
-    {
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
-      lvar->name = tok->str;
-      lvar->len = tok->len;
-      if (locals)
-        lvar->offset = locals->offset + 8;
-      else
-        lvar->offset = 0;
-      node->offset = lvar->offset;
-      locals = lvar;
-    }
+    if (!lvar)
+      lvar = new_lvar(tok);
+    node->offset = lvar->offset;
     return node;
   }
 
