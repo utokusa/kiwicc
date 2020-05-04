@@ -4,6 +4,7 @@
 * ...parser...
 *********************************************/
 
+static Function *function();
 static Node *stmt();
 static Node *expr();
 static Node *assign();
@@ -59,17 +60,47 @@ LVar *new_lvar(Token *tok)
   locals = lvar;
 }
 
-// program = stmt*
-void program()
+// program = function*
+Function *program()
 {
+  Function head = {};
+  Function *cur = &head;
+  while (!at_eof())
+  {
+    cur->next = function();
+    cur = cur->next;
+  }
+
+  return head.next;
+}
+
+// function = ident "(" ")" "{" stmt* "}"
+static Function *function()
+{
+  locals = NULL;
+
+  char *name = expect_ident();
+  expect("(");
+  expect(")");
+  expect("{");
+
   Node head = {};
   Node *cur = &head;
-  while (!at_eof())
+  while (!consume("}"))
   {
     cur->next = stmt();
     cur = cur->next;
   }
-  code = head.next;
+
+  Function *fn = calloc(1, sizeof(Function));
+  fn->name = name;
+  fn->node = head.next;
+  fn->locals = locals;
+  if (locals)
+    fn->stack_size = locals->offset;
+  else
+    fn->stack_size = 0;
+  return fn;
 }
 
 // stmt = expr ";"

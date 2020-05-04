@@ -76,6 +76,18 @@ int expect_number()
   return val;
 }
 
+// If next token is an identifier,
+// we move it forward and return the name.
+// Otherwise report error.
+char *expect_ident()
+{
+  if (token->kind != TK_IDENT)
+    error_at(token->str, "The token is not an identifier");
+  char *name = strndup(token->str, token->len);
+  token = token->next;
+  return name;
+}
+
 bool at_eof()
 {
   return token->kind == TK_EOF;

@@ -5,6 +5,7 @@
 *********************************************/
 
 static int labelseq = 1;
+static char *funcname;
 static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 static void gen_lval(Node *node)
@@ -16,7 +17,7 @@ static void gen_lval(Node *node)
   printf("  push rax\n");
 }
 
-void gen(Node *node)
+static void gen(Node *node)
 {
   switch (node->kind)
   {
@@ -110,11 +111,7 @@ void gen(Node *node)
   case ND_RETURN:
     gen(node->lhs);
     printf("  pop rax\n");
-    // Epilogue
-    // The value of rax is the return value
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
+    printf("  jmp .L.return.%s\n", funcname);
     return;
   case ND_FUNCALL:
   {
@@ -194,4 +191,38 @@ void gen(Node *node)
   }
 
   printf("  push rax\n");
+}
+
+void codegen(Function *prog)
+{
+  // Output the assembly code.
+  printf(".intel_syntax noprefix\n");
+
+  for (Function *fn = prog; fn; fn = fn->next)
+  {
+    funcname = fn->name;
+    printf(".global %s\n", fn->name);
+    printf("%s:\n", fn->name);
+
+    // Prologue
+    // Allocate local variables
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, %d\n", fn->stack_size);
+
+    // Generate statements
+    for (Node *node = fn->node; node; node = node->next)
+    {
+      gen(node);
+      // Pop unnecessary　evaluation result of the expression.
+      printf("  pop rax\n");
+    }
+
+    // Epilogue
+    // The value of rax is the return value
+    printf(".L.return.%s:\n", fn->name);
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+  }
 }

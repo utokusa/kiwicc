@@ -93,6 +93,17 @@ struct Node
   int offset; // Use only if kind is ND_LVAR
 };
 
+// Function
+typedef struct Function Function;
+struct Function
+{
+  Function *next;
+  char *name;
+  Node *node;
+  LVar *locals;
+  int stack_size;
+};
+
 /*********************************************
 * ...global variables...
 *********************************************/
@@ -102,9 +113,6 @@ extern Token *token;
 
 // Input program
 extern char *user_input;
-
-// Statement Nodes
-extern Node *code;
 
 // Local variables
 extern LVar *locals;
@@ -139,6 +147,11 @@ void expect(char *op);
 
 int expect_number();
 
+// If next token is an identifier,
+// we move it forward.
+// Otherwise report error.
+char *expect_ident();
+
 bool is_number();
 
 bool at_eof();
@@ -151,8 +164,8 @@ Token *tokenize();
 
 // ********** parse.c *************
 
-void program();
+Function *program();
 
 // ********** codegen.c *************
 
-void gen(Node *node);
+void codegen(Function *prog);
