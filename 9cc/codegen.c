@@ -8,15 +8,6 @@ static int labelseq = 1;
 static char *funcname;
 static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
-static void gen_lval(Node *node)
-{
-  if (node->kind != ND_LVAR)
-    error_tok(node->tok, "The lvalue of the assignment is not a variable.");
-  printf("  mov rax, rbp\n");
-  printf("  sub rax, %d\n", node->offset);
-  printf("  push rax\n");
-}
-
 static void load()
 {
   printf("  pop rax\n");
@@ -30,6 +21,26 @@ static void store()
   printf("  pop rax\n");
   printf("  mov [rax], rdi\n");
   printf("  push rdi\n");
+}
+
+static void gen(Node *node);
+
+static void gen_lval(Node *node)
+{
+  switch (node->kind)
+  {
+  case ND_LVAR:
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", node->offset);
+    printf("  push rax\n");
+    return;
+  case ND_DEREF:
+    gen(node->lhs);
+    return;
+  default:
+    printf("node->kind : %d\n", node->kind);
+    error_tok(node->tok, "The lvalue of the assignment is not a variable.");
+  }
 }
 
 static void gen(Node *node)
