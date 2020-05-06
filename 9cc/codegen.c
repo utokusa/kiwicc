@@ -48,6 +48,13 @@ static void gen(Node *node)
     gen(node->rhs);
     store();
     return;
+  case ND_ADDR:
+    gen_lval(node->lhs);
+    return;
+  case ND_DEREF:
+    gen(node->lhs);
+    load();
+    return;
   case ND_IF:
   {
     int seq = labelseq++;

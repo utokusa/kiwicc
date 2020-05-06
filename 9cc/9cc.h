@@ -61,6 +61,8 @@ typedef enum
   ND_LT,      // <  less than
   ND_LE,      // <= less than or equal to
   ND_ASSIGN,  // = assignment
+  ND_ADDR,    // & address-of
+  ND_DEREF,   // * dereference (indirection)
   ND_LVAR,    // local variables
   ND_NUM,     // integer
   ND_IF,      // "if"

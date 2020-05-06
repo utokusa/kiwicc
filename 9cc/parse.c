@@ -310,13 +310,20 @@ static Node *mul()
   }
 }
 
-// unary = ("+" | "-")? primary
+// unary = "+"? primary
+//       | "-"? primary
+//       | "*" unary
+//       | "&" unary
 static Node *unary()
 {
   if (consume("+"))
     return primary();
   if (consume("-"))
     return new_node_binary(ND_SUB, new_node_num(0), primary());
+  if (consume("*"))
+    return new_node_unary(ND_DEREF, unary());
+  if (consume("&"))
+    return new_node_unary(ND_ADDR, unary());
   return primary();
 }
 
