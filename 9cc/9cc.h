@@ -78,6 +78,7 @@ typedef struct Node Node;
 struct Node
 {
   NodeKind kind;
+  Token *tok; // Representative token
 
   Node *lhs;
   Node *rhs;
@@ -137,15 +138,17 @@ void error(char *fmt, ...);
 // Report error and error position
 void error_at(char *loc, char *fmt, ...);
 
-// If next token is the symbol which we expect,
-// we move it forward and return true.
-// Otherwise we return false
-bool consume(char *op);
+void error_tok(Token *tok, char *fmt, ...);
+
+// If the next token is the symbol which we expect,
+// we move it forward and return the current token.
+// Otherwise we return NULL
+Token *consume(char *op);
 
 // If next token is a identifier,
 // we move it forward and return true.
 // Otherwise we return NULL.
-char *consume_ident();
+Token *consume_ident();
 
 // If next token is the symbol which we expect,
 // we move it forward.

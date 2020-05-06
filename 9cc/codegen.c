@@ -11,7 +11,7 @@ static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static void gen_lval(Node *node)
 {
   if (node->kind != ND_LVAR)
-    error("The lvalue of the assignment is not a variable.");
+    error_tok(node->tok, "The lvalue of the assignment is not a variable.");
   printf("  mov rax, rbp\n");
   printf("  sub rax, %d\n", node->offset);
   printf("  push rax\n");

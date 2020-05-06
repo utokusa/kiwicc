@@ -15,12 +15,9 @@ void error(char *fmt, ...)
   exit(1);
 }
 
-// Report error and error position
-void error_at(char *loc, char *fmt, ...)
+// Report an error position and exit
+static void verror_at(char *loc, char *fmt, va_list ap)
 {
-  va_list ap;
-  va_start(ap, fmt);
-
   int pos = loc - user_input;
   fprintf(stderr, "%s\n", user_input);
   fprintf(stderr, "%*s", pos, ""); // print pos spaces.
@@ -30,30 +27,46 @@ void error_at(char *loc, char *fmt, ...)
   exit(1);
 }
 
-// If next token is the symbol which we expect,
-// we move it forward and return true.
-// Otherwise we return false
-bool consume(char *op)
+// Report an error position and exit
+void error_at(char *loc, char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  verror_at(loc, fmt, ap);
+}
+
+// Report an error position and exit
+void error_tok(Token *tok, char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  verror_at(tok->str, fmt, ap);
+}
+
+// If the next token is the symbol which we expect,
+// we move it forward and return the current token.
+// Otherwise we return NULL
+Token *consume(char *op)
 {
   if (token->kind != TK_RESERVED ||
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len))
-    return false;
+    return NULL;
+  Token *tok = token;
   token = token->next;
-  return true;
+  return tok;
 }
 
 // If next token is a identifier,
-// we move it forward and return token.
+// we move it forward and eturn the current token.
 // Otherwise we return NULL.
-char *consume_ident()
+Token *consume_ident()
 {
   if (token->kind != TK_IDENT)
     return NULL;
   Token *tok = token;
   token = token->next;
-  char *name = strndup(tok->str, tok->len);
-  return name;
+  return tok;
 }
 
 // If next token is the symbol which we expect,
@@ -64,14 +77,14 @@ void expect(char *op)
   if (token->kind != TK_RESERVED ||
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len))
-    error_at(token->str, "The token is not %s.", op);
+    error_tok(token, "The token is not %s.", op);
   token = token->next;
 }
 
 int expect_number()
 {
   if (token->kind != TK_NUM)
-    error_at(token->str, "The token is not a number.");
+    error_tok(token, "The token is not a number.");
   int val = token->val;
   token = token->next;
   return val;
@@ -83,7 +96,7 @@ int expect_number()
 char *expect_ident()
 {
   if (token->kind != TK_IDENT)
-    error_at(token->str, "The token is not an identifier");
+    error_tok(token, "The token is not an identifier");
   char *name = strndup(token->str, token->len);
   token = token->next;
   return name;
