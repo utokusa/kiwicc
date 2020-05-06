@@ -100,7 +100,7 @@ struct Node
   Node *arg;
 
   int val;    // Use only if kind is ND_NUM
-  int offset; // Use only if kind is ND_LVAR
+  LVar *lvar; // Use only if kind is ND_LVAR
 };
 
 // Function

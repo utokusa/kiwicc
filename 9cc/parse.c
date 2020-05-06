@@ -65,10 +65,6 @@ static LVar *new_lvar(char *name)
   LVar *lvar = calloc(1, sizeof(LVar));
   lvar->name = name;
   lvar->len = strlen(name);
-  if (locals)
-    lvar->offset = locals->lvar->offset + 8;
-  else
-    lvar->offset = 8;
   VarList *vl = calloc(1, sizeof(VarList));
   vl->lvar = lvar;
   vl->next = locals;
@@ -131,10 +127,6 @@ static Function *function()
   }
   fn->node = head.next;
   fn->locals = locals;
-  if (locals)
-    fn->stack_size = locals->lvar->offset;
-  else
-    fn->stack_size = 0;
   return fn;
 }
 
@@ -377,7 +369,7 @@ static Node *primary()
     LVar *lvar = find_lvar(identname);
     if (!lvar)
       lvar = new_lvar(identname);
-    node->offset = lvar->offset;
+    node->lvar = lvar;
     return node;
   }
 

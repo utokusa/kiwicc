@@ -21,6 +21,18 @@ int main(int argc, char **argv)
   // parse
   Function *prog = program();
 
+  // Assign offsets to local variables.
+  for (Function *fn = prog; fn; fn = fn->next)
+  {
+    int offset = 0;
+    for (VarList *vl = fn->locals; vl; vl = vl->next)
+    {
+      offset += 8;
+      vl->lvar->offset = offset;
+    }
+    fn->stack_size = offset;
+  }
+
   // generate code
   codegen(prog);
 
