@@ -9,6 +9,8 @@
 * ...type definitions...
 *********************************************/
 
+typedef struct Type Type;
+
 // ********** tokenize.c *************
 
 typedef enum
@@ -52,25 +54,28 @@ struct VarList
 // Kind of AST node
 typedef enum
 {
-  ND_ADD,     // +
-  ND_SUB,     // -
-  ND_MUL,     // *
-  ND_DIV,     // /
-  ND_EQ,      // == equal to
-  ND_NE,      // != not equal to
-  ND_LT,      // <  less than
-  ND_LE,      // <= less than or equal to
-  ND_ASSIGN,  // = assignment
-  ND_ADDR,    // & address-of
-  ND_DEREF,   // * dereference (indirection)
-  ND_LVAR,    // local variables
-  ND_NUM,     // integer
-  ND_IF,      // "if"
-  ND_WHILE,   // "while"
-  ND_FOR,     // "for"
-  ND_BLOCK,   // {...} block
-  ND_RETURN,  // "return"
-  ND_FUNCALL, // function call
+  ND_ADD,      // num + num
+  ND_PTR_ADD,  // ptr + num or num + ptr
+  ND_SUB,      // num - num
+  ND_PTR_SUB,  // ptr - num
+  ND_PTR_DIFF, // ptr - ptr
+  ND_MUL,      // *
+  ND_DIV,      // /
+  ND_EQ,       // == equal to
+  ND_NE,       // != not equal to
+  ND_LT,       // <  less than
+  ND_LE,       // <= less than or equal to
+  ND_ASSIGN,   // = assignment
+  ND_ADDR,     // & address-of
+  ND_DEREF,    // * dereference (indirection)
+  ND_LVAR,     // local variables
+  ND_NUM,      // integer
+  ND_IF,       // "if"
+  ND_WHILE,    // "while"
+  ND_FOR,      // "for"
+  ND_BLOCK,    // {...} block
+  ND_RETURN,   // "return"
+  ND_FUNCALL,  // function call
 } NodeKind;
 
 // Node of AST
@@ -79,6 +84,7 @@ struct Node
 {
   NodeKind kind;
   Token *tok; // Representative token
+  Type *ty;   // TYpe, e.g. int or pointer to int
 
   Node *lhs;
   Node *rhs;
@@ -113,6 +119,20 @@ struct Function
   VarList *locals;
   VarList *params;
   int stack_size;
+};
+
+// ********** type.c *************
+
+typedef enum
+{
+  TY_INT,
+  TY_PTR,
+} TypeKind;
+
+struct Type
+{
+  TypeKind kind;
+  Type *base;
 };
 
 /*********************************************
@@ -176,3 +196,8 @@ Function *program();
 // ********** codegen.c *************
 
 void codegen(Function *prog);
+
+// ********** type.c *************
+
+bool is_integer(Type *ty);
+void add_type(Node *node);

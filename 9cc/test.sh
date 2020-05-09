@@ -99,12 +99,13 @@ assert 7 'main() { return add2(3,4); } add2(x,y) {return x+y;}'
 assert 1 'main() { return sub2(4,3); } sub2(x,y) {return x-y;}'
 assert 55 'main() { return fib(9); } fib(x) { if (x <= 1) return 1; return fib(x-1)+fib(x-2); }'
 assert 3 'main() {x=3; y=&x; return *y;}'
-assert 10 'main() {x=10; y=5; z=&y-8; return *z;}'
+assert 10 'main() {x=10; y=5; z=&y-1; return *z;}'
 assert 5 'main() {x=5; return *&x;}'
 assert 10 'main() { x = 5; px = &x; *px = 10; return *px; }'
 assert 10 'main() { x = 5; px = &x; *px = 10; return x; }'
-assert 7 'main() { x=3; y=5; *(&x+8)=7; return y; }'
-assert 7 'main() { x=3; y=5; *(&y-8)=7; return x; }'
+assert 7 'main() { x=3; y=5; *(&x+1)=7; return y; }'
+assert 7 'main() { x=3; y=5; *(&y-1)=7; return x; }'
+assert 5 'main() { x = 3; return (&x+5) - (&x); }'
 
 
 echo OK
