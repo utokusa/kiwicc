@@ -38,6 +38,7 @@ struct LVar
 {
   char *name; // The name of the local variable.
   int len;    // The length of the local variable.
+  Type *ty;   // Type
   int offset; // The offset from RBP.
 };
 
@@ -70,6 +71,7 @@ typedef enum
   ND_DEREF,    // * dereference (indirection)
   ND_LVAR,     // local variables
   ND_NUM,      // integer
+  ND_NULL,     // nulls
   ND_IF,       // "if"
   ND_WHILE,    // "while"
   ND_FOR,      // "for"
@@ -145,6 +147,8 @@ extern Token *token;
 // Input program
 extern char *user_input;
 
+extern Type *int_type;
+
 /*********************************************
 * ...function declarations...
 *********************************************/
@@ -164,6 +168,9 @@ void error_tok(Token *tok, char *fmt, ...);
 // we move it forward and return the current token.
 // Otherwise we return NULL
 Token *consume(char *op);
+
+// Returns the current token if it matches a given string
+Token *peek(char *s);
 
 // If next token is a identifier,
 // we move it forward and return true.
@@ -200,4 +207,7 @@ void codegen(Function *prog);
 // ********** type.c *************
 
 bool is_integer(Type *ty);
+
+Type *pointer_to(Type *base);
+
 void add_type(Node *node);

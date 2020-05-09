@@ -57,6 +57,15 @@ Token *consume(char *op)
   return tok;
 }
 
+// Returns the current token if it matches a given string
+Token *peek(char *s)
+{
+  if (token->kind != TK_RESERVED || strlen(s) != token->len ||
+      strncmp(token->str, s, token->len))
+    return NULL;
+  return token;
+}
+
 // If next token is a identifier,
 // we move it forward and eturn the current token.
 // Otherwise we return NULL.
@@ -69,15 +78,13 @@ Token *consume_ident()
   return tok;
 }
 
-// If next token is the symbol which we expect,
+// If next token is givin string,
 // we move it forward.
 // Otherwise report error.
-void expect(char *op)
+void expect(char *s)
 {
-  if (token->kind != TK_RESERVED ||
-      strlen(op) != token->len ||
-      memcmp(token->str, op, token->len))
-    error_tok(token, "The token is not %s.", op);
+  if (!peek(s))
+    error_tok(token, "The token is not %s.", s);
   token = token->next;
 }
 
@@ -140,7 +147,7 @@ static int var_len(char *p)
 static char *starts_with_reserved(char *p)
 {
   // Keywords
-  static char *kw[] = {"return", "if", "else", "while", "for"};
+  static char *kw[] = {"return", "if", "else", "while", "for", "int"};
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)
   {
     int len = strlen(kw[i]);

@@ -54,6 +54,8 @@ static void gen(Node *node)
     gen_lval(node);
     load();
     return;
+  case ND_NULL:
+    return;
   case ND_ASSIGN:
     gen_lval(node->lhs);
     gen(node->rhs);
