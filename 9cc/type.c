@@ -4,7 +4,7 @@
 * ...type...
 *********************************************/
 
-Type *int_type = &(Type){TY_INT, NULL, 4};
+Type *int_type = &(Type){TY_INT, NULL, 8};
 
 bool is_integer(Type *ty)
 {

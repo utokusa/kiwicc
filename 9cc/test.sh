@@ -107,12 +107,12 @@ assert 10 'int main() { int x = 5; int *px = &x; *px = 10; return x; }'
 assert 7 'int main() { int x=3; int y=5; *(&x+1)=7; return y; }'
 assert 7 'int main() { int x=3; int y=5; *(&y-1)=7; return x; }'
 assert 5 'int main() { int x = 3; return (&x+5) - (&x); }'
-assert 4 'int main() { int x = 0; return sizeof(x); }'
-assert 4 'int main() { return sizeof(1); }'
-assert 4 'int main() { return sizeof(sizeof(1)); }'
+assert 8 'int main() { int x = 0; return sizeof(x); }'
+assert 8 'int main() { return sizeof(1); }'
+assert 8 'int main() { return sizeof(sizeof(1)); }'
 assert 8 'int main() { int x = 0; return sizeof(&x); }'
 assert 8 'int main() { int x = 0; return sizeof(&x + 2); }'
-assert 4 'int main() { int x = 0; return sizeof(sizeof(&x)); }'
+assert 8 'int main() { int x = 0; return sizeof(sizeof(&x)); }'
 
 
 echo OK
