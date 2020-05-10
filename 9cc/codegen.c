@@ -170,6 +170,10 @@ static void gen(Node *node)
     printf("  push rax\n");
     return;
   }
+  case ND_EXPR_STMT:
+    gen(node->lhs);
+    printf("  pop rax\n");
+    return;
   }
 
   gen(node->lhs);

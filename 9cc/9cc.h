@@ -55,29 +55,30 @@ struct VarList
 // Kind of AST node
 typedef enum
 {
-  ND_ADD,      // num + num
-  ND_PTR_ADD,  // ptr + num or num + ptr
-  ND_SUB,      // num - num
-  ND_PTR_SUB,  // ptr - num
-  ND_PTR_DIFF, // ptr - ptr
-  ND_MUL,      // *
-  ND_DIV,      // /
-  ND_EQ,       // == equal to
-  ND_NE,       // != not equal to
-  ND_LT,       // <  less than
-  ND_LE,       // <= less than or equal to
-  ND_ASSIGN,   // = assignment
-  ND_ADDR,     // & address-of
-  ND_DEREF,    // * dereference (indirection)
-  ND_LVAR,     // local variables
-  ND_NUM,      // integer
-  ND_NULL,     // nulls
-  ND_IF,       // "if"
-  ND_WHILE,    // "while"
-  ND_FOR,      // "for"
-  ND_BLOCK,    // {...} block
-  ND_RETURN,   // "return"
-  ND_FUNCALL,  // function call
+  ND_ADD,       // num + num
+  ND_PTR_ADD,   // ptr + num or num + ptr
+  ND_SUB,       // num - num
+  ND_PTR_SUB,   // ptr - num
+  ND_PTR_DIFF,  // ptr - ptr
+  ND_MUL,       // *
+  ND_DIV,       // /
+  ND_EQ,        // == equal to
+  ND_NE,        // != not equal to
+  ND_LT,        // <  less than
+  ND_LE,        // <= less than or equal to
+  ND_ASSIGN,    // = assignment
+  ND_ADDR,      // & address-of
+  ND_DEREF,     // * dereference (indirection)
+  ND_LVAR,      // local variables
+  ND_NUM,       // integer
+  ND_NULL,      // nulls
+  ND_IF,        // "if"
+  ND_WHILE,     // "while"
+  ND_FOR,       // "for"
+  ND_BLOCK,     // {...} block
+  ND_RETURN,    // "return"
+  ND_FUNCALL,   // function call
+  ND_EXPR_STMT, // Expression statement
 } NodeKind;
 
 // Node of AST

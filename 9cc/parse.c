@@ -200,7 +200,13 @@ static Node *declaration()
   Node *rhs = expr();
   expect(";");
   Node *node = new_node_binary(ND_ASSIGN, lhs, rhs, tok);
-  return node;
+  return new_node_unary(ND_EXPR_STMT, node, tok);
+}
+
+static Node *read_expr_stmt()
+{
+  Token *tok = token;
+  return new_node_unary(ND_EXPR_STMT, expr(), tok);
 }
 
 Node *stmt()
@@ -255,7 +261,7 @@ static Node *stmt2()
     expect("(");
     if (!consume(";"))
     {
-      node->init = expr();
+      node->init = read_expr_stmt();
       expect(";");
     }
     // For "for (a; b; c) {...}" we regard b as true if b is empty.
@@ -267,7 +273,7 @@ static Node *stmt2()
     }
     if (!consume(")"))
     {
-      node->inc = expr();
+      node->inc = read_expr_stmt();
       expect(")");
     }
     node->then = stmt();
@@ -297,7 +303,7 @@ static Node *stmt2()
   if (tok = peek("int"))
     return declaration();
 
-  Node *node = expr();
+  Node *node = read_expr_stmt();
   expect(";");
   return node;
 }
