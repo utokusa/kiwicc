@@ -25,7 +25,8 @@ static void store()
 
 static void gen(Node *node);
 
-static void gen_lval(Node *node)
+// push the given node's addresss to the stack
+static void gen_addr(Node *node)
 {
   switch (node->kind)
   {
@@ -43,6 +44,13 @@ static void gen_lval(Node *node)
   }
 }
 
+static void gen_lval(Node *node)
+{
+  if (node->ty->kind == TY_ARR)
+    error_tok(node->tok, "not an lvalue");
+  gen_addr(node);
+}
+
 static void gen(Node *node)
 {
   switch (node->kind)
@@ -51,8 +59,9 @@ static void gen(Node *node)
     printf("  push %d\n", node->val);
     return;
   case ND_LVAR:
-    gen_lval(node);
-    load();
+    gen_addr(node);
+    if (node->ty->kind != TY_ARR)
+      load();
     return;
   case ND_NULL:
     return;
@@ -65,11 +74,12 @@ static void gen(Node *node)
     store();
     return;
   case ND_ADDR:
-    gen_lval(node->lhs);
+    gen_addr(node->lhs);
     return;
   case ND_DEREF:
     gen(node->lhs);
-    load();
+    if (node->ty->kind != TY_ARR)
+      load();
     return;
   case ND_IF:
   {
@@ -191,20 +201,20 @@ static void gen(Node *node)
     printf("  add rax, rdi\n");
     break;
   case ND_PTR_ADD:
-    printf("  imul rdi, 8\n");
+    printf("  imul rdi, %d\n", node->ty->base->size);
     printf("  add rax, rdi\n");
     break;
   case ND_SUB:
     printf("  sub rax, rdi\n");
     break;
   case ND_PTR_SUB:
-    printf("  imul rdi, 8\n");
+    printf("  imul rdi, %d\n", node->ty->base->size);
     printf("  sub rax, rdi\n");
     break;
   case ND_PTR_DIFF:
     printf("  sub rax, rdi\n");
     printf("  cqo\n");
-    printf("  mov rdi, 8\n");
+    printf("  mov rdi, %d\n", node->lhs->ty->base->size);
     printf("  idiv rdi\n");
     break;
   case ND_MUL:

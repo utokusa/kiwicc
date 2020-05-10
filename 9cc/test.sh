@@ -113,6 +113,16 @@ assert 8 'int main() { return sizeof(sizeof(1)); }'
 assert 8 'int main() { int x = 0; return sizeof(&x); }'
 assert 8 'int main() { int x = 0; return sizeof(&x + 2); }'
 assert 8 'int main() { int x = 0; return sizeof(sizeof(&x)); }'
+assert 11 'int main() { int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); return *(a+2);}'
+assert 11 'int main() { int a[3]; int *b=a+2; *b=11; return *(a+2);}'
+assert 64 'int main() { int a[8]; return sizeof(a);}'
+assert 8 'int main() { int a[8]; int *b = a; return sizeof(b); }'
+assert 0 'int main() { int x[2][3]; int *y=x; *y=0; return **x; }'
+assert 1 'int main() { int x[2][3]; int *y=x; *(y+1)=1; return *(*x+1); }'
+assert 2 'int main() { int x[2][3]; int *y=x; *(y+2)=2; return *(*x+2); }'
+assert 3 'int main() { int x[2][3]; int *y=x; *(y+3)=3; return **(x+1); }'
+assert 4 'int main() { int x[2][3]; int *y=x; *(y+4)=4; return *(*(x+1)+1); }'
+assert 5 'int main() { int x[2][3]; int *y=x; *(y+5)=5; return *(*(x+1)+2); }'
 
 
 echo OK

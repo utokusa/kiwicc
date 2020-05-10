@@ -97,6 +97,7 @@ LVar *find_lvar(char *name)
   return NULL;
 }
 
+// new local variable
 static LVar *new_lvar(char *name, Type *ty)
 {
   LVar *lvar = calloc(1, sizeof(LVar));
@@ -133,11 +134,24 @@ static Type *basetype()
   return ty;
 }
 
+static Type *read_type_suffix(Type *base)
+{
+  if (!consume("["))
+    return base;
+  int len = expect_number();
+  expect("]");
+  base = read_type_suffix(base);
+  return array_of(base, len);
+}
+
 static VarList *read_func_param()
 {
-  VarList *vl = calloc(1, sizeof(VarList));
   Type *ty = basetype();
-  vl->lvar = new_lvar(expect_ident(), ty);
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+
+  VarList *vl = calloc(1, sizeof(VarList));
+  vl->lvar = new_lvar(name, ty);
   return vl;
 }
 
@@ -185,12 +199,14 @@ static Function *function()
   return fn;
 }
 
-// declaration = basetype ident ("=" expr)? ";"
+// declaration = basetype ident ("[" num "]")* ("=" expr)? ";"
 static Node *declaration()
 {
   Token *tok = token;
   Type *ty = basetype();
-  LVar *lvar = new_lvar(expect_ident(), ty);
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+  LVar *lvar = new_lvar(name, ty);
 
   if (consume(";"))
     return new_node(ND_NULL, tok);

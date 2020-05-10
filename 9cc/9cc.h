@@ -131,13 +131,15 @@ typedef enum
 {
   TY_INT,
   TY_PTR,
+  TY_ARR,
 } TypeKind;
 
 struct Type
 {
-  TypeKind kind;
-  Type *base;
-  int size;
+  TypeKind kind; // type kind
+  Type *base;    // base type
+  int size;      // sizeof() value
+  int array_len; // number of elements in an array
 };
 
 /*********************************************
@@ -212,5 +214,7 @@ void codegen(Function *prog);
 bool is_integer(Type *ty);
 
 Type *pointer_to(Type *base);
+
+Type *array_of(Type *base, int len);
 
 void add_type(Node *node);
