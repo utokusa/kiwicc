@@ -72,6 +72,7 @@ typedef enum
   ND_LVAR,      // local variables
   ND_NUM,       // integer
   ND_NULL,      // nulls
+  ND_SIZEOF,    // sizeof operator
   ND_IF,        // "if"
   ND_WHILE,     // "while"
   ND_FOR,       // "for"
@@ -136,6 +137,7 @@ struct Type
 {
   TypeKind kind;
   Type *base;
+  int size;
 };
 
 /*********************************************

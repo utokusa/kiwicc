@@ -395,14 +395,16 @@ static Node *mul()
   }
 }
 
-// unary = "+"? primary
+// unary = "sizeof" unary
+//       | "+"? primary
 //       | "-"? primary
 //       | "*" unary
 //       | "&" unary
 static Node *unary()
 {
   Token *tok;
-
+  if (tok = consume("sizeof"))
+    return new_node_unary(ND_SIZEOF, unary(), tok);
   if (tok = consume("+"))
     return primary();
   if (tok = consume("-"))

@@ -56,6 +56,9 @@ static void gen(Node *node)
     return;
   case ND_NULL:
     return;
+  case ND_SIZEOF:
+    printf("  push %d\n", node->lhs->ty->size);
+    return;
   case ND_ASSIGN:
     gen_lval(node->lhs);
     gen(node->rhs);

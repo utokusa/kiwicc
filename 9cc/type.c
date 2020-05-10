@@ -4,7 +4,7 @@
 * ...type...
 *********************************************/
 
-Type *int_type = &(Type){TY_INT};
+Type *int_type = &(Type){TY_INT, NULL, 4};
 
 bool is_integer(Type *ty)
 {
@@ -16,6 +16,7 @@ Type *pointer_to(Type *base)
   Type *ty = calloc(1, sizeof(Type));
   ty->kind = TY_PTR;
   ty->base = base;
+  ty->size = 8;
   return ty;
 }
 
@@ -69,5 +70,7 @@ void add_type(Node *node)
     else
       error_tok(node->tok, "invalid pointer dereference");
     return;
+  case ND_SIZEOF:
+    node->ty = int_type;
   }
 }
