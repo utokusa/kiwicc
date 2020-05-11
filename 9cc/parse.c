@@ -411,20 +411,17 @@ static Node *mul()
   }
 }
 
-// unary = "sizeof" unary
-//       | "+"? primary
-//       | "-"? primary
-//       | "*" unary
-//       | "&" unary
+// unary = ("sizeof" | "+" | "-" | "*" | "&")? unary
+//       | primary
 static Node *unary()
 {
   Token *tok;
   if (tok = consume("sizeof"))
     return new_node_unary(ND_SIZEOF, unary(), tok);
   if (tok = consume("+"))
-    return primary();
+    return unary();
   if (tok = consume("-"))
-    return new_node_binary(ND_SUB, new_node_num(0, tok), primary(), tok);
+    return new_node_binary(ND_SUB, new_node_num(0, tok), unary(), tok);
   if (tok = consume("*"))
     return new_node_unary(ND_DEREF, unary(), tok);
   if (tok = consume("&"))
