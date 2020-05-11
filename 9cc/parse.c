@@ -18,6 +18,7 @@ static Node *relational();
 static Node *add();
 static Node *mul();
 static Node *unary();
+static Node *postfix();
 static Node *primary();
 
 static Node *new_node(NodeKind kind, Token *tok)
@@ -412,7 +413,7 @@ static Node *mul()
 }
 
 // unary = ("sizeof" | "+" | "-" | "*" | "&")? unary
-//       | primary
+//       | postfix
 static Node *unary()
 {
   Token *tok;
@@ -426,7 +427,23 @@ static Node *unary()
     return new_node_unary(ND_DEREF, unary(), tok);
   if (tok = consume("&"))
     return new_node_unary(ND_ADDR, unary(), tok);
-  return primary();
+  return postfix();
+}
+
+// postfix = primary ("[" expr "]")*
+static Node *postfix()
+{
+  Node *node = primary();
+  Token *tok;
+
+  while (tok = consume("["))
+  {
+    // x[y] is short for *(x + y)
+    Node *exp = new_node_add(node, expr(), tok);
+    expect("]");
+    node = new_node_unary(ND_DEREF, exp, tok);
+  }
+  return node;
 }
 
 // primary = num
