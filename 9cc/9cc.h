@@ -33,8 +33,8 @@ struct Token
 };
 
 // Type of local variables
-typedef struct LVar LVar;
-struct LVar
+typedef struct Var Var;
+struct Var
 {
   char *name; // The name of the local variable.
   int len;    // The length of the local variable.
@@ -47,7 +47,7 @@ typedef struct VarList VarList;
 struct VarList
 {
   VarList *next;
-  LVar *lvar;
+  Var *var;
 };
 
 // ********** parse.c *************
@@ -109,8 +109,8 @@ struct Node
   char *funcname;
   Node *arg;
 
-  int val;    // Use only if kind is ND_NUM
-  LVar *lvar; // Use only if kind is ND_LVAR
+  int val;  // Use only if kind is ND_NUM
+  Var *var; // Use only if kind is ND_LVAR
 };
 
 // Function

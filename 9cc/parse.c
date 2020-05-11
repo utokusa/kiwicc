@@ -36,10 +36,10 @@ static Node *new_node_num(int val, Token *tok)
   return node;
 }
 
-static Node *new_node_lvar(LVar *lvar, Token *tok)
+static Node *new_node_var(Var *var, Token *tok)
 {
   Node *node = new_node(ND_LVAR, tok);
-  node->lvar = lvar;
+  node->var = var;
   return node;
 }
 
@@ -87,29 +87,29 @@ static Node *new_node_sub(Node *lhs, Node *rhs, Token *tok)
 }
 
 // Search variable name. Return NULL if not found.
-LVar *find_lvar(char *name)
+Var *find_var(char *name)
 {
-  for (VarList *var = locals; var; var = var->next)
+  for (VarList *vl = locals; vl; vl = vl->next)
   {
-    LVar *lvar = var->lvar;
-    if (lvar->len == strlen(name) && !memcmp(name, lvar->name, lvar->len))
-      return lvar;
+    Var *var = vl->var;
+    if (var->len == strlen(name) && !memcmp(name, var->name, var->len))
+      return var;
   }
   return NULL;
 }
 
 // new local variable
-static LVar *new_lvar(char *name, Type *ty)
+static Var *new_lvar(char *name, Type *ty)
 {
-  LVar *lvar = calloc(1, sizeof(LVar));
-  lvar->name = name;
-  lvar->len = strlen(name);
-  lvar->ty = ty;
+  Var *var = calloc(1, sizeof(Var));
+  var->name = name;
+  var->len = strlen(name);
+  var->ty = ty;
   VarList *vl = calloc(1, sizeof(VarList));
-  vl->lvar = lvar;
+  vl->var = var;
   vl->next = locals;
   locals = vl;
-  return lvar;
+  return var;
 }
 
 // program = function*
@@ -152,7 +152,7 @@ static VarList *read_func_param()
   ty = read_type_suffix(ty);
 
   VarList *vl = calloc(1, sizeof(VarList));
-  vl->lvar = new_lvar(name, ty);
+  vl->var = new_lvar(name, ty);
   return vl;
 }
 
@@ -207,13 +207,13 @@ static Node *declaration()
   Type *ty = basetype();
   char *name = expect_ident();
   ty = read_type_suffix(ty);
-  LVar *lvar = new_lvar(name, ty);
+  Var *var = new_lvar(name, ty);
 
   if (consume(";"))
     return new_node(ND_NULL, tok);
 
   expect("=");
-  Node *lhs = new_node_lvar(lvar, tok);
+  Node *lhs = new_node_var(var, tok);
   Node *rhs = expr();
   expect(";");
   Node *node = new_node_binary(ND_ASSIGN, lhs, rhs, tok);
@@ -487,10 +487,10 @@ static Node *primary()
     }
 
     // Local variable
-    LVar *lvar = find_lvar(identname);
-    if (!lvar)
+    Var *var = find_var(identname);
+    if (!var)
       error_tok(tok, "undefind variable");
-    return new_node_lvar(lvar, tok);
+    return new_node_var(var, tok);
   }
 
   tok = token;

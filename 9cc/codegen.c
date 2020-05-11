@@ -32,7 +32,7 @@ static void gen_addr(Node *node)
   {
   case ND_LVAR:
     printf("  mov rax, rbp\n");
-    printf("  sub rax, %d\n", node->lvar->offset);
+    printf("  sub rax, %d\n", node->var->offset);
     printf("  push rax\n");
     return;
   case ND_DEREF:
@@ -269,7 +269,7 @@ void codegen(Function *prog)
     // Push arguments to the stack
     int nargs = 0;
     for (VarList *param = fn->params; param && nargs < 6; param = param->next)
-      printf("  mov [rbp-%d], %s\n", param->lvar->offset, argreg[nargs++]);
+      printf("  mov [rbp-%d], %s\n", param->var->offset, argreg[nargs++]);
 
     // Generate statements
     for (Node *node = fn->node; node; node = node->next)

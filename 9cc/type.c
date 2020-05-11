@@ -69,7 +69,7 @@ void add_type(Node *node)
     node->ty = node->lhs->ty;
     return;
   case ND_LVAR:
-    node->ty = node->lvar->ty;
+    node->ty = node->var->ty;
     return;
   case ND_ADDR:
     if (node->lhs->ty->kind == TY_ARR)
