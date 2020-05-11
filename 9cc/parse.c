@@ -92,7 +92,7 @@ Var *find_var(char *name)
   for (VarList *vl = locals; vl; vl = vl->next)
   {
     Var *var = vl->var;
-    if (var->len == strlen(name) && !memcmp(name, var->name, var->len))
+    if (strlen(var->name) == strlen(name) && !memcmp(name, var->name, strlen(name)))
       return var;
   }
   return NULL;
@@ -103,7 +103,6 @@ static Var *new_lvar(char *name, Type *ty)
 {
   Var *var = calloc(1, sizeof(Var));
   var->name = name;
-  var->len = strlen(name);
   var->ty = ty;
   VarList *vl = calloc(1, sizeof(VarList));
   vl->var = var;

@@ -32,12 +32,11 @@ struct Token
   int len;        // Length of the token
 };
 
-// Type of local variables
+// Variable
 typedef struct Var Var;
 struct Var
 {
   char *name; // The name of the local variable.
-  int len;    // The length of the local variable.
   Type *ty;   // Type
   int offset; // The offset from RBP.
 };
