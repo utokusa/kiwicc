@@ -6,8 +6,11 @@
 
 // Local variables
 static VarList *locals;
+static VarList *globals;
 
 static Function *function();
+static Type *basetype();
+static void global_var();
 static Node *declaration();
 static Node *stmt();
 static Node *stmt2();
@@ -38,7 +41,7 @@ static Node *new_node_num(int val, Token *tok)
 
 static Node *new_node_var(Var *var, Token *tok)
 {
-  Node *node = new_node(ND_LVAR, tok);
+  Node *node = new_node(ND_VAR, tok);
   node->var = var;
   return node;
 }
@@ -95,15 +98,31 @@ Var *find_var(char *name)
     if (strlen(var->name) == strlen(name) && !memcmp(name, var->name, strlen(name)))
       return var;
   }
+
+  for (VarList *vl = globals; vl; vl = vl->next)
+  {
+    Var *var = vl->var;
+    if (strlen(var->name) == strlen(name) && !memcmp(name, var->name, strlen(name)))
+      return var;
+  }
+
   return NULL;
 }
 
-// new local variable
-static Var *new_lvar(char *name, Type *ty)
+// Return new variable
+static Var *new_var(char *name, Type *ty, bool is_local)
 {
   Var *var = calloc(1, sizeof(Var));
   var->name = name;
   var->ty = ty;
+  var->is_local = is_local;
+  return var;
+}
+
+// Return new local variable
+static Var *new_lvar(char *name, Type *ty)
+{
+  Var *var = new_var(name, ty, true);
   VarList *vl = calloc(1, sizeof(VarList));
   vl->var = var;
   vl->next = locals;
@@ -111,18 +130,52 @@ static Var *new_lvar(char *name, Type *ty)
   return var;
 }
 
-// program = function*
-Function *program()
+// Return new global variable
+static Var *new_gvar(char *name, Type *ty)
+{
+  Var *var = new_var(name, ty, false);
+  VarList *vl = calloc(1, sizeof(VarList));
+  vl->var = var;
+  vl->next = globals;
+  globals = vl;
+  return var;
+}
+
+// Determine wheter the next top-level is a function
+// or a global variable by looking ahead input tokens.
+static bool is_function()
+{
+  Token *tok = token;
+  basetype();
+  bool isfunc = consume_ident() && consume("(");
+  token = tok;
+  return isfunc;
+}
+
+// program = (global-var | function)*
+Program *program()
 {
   Function head = {};
   Function *cur = &head;
+  globals = NULL;
+
   while (!at_eof())
   {
-    cur->next = function();
-    cur = cur->next;
+    if (is_function())
+    {
+      cur->next = function();
+      cur = cur->next;
+    }
+    else
+    {
+      global_var();
+    }
   }
 
-  return head.next;
+  Program *prog = calloc(1, sizeof(Program));
+  prog->globals = globals;
+  prog->fns = head.next;
+  return prog;
 }
 
 static Type *basetype()
@@ -197,6 +250,16 @@ static Function *function()
   fn->node = head.next;
   fn->locals = locals;
   return fn;
+}
+
+// global-var = basetype ident ("[" num "]")* ";"
+static void global_var()
+{
+  Type *ty = basetype();
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+  expect(";");
+  new_gvar(name, ty);
 }
 
 // declaration = basetype ident ("[" num "]")* ("=" expr)? ";"

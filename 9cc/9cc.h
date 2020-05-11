@@ -11,8 +11,6 @@
 
 typedef struct Type Type;
 
-// ********** tokenize.c *************
-
 typedef enum
 {
   TK_RESERVED, // Keywords or punctuators
@@ -36,8 +34,11 @@ struct Token
 typedef struct Var Var;
 struct Var
 {
-  char *name; // The name of the local variable.
-  Type *ty;   // Type
+  char *name;    // The name of the local variable.
+  Type *ty;      // Type
+  bool is_local; // local or global
+
+  // Local variable
   int offset; // The offset from RBP.
 };
 
@@ -48,8 +49,6 @@ struct VarList
   VarList *next;
   Var *var;
 };
-
-// ********** parse.c *************
 
 // Kind of AST node
 typedef enum
@@ -68,7 +67,7 @@ typedef enum
   ND_ASSIGN,    // = assignment
   ND_ADDR,      // & address-of
   ND_DEREF,     // * dereference (indirection)
-  ND_LVAR,      // local variables
+  ND_VAR,       // variable
   ND_NUM,       // integer
   ND_NULL,      // nulls
   ND_SIZEOF,    // sizeof operator
@@ -109,7 +108,7 @@ struct Node
   Node *arg;
 
   int val;  // Use only if kind is ND_NUM
-  Var *var; // Use only if kind is ND_LVAR
+  Var *var; // Use only if kind is ND_VAR
 };
 
 // Function
@@ -124,7 +123,13 @@ struct Function
   int stack_size;
 };
 
-// ********** type.c *************
+// Program
+typedef struct Program Program;
+struct Program
+{
+  VarList *globals;
+  Function *fns;
+};
 
 typedef enum
 {
@@ -202,11 +207,11 @@ Token *tokenize();
 
 // ********** parse.c *************
 
-Function *program();
+Program *program();
 
 // ********** codegen.c *************
 
-void codegen(Function *prog);
+void codegen(Program *prog);
 
 // ********** type.c *************
 
