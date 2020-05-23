@@ -524,7 +524,7 @@ static Node *primary()
 
   if (tok = consume_ident())
   {
-    char *identname = strndup(tok->str, tok->len);
+    char *identname = strndup(tok->loc, tok->len);
     // Function call
     if (consume("("))
     {

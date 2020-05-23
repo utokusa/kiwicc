@@ -40,7 +40,7 @@ void error_tok(Token *tok, char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  verror_at(tok->str, fmt, ap);
+  verror_at(tok->loc, fmt, ap);
 }
 
 // If the next token is the symbol which we expect,
@@ -50,7 +50,7 @@ Token *consume(char *op)
 {
   if (token->kind != TK_RESERVED ||
       strlen(op) != token->len ||
-      memcmp(token->str, op, token->len))
+      memcmp(token->loc, op, token->len))
     return NULL;
   Token *tok = token;
   token = token->next;
@@ -61,7 +61,7 @@ Token *consume(char *op)
 Token *peek(char *s)
 {
   if (token->kind != TK_RESERVED || strlen(s) != token->len ||
-      strncmp(token->str, s, token->len))
+      strncmp(token->loc, s, token->len))
     return NULL;
   return token;
 }
@@ -104,7 +104,7 @@ char *expect_ident()
 {
   if (token->kind != TK_IDENT)
     error_tok(token, "The token is not an identifier");
-  char *name = strndup(token->str, token->len);
+  char *name = strndup(token->loc, token->len);
   token = token->next;
   return name;
 }
@@ -171,7 +171,7 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
 {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
-  tok->str = str;
+  tok->loc = str;
   tok->len = len;
   cur->next = tok;
   return tok;
