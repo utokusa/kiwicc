@@ -48,22 +48,22 @@ void error_tok(Token *tok, char *fmt, ...)
 // Otherwise we return NULL
 Token *consume(char *op)
 {
-  if (token->kind != TK_RESERVED ||
-      strlen(op) != token->len ||
-      memcmp(token->loc, op, token->len))
+  if (token_old->kind != TK_RESERVED ||
+      strlen(op) != token_old->len ||
+      memcmp(token_old->loc, op, token_old->len))
     return NULL;
-  Token *tok = token;
-  token = token->next;
+  Token *tok = token_old;
+  token_old = token_old->next;
   return tok;
 }
 
 // Returns the current token if it matches a given string
 Token *peek(char *s)
 {
-  if (token->kind != TK_RESERVED || strlen(s) != token->len ||
-      strncmp(token->loc, s, token->len))
+  if (token_old->kind != TK_RESERVED || strlen(s) != token_old->len ||
+      strncmp(token_old->loc, s, token_old->len))
     return NULL;
-  return token;
+  return token_old;
 }
 
 // If next token is a identifier,
@@ -71,10 +71,10 @@ Token *peek(char *s)
 // Otherwise we return NULL.
 Token *consume_ident()
 {
-  if (token->kind != TK_IDENT)
+  if (token_old->kind != TK_IDENT)
     return NULL;
-  Token *tok = token;
-  token = token->next;
+  Token *tok = token_old;
+  token_old = token_old->next;
   return tok;
 }
 
@@ -84,16 +84,16 @@ Token *consume_ident()
 void expect(char *s)
 {
   if (!peek(s))
-    error_tok(token, "The token is not %s.", s);
-  token = token->next;
+    error_tok(token_old, "The token is not %s.", s);
+  token_old = token_old->next;
 }
 
 int expect_number()
 {
-  if (token->kind != TK_NUM)
-    error_tok(token, "The token is not a number.");
-  int val = token->val;
-  token = token->next;
+  if (token_old->kind != TK_NUM)
+    error_tok(token_old, "The token is not a number.");
+  int val = token_old->val;
+  token_old = token_old->next;
   return val;
 }
 
@@ -102,16 +102,31 @@ int expect_number()
 // Otherwise report error.
 char *expect_ident()
 {
-  if (token->kind != TK_IDENT)
-    error_tok(token, "The token is not an identifier");
-  char *name = strndup(token->loc, token->len);
-  token = token->next;
+  if (token_old->kind != TK_IDENT)
+    error_tok(token_old, "The token is not an identifier");
+  char *name = strndup(token_old->loc, token_old->len);
+  token_old = token_old->next;
   return name;
+}
+
+// Consumes the current token if it matches `s`.
+bool equal(Token *tok, char *s)
+{
+  return strlen(s) == tok->len &&
+         !strncmp(tok->loc, s, tok->len);
+}
+
+// Ensure that the current token is `s`.
+Token *skip(Token *tok, char *s)
+{
+  if (!equal(tok, s))
+    error_tok(tok, "expected '%s'", s);
+  return tok->next;
 }
 
 bool at_eof()
 {
-  return token->kind == TK_EOF;
+  return token_old->kind == TK_EOF;
 }
 
 static bool startswith(char *tgt, char *ref)

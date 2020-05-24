@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -151,7 +152,7 @@ struct Type
 *********************************************/
 
 // Current token
-extern Token *token;
+extern Token *token_old;
 
 // Input program
 extern char *user_input;
@@ -198,6 +199,10 @@ int expect_number();
 // Otherwise report error.
 char *expect_ident();
 
+bool equal(Token *tok, char *s);
+
+Token *skip(Token *tok, char *s);
+
 bool is_number();
 
 bool at_eof();
@@ -207,7 +212,8 @@ Token *tokenize();
 
 // ********** parse.c *************
 
-Program *program();
+Program *program_old();
+Program *parse(Token *tok);
 
 // ********** codegen.c *************
 

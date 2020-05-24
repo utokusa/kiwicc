@@ -1,7 +1,7 @@
 #include "9cc.h"
 
 // Current token
-Token *token;
+Token *token_old;
 
 // Input program
 char *user_input;
@@ -16,10 +16,11 @@ int main(int argc, char **argv)
 
   // Tokenize
   user_input = argv[1];
-  token = tokenize();
+  token_old = tokenize();
 
   // parse
-  Program *prog = program();
+  // Program *prog = program_old();
+  Program *prog = parse(token_old);
 
   // Assign offsets to local variables.
   for (Function *fn = prog->fns; fn; fn = fn->next)
