@@ -43,72 +43,6 @@ void error_tok(Token *tok, char *fmt, ...)
   verror_at(tok->loc, fmt, ap);
 }
 
-// If the next token is the symbol which we expect,
-// we move it forward and return the current token.
-// Otherwise we return NULL
-Token *consume(char *op)
-{
-  if (token_old->kind != TK_RESERVED ||
-      strlen(op) != token_old->len ||
-      memcmp(token_old->loc, op, token_old->len))
-    return NULL;
-  Token *tok = token_old;
-  token_old = token_old->next;
-  return tok;
-}
-
-// Returns the current token if it matches a given string
-Token *peek(char *s)
-{
-  if (token_old->kind != TK_RESERVED || strlen(s) != token_old->len ||
-      strncmp(token_old->loc, s, token_old->len))
-    return NULL;
-  return token_old;
-}
-
-// If next token is a identifier,
-// we move it forward and eturn the current token.
-// Otherwise we return NULL.
-Token *consume_ident()
-{
-  if (token_old->kind != TK_IDENT)
-    return NULL;
-  Token *tok = token_old;
-  token_old = token_old->next;
-  return tok;
-}
-
-// If next token is givin string,
-// we move it forward.
-// Otherwise report error.
-void expect(char *s)
-{
-  if (!peek(s))
-    error_tok(token_old, "The token is not %s.", s);
-  token_old = token_old->next;
-}
-
-int expect_number()
-{
-  if (token_old->kind != TK_NUM)
-    error_tok(token_old, "The token is not a number.");
-  int val = token_old->val;
-  token_old = token_old->next;
-  return val;
-}
-
-// If next token is an identifier,
-// we move it forward and return the name.
-// Otherwise report error.
-char *expect_ident()
-{
-  if (token_old->kind != TK_IDENT)
-    error_tok(token_old, "The token is not an identifier");
-  char *name = strndup(token_old->loc, token_old->len);
-  token_old = token_old->next;
-  return name;
-}
-
 // Consumes the current token if it matches `s`.
 bool equal(Token *tok, char *s)
 {
@@ -122,11 +56,6 @@ Token *skip(Token *tok, char *s)
   if (!equal(tok, s))
     error_tok(tok, "expected '%s'", s);
   return tok->next;
-}
-
-bool at_eof()
-{
-  return token_old->kind == TK_EOF;
 }
 
 static bool startswith(char *tgt, char *ref)

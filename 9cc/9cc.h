@@ -174,45 +174,16 @@ void error_at(char *loc, char *fmt, ...);
 
 void error_tok(Token *tok, char *fmt, ...);
 
-// If the next token is the symbol which we expect,
-// we move it forward and return the current token.
-// Otherwise we return NULL
-Token *consume(char *op);
-
-// Returns the current token if it matches a given string
-Token *peek(char *s);
-
-// If next token is a identifier,
-// we move it forward and return true.
-// Otherwise we return NULL.
-Token *consume_ident();
-
-// If next token is the symbol which we expect,
-// we move it forward.
-// Otherwise report error.
-void expect(char *op);
-
-int expect_number();
-
-// If next token is an identifier,
-// we move it forward.
-// Otherwise report error.
-char *expect_ident();
-
 bool equal(Token *tok, char *s);
 
 Token *skip(Token *tok, char *s);
 
 bool is_number();
 
-bool at_eof();
-
 // convert input 'user_input' to token
 Token *tokenize();
 
 // ********** parse.c *************
-
-Program *program_old();
 Program *parse(Token *tok);
 
 // ********** codegen.c *************
