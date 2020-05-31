@@ -122,6 +122,24 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   return tok;
 }
 
+static Token *read_string_literal(Token *cur, char *start)
+{
+  //  ..."abc"....
+  //     ^
+  //     |
+  //     start
+  char *p = start + 1;
+  while (*p && *p != '"')
+    p++;
+  if (!*p)
+    error_at(start, "unclosed string literal");
+
+  Token *tok = new_token(TK_STR, cur, start, p - start + 1);
+  tok->contents = strndup(start + 1, p - start - 1);
+  tok->cont_len = p - start; // cont_len include terminating '\n'
+  return tok;
+}
+
 // Convert input 'user_input' to token
 Token *tokenize()
 {
@@ -168,13 +186,21 @@ Token *tokenize()
       continue;
     }
 
-    // numbers
+    // Numeric literal
     if (isdigit(*p))
     {
       cur = new_token(TK_NUM, cur, p, DUMMY_LEN);
       char *prev_p = p;
       cur->val = strtol(p, &p, 10);
       cur->len = (int)(prev_p - p);
+      continue;
+    }
+
+    // String literal
+    if (*p == '"')
+    {
+      cur = read_string_literal(cur, p);
+      p += cur->len;
       continue;
     }
 

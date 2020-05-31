@@ -142,6 +142,22 @@ static Var *new_gvar(char *name, Type *ty)
   return var;
 }
 
+static char *new_gvar_name()
+{
+  static int cnt = 0;
+  char *buf = malloc(20);
+  sprintf(buf, ".L.data.%d", cnt++);
+  return buf;
+}
+
+static Var *new_string_literal(char *p, int len)
+{
+  Type *ty = array_of(char_type, len);
+  Var *var = new_gvar(new_gvar_name(), ty);
+  var->init_data = p;
+  return var;
+}
+
 static char *get_ident(Token *tok)
 {
   if (tok->kind != TK_IDENT)
@@ -615,6 +631,7 @@ static Node *postfix(Token **rest, Token *tok)
 }
 
 // primary = num
+//         | str
 //         | ident ( "(" args? ")" )?
 //         | "(" expr ")"
 // args = (expr ",")*  expr
@@ -666,6 +683,18 @@ static Node *primary(Token **rest, Token *tok)
     *rest = tok->next;
     return new_node_var(var, tok);
   }
+
+  // String literal
+  if (tok->kind == TK_STR)
+  {
+    Var *var = new_string_literal(tok->contents, tok->cont_len);
+    *rest = tok->next;
+    return new_node_var(var, tok);
+  }
+
+  // Numeric literal
+  if (tok->kind != TK_NUM)
+    error_tok(tok, "expected expression");
 
   *rest = tok->next;
   return new_node_num(get_number(tok), tok);

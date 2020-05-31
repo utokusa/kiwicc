@@ -166,8 +166,14 @@ assert 15 'int main() {return add_char(7,5,3);} int add_char(char a, char b, cha
 assert 15 'int main() {return add_char(7,5,3);} char add_char(char a, char b, char c) { return a+b+c; }'
 assert 10 'char x; int main() { x = 10; return x; }'
 assert 1 'char x[3]; int main() {x[1]=1; return x[1];}'
-
-
-
+assert 97 'int main() { return "abc"[0]; }'
+assert 98 'int main() { return "abc"[1]; }'
+assert 99 'int main() { return "abc"[2]; }'
+assert 0 'int main() { return "abc"[3]; }'
+assert 97 'int main() { char *str = "abc"; return str[0]; }'
+assert 98 'int main() { char *str = "abc"; return str[1]; }'
+assert 99 'int main() { char *str = "abc"; return str[2]; }'
+assert 0 'int main() { char *str = "abc"; return str[3]; }'
+assert 4 'int main() { return sizeof("abc"); }'
 
 echo OK
