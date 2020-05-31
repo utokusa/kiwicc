@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -150,9 +151,6 @@ struct Type
 /*********************************************
 * ...global variables...
 *********************************************/
-
-// Current token
-extern Token *token_old;
 
 // Input program
 extern char *user_input;
