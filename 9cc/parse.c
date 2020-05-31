@@ -193,8 +193,22 @@ Program *parse(Token *tok)
 
 static Type *basetype(Token **rest, Token *tok)
 {
-  tok = skip(tok, "int");
-  Type *ty = int_type;
+  Type *ty;
+  if (equal(tok, "char"))
+  {
+    tok = tok->next;
+    ty = char_type;
+  }
+  else if (equal(tok, "int"))
+  {
+    tok = tok->next;
+    ty = int_type;
+  }
+  else
+  {
+    error_tok(tok, "expected type name");
+  }
+
   while (equal(tok, "*"))
   {
     tok = tok->next;
@@ -202,6 +216,12 @@ static Type *basetype(Token **rest, Token *tok)
   }
   *rest = tok;
   return ty;
+}
+
+// Returns true if a givin token represents a type
+static bool is_typename(Token *tok)
+{
+  return equal(tok, "char") || equal(tok, "int");
 }
 
 static Type *read_type_suffix(Type *base, Token **rest, Token *tok)
@@ -415,7 +435,7 @@ static Node *stmt2(Token **rest, Token *tok)
     }
   }
 
-  if (equal(tok, "int"))
+  if (is_typename(tok))
     return declaration(rest, tok);
 
   Node *node = expr_stmt(&tok, tok);

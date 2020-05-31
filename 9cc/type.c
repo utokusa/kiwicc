@@ -4,11 +4,20 @@
 * ...type...
 *********************************************/
 
+Type *char_type = &(Type){TY_CHAR, NULL, 1};
 Type *int_type = &(Type){TY_INT, NULL, 8};
+
+static Type *new_type(TypeKind kind, int size)
+{
+  Type *ty = malloc(sizeof(Type));
+  ty->kind = kind;
+  ty->size = size;
+  return ty;
+}
 
 bool is_integer(Type *ty)
 {
-  return ty->kind == TY_INT;
+  return ty->kind == TY_CHAR || ty->kind == TY_INT;
 }
 
 Type *pointer_to(Type *base)

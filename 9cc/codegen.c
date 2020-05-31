@@ -7,7 +7,8 @@
 static int top;
 static int labelseq = 1;
 static char *funcname;
-static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
+static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 static char *reg(int idx)
 {
@@ -17,14 +18,24 @@ static char *reg(int idx)
   return r[idx];
 }
 
-static void load()
+static void load(Type *ty)
 {
-  printf("  mov %s, [%s]\n", reg(top - 1), reg(top - 1));
+  char *r = reg(top - 1);
+  if (ty->size == 1)
+    printf("  movsx %s, byte ptr [%s]\n", r, r);
+  else
+    printf("  mov %s, [%s]\n", r, r);
 }
 
-static void store()
+static void store(Type *ty)
 {
-  printf("  mov [%s], %s\n", reg(top - 1), reg(top - 2));
+  char *rd = reg(top - 1);
+  char *rs = reg(top - 2);
+
+  if (ty->size == 1)
+    printf("  mov [%s], %sb\n", rd, rs);
+  else
+    printf("  mov [%s], %s\n", rd, rs);
   top--;
 }
 
@@ -70,7 +81,7 @@ static void gen_expr(Node *node)
   case ND_VAR:
     gen_addr(node);
     if (node->ty->kind != TY_ARR)
-      load();
+      load(node->ty);
     return;
   case ND_SIZEOF:
     printf("  mov %s, %d\n", reg(top++), node->lhs->ty->size);
@@ -78,7 +89,7 @@ static void gen_expr(Node *node)
   case ND_ASSIGN:
     gen_expr(node->rhs);
     gen_lval(node->lhs);
-    store();
+    store(node->ty);
     return;
   case ND_ADDR:
     gen_addr(node->lhs);
@@ -86,7 +97,7 @@ static void gen_expr(Node *node)
   case ND_DEREF:
     gen_expr(node->lhs);
     if (node->ty->kind != TY_ARR)
-      load();
+      load(node->ty);
     return;
   case ND_FUNCALL:
   {
@@ -98,7 +109,7 @@ static void gen_expr(Node *node)
       nargs++;
     }
     for (int i = nargs - 1; i >= 0; --i)
-      printf("  mov %s, %s\n", argreg[i], reg(--top));
+      printf("  mov %s, %s\n", argreg64[i], reg(--top));
 
     // We should push r10 and r11 becouse they are caller saved registers.
     // RAX is set to 0 for varidic function.
@@ -294,7 +305,13 @@ static void emit_text(Program *prog)
     // Save arguments to the stack
     int nargs = 0;
     for (VarList *param = fn->params; param && nargs < 6; param = param->next)
-      printf("  mov [rbp-%d], %s\n", param->var->offset, argreg[nargs++]);
+    {
+      Var *var = param->var;
+      if (var->ty->size == 1)
+        printf("  mov [rbp-%d], %s\n", param->var->offset, argreg8[nargs++]);
+      else
+        printf("  mov [rbp-%d], %s\n", param->var->offset, argreg64[nargs++]);
+    }
 
     // Generate statements
     for (Node *node = fn->node; node; node = node->next)

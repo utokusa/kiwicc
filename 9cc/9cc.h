@@ -135,6 +135,7 @@ struct Program
 
 typedef enum
 {
+  TY_CHAR,
   TY_INT,
   TY_PTR,
   TY_ARR,
@@ -155,6 +156,7 @@ struct Type
 // Input program
 extern char *user_input;
 
+extern Type *char_type;
 extern Type *int_type;
 
 /*********************************************

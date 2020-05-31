@@ -152,6 +152,22 @@ assert 8 'int x; int main() { return sizeof(x); }'
 assert 0 'int x[3]; int main() {x[0]=0; return x[0];}'
 assert 1 'int x[3]; int main() {x[1]=1; return x[1];}'
 assert 2 'int x[3]; int main() {x[2]=2; return x[2];}'
+assert 1 'int main() { char x=1; return x; }'
+assert 1 'int main() { char x=1; char y=2; return x; }'
+assert 2 'int main() { char x=1; char y=2; return y; }'
+assert 1 'int main() { char x=1; return sizeof(x); }'
+assert 10 'int main() { char x[10]; return sizeof(x); }'
+assert 5 'int main() { char x[10]; char *y=x+3; *y=5; return x[3]; }'
+assert 5 'int main() { char a=1; char b=4; char c=a+b; return c; }'
+assert 5 'int main() { char a=1; char b=4; int c=a+b; return c; }'
+assert 5 'int main() { int a=1; int b=4; char c=a+b; return c; }'
+assert 5 'int main() { int a=1; char b=4; char c=a+b; return c; }'
+assert 15 'int main() {return add_char(7,5,3);} int add_char(char a, char b, char c) { return a+b+c; }'
+assert 15 'int main() {return add_char(7,5,3);} char add_char(char a, char b, char c) { return a+b+c; }'
+assert 10 'char x; int main() { x = 10; return x; }'
+assert 1 'char x[3]; int main() {x[1]=1; return x[1];}'
+
+
 
 
 echo OK
