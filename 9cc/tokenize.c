@@ -122,8 +122,24 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   return tok;
 }
 
-static char read_escaped_char(char *p)
+static char read_escaped_char(char **new_pos, char *p)
 {
+  if ('0' <= *p && *p <= '7')
+  {
+    // Read an octal number up to 3 digits.
+    int c = *p++ - '0';
+    if ('0' <= *p && *p <= '7')
+    {
+      c = (c << 3) | (*p++ - '0');
+      if ('0' <= *p && *p <= '7')
+      {
+        c = (c << 3) | (*p++ - '0');
+      }
+    }
+    *new_pos = p;
+    return c;
+  }
+
   switch (*p)
   {
   case 'a':
@@ -178,8 +194,7 @@ static Token *read_string_literal(Token *cur, char *start)
   {
     if (*p == '\\')
     {
-      buf[len++] = read_escaped_char(p + 1);
-      p += 2;
+      buf[len++] = read_escaped_char(&p, p + 1);
     }
     else
     {
