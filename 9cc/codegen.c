@@ -40,6 +40,7 @@ static void store(Type *ty)
 }
 
 static void gen_expr(Node *node);
+static void gen_stmt(Node *node);
 
 // push the given node's addresss to the stack
 static void gen_addr(Node *node)
@@ -98,6 +99,11 @@ static void gen_expr(Node *node)
     gen_expr(node->lhs);
     if (node->ty->kind != TY_ARR)
       load(node->ty);
+    return;
+  case ND_STMT_EXPR:
+    for (Node *n = node->body; n; n = n->next)
+      gen_stmt(n);
+    top++;
     return;
   case ND_FUNCALL:
   {
@@ -253,7 +259,7 @@ static void gen_stmt(Node *node)
   }
   case ND_BLOCK:
   {
-    for (Node *cur = node->block; cur; cur = cur->next)
+    for (Node *cur = node->body; cur; cur = cur->next)
       gen_stmt(cur);
     return;
   }

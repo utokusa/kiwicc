@@ -444,7 +444,7 @@ static Node *stmt2(Token **rest, Token *tok)
       else
       {
         tok = skip(tok, "}");
-        node->block = head.next;
+        node->body = head.next;
         *rest = tok;
         return node;
       }
@@ -630,13 +630,46 @@ static Node *postfix(Token **rest, Token *tok)
   return node;
 }
 
-// primary = num
+// primary = "(" "{" stmt stmt* "}" ")"
+//         | "(" expr ")"
+//         | num
 //         | str
 //         | ident ( "(" args? ")" )?
-//         | "(" expr ")"
 // args = (expr ",")*  expr
 static Node *primary(Token **rest, Token *tok)
 {
+  if (equal(tok, "(") && equal(tok->next, "{"))
+  {
+    // This is a GNU statement expression.
+    Node *node = new_node(ND_STMT_EXPR, tok);
+    Node head = {};
+    Node *cur = &head;
+    tok = skip(tok->next, "{");
+    for (;;)
+    {
+      if (!equal(tok, "}"))
+      {
+        cur->next = stmt(&tok, tok);
+        cur = cur->next;
+      }
+      else
+      {
+        break;
+      }
+    }
+    tok = skip(tok, "}");
+    *rest = skip(tok, ")");
+    node->body = head.next;
+
+    cur = node->body;
+    while (cur->next)
+      cur = cur->next;
+
+    if (cur->kind != ND_EXPR_STMT)
+      error_tok(cur->tok, "statement expression returning void is not supported");
+    return node;
+  }
+
   if (equal(tok, "("))
   {
     Node *node = expr(&tok, tok->next);

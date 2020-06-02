@@ -52,7 +52,7 @@ void add_type(Node *node)
   add_type(node->init);
   add_type(node->inc);
 
-  for (Node *n = node->block; n; n = n->next)
+  for (Node *n = node->body; n; n = n->next)
     add_type(n);
   for (Node *n = node->arg; n; n = n->next)
     add_type(n);
@@ -94,5 +94,14 @@ void add_type(Node *node)
     return;
   case ND_SIZEOF:
     node->ty = int_type;
+    return;
+  case ND_STMT_EXPR:
+  {
+    Node *stmt = node->body;
+    while (stmt->next)
+      stmt = stmt->next;
+    node->ty = stmt->lhs->ty;
+    return;
+  }
   }
 }

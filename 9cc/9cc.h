@@ -87,6 +87,7 @@ typedef enum
   ND_RETURN,    // "return"
   ND_FUNCALL,   // function call
   ND_EXPR_STMT, // Expression statement
+  ND_STMT_EXPR, // Statement expression
 } NodeKind;
 
 // Node of AST
@@ -109,8 +110,8 @@ struct Node
   Node *init;
   Node *inc;
 
-  // {...} block
-  Node *block;
+  // Block or statement expression
+  Node *body;
 
   // Function call
   char *funcname;
