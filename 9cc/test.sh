@@ -205,5 +205,8 @@ assert 6 'int main() { return ({ int x=6; x; });}'
 assert 1 'int main() { /* return 2; */ return 1; }'
 assert 1 'int main() { // return 2;
 return 1; }'
+assert 2 'int main() { int x=2; {int x=3;} return x; }'
+assert 2 'int main() { int x=2; {int x=3;} {int y=4; return x; }}'
+assert 3 'int main() { int x=2; {x=3;} return x; }'
 
 echo OK

@@ -4,9 +4,26 @@
 * ...parser...
 *********************************************/
 
+// Scope for local or global variables.
+typedef struct VarScope VarScope;
+struct VarScope
+{
+  VarScope *next;
+  char *name;
+  int depth;
+  Var *var;
+};
+
 // Local variables
 static VarList *locals;
+// Global variables
 static VarList *globals;
+
+static VarScope *var_scope;
+
+// scope_depth is incremented by one at "{" and decremented
+// by one at "}"
+static int scope_depth;
 
 static Function *function(Token **rest, Token *tok);
 static Type *basetype(Token **rest, Token *tok);
@@ -90,24 +107,38 @@ static Node *new_node_sub(Node *lhs, Node *rhs, Token *tok)
   error_tok(tok, "invalid operands");
 }
 
-// Search variable name. Return NULL if not found.
-Var *find_var(char *name)
+static void enter_scope()
 {
-  for (VarList *vl = locals; vl; vl = vl->next)
-  {
-    Var *var = vl->var;
-    if (strlen(var->name) == strlen(name) && !memcmp(name, var->name, strlen(name)))
-      return var;
-  }
+  scope_depth++;
+}
 
-  for (VarList *vl = globals; vl; vl = vl->next)
-  {
-    Var *var = vl->var;
-    if (strlen(var->name) == strlen(name) && !memcmp(name, var->name, strlen(name)))
-      return var;
-  }
+static void leave_scope()
+{
+  scope_depth--;
+  while (var_scope && var_scope->depth > scope_depth)
+    var_scope = var_scope->next;
+}
 
+// Search variable by name. Return NULL if not found.
+Var *find_var(Token *tok)
+{
+  for (VarScope *sc = var_scope; sc; sc = sc->next)
+  {
+    if (strlen(sc->name) == tok->len && !strncmp(tok->loc, sc->name, tok->len))
+      return sc->var;
+  }
   return NULL;
+}
+
+static VarScope *push_scope(char *name, Var *var)
+{
+  VarScope *sc = calloc(1, sizeof(VarScope));
+  sc->next = var_scope;
+  sc->name = name;
+  sc->var = var;
+  sc->depth = scope_depth;
+  var_scope = sc;
+  return sc;
 }
 
 // Return new variable
@@ -128,6 +159,7 @@ static Var *new_lvar(char *name, Type *ty)
   vl->var = var;
   vl->next = locals;
   locals = vl;
+  push_scope(name, var);
   return var;
 }
 
@@ -139,6 +171,7 @@ static Var *new_gvar(char *name, Type *ty)
   vl->var = var;
   vl->next = globals;
   globals = vl;
+  push_scope(name, var);
   return var;
 }
 
@@ -298,6 +331,8 @@ static Function *function(Token **rest, Token *tok)
   Function *fn = calloc(1, sizeof(Function));
   basetype(&tok, tok);
   fn->name = get_ident(tok);
+
+  enter_scope();
   tok = skip(tok->next, "(");
   fn->params = read_func_params(&tok, tok);
   tok = skip(tok, "{");
@@ -312,6 +347,8 @@ static Function *function(Token **rest, Token *tok)
   fn->node = head.next;
   fn->locals = locals;
   *rest = tok->next;
+
+  leave_scope();
   return fn;
 }
 
@@ -430,6 +467,7 @@ static Node *stmt2(Token **rest, Token *tok)
 
   if (equal(tok, "{"))
   {
+    enter_scope();
     Node *node = new_node(ND_BLOCK, tok);
     Node head = {};
     Node *cur = &head;
@@ -446,6 +484,7 @@ static Node *stmt2(Token **rest, Token *tok)
         tok = skip(tok, "}");
         node->body = head.next;
         *rest = tok;
+        leave_scope();
         return node;
       }
     }
@@ -645,6 +684,7 @@ static Node *primary(Token **rest, Token *tok)
     Node head = {};
     Node *cur = &head;
     tok = skip(tok->next, "{");
+    enter_scope();
     for (;;)
     {
       if (!equal(tok, "}"))
@@ -658,6 +698,7 @@ static Node *primary(Token **rest, Token *tok)
       }
     }
     tok = skip(tok, "}");
+    leave_scope();
     *rest = skip(tok, ")");
     node->body = head.next;
 
@@ -679,12 +720,12 @@ static Node *primary(Token **rest, Token *tok)
 
   if (tok->kind == TK_IDENT)
   {
-    char *identname = strndup(tok->loc, tok->len);
     // Function call
     if (equal(tok->next, "("))
     {
       Node *node = new_node(ND_FUNCALL, tok);
-      node->funcname = identname;
+      node->funcname = strndup(tok->loc, tok->len);
+      ;
       tok = tok->next;
       if (!equal(tok->next, ")"))
       {
@@ -710,7 +751,7 @@ static Node *primary(Token **rest, Token *tok)
     }
 
     // Local variable
-    Var *var = find_var(identname);
+    Var *var = find_var(tok);
     if (!var)
       error_tok(tok, "undefind variable");
     *rest = tok->next;
