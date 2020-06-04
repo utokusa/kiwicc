@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -161,9 +162,6 @@ struct Type
 * ...global variables...
 *********************************************/
 
-// Input program
-extern char *user_input;
-
 extern Type *char_type;
 extern Type *int_type;
 
@@ -189,7 +187,7 @@ Token *skip(Token *tok, char *s);
 bool is_number();
 
 // convert input 'user_input' to token
-Token *tokenize();
+Token *tokenize_file(char *filename);
 
 // ********** parse.c *************
 Program *parse(Token *tok);

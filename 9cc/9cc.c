@@ -1,8 +1,5 @@
 #include "9cc.h"
 
-// Input program
-char *user_input;
-
 int main(int argc, char **argv)
 {
   if (argc != 2)
@@ -12,8 +9,7 @@ int main(int argc, char **argv)
   }
 
   // Tokenize
-  user_input = argv[1];
-  Token *token = tokenize();
+  Token *token = tokenize_file(argv[1]);
 
   // parse
   // Program *prog = program_old();
