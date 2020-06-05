@@ -152,7 +152,7 @@ static char *starts_with_reserved(char *p)
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)
   {
     int len = strlen(kw[i]);
-    if (startswith(p, kw[i]) && !is_alnum(len))
+    if (startswith(p, kw[i]) && !is_alnum(p[len]))
       return kw[i];
   }
 

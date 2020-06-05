@@ -24,6 +24,7 @@ int assert(int expected, int actual, char *code)
 
 int ret3() { return 3; }
 int ret5() { return 5; }
+int return_1() { return 1; }
 int add(int x, int y) { return x + y; }
 int sub(int x, int y) { return x - y; }
 int add5(int a, int b, int c, int d, int e) { return a + b + c + d + e; }
@@ -139,6 +140,7 @@ int main()
 
   assert(3, ret3(), "ret3()");
   assert(5, ({ ret5(); }), "({ ret5(); })");
+  assert(1, return_1(), "return_1()");
   assert(3, add(1, 2), "add(1, 2)");
   assert(6, sub(10, 4), "sub(10, 4)");
   assert(10, add5(2, 1, 1, 1, 5), "add5(2, 1, 1, 1, 5)");
