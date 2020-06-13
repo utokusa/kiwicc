@@ -25,7 +25,7 @@ static VarScope *var_scope;
 // by one at "}"
 static int scope_depth;
 
-static Function *function(Token **rest, Token *tok);
+static Function *funcdef(Token **rest, Token *tok);
 static Type *basetype(Token **rest, Token *tok);
 static void global_var(Token **rest, Token *tok);
 
@@ -215,7 +215,7 @@ static bool is_function(Token *tok)
   return isfunc;
 }
 
-// program = (global-var | function)*
+// program = (global-var | funcdef)*
 Program *parse(Token *tok)
 {
   Function head = {};
@@ -226,7 +226,7 @@ Program *parse(Token *tok)
   {
     if (is_function(tok))
     {
-      cur->next = function(&tok, tok);
+      cur->next = funcdef(&tok, tok);
       cur = cur->next;
     }
     else
@@ -322,10 +322,10 @@ static VarList *read_func_params(Token **rest, Token *tok)
   return head.next;
 }
 
-// function = basetype ident "(" params? ")" compound-stmt"
+// funcdef = basetype ident "(" params? ")" compound-stmt"
 // params = (param ",")*  param
 // param = basetype ident
-static Function *function(Token **rest, Token *tok)
+static Function *funcdef(Token **rest, Token *tok)
 {
   locals = NULL;
 
