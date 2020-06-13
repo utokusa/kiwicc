@@ -30,6 +30,7 @@ static Type *basetype(Token **rest, Token *tok);
 static void global_var(Token **rest, Token *tok);
 
 static Node *declaration(Token **rest, Token *tok);
+static Node *compound_stmt(Token **Rest, Token *tok);
 static Node *stmt(Token **rest, Token *tok);
 static Node *stmt2(Token **rest, Token *tok);
 static Node *expr(Token **rest, Token *tok);
@@ -321,7 +322,7 @@ static VarList *read_func_params(Token **rest, Token *tok)
   return head.next;
 }
 
-// function = basetype ident "(" params? ")" "{" stmt* "}"
+// function = basetype ident "(" params? ")" compound-stmt"
 // params = (param ",")*  param
 // param = basetype ident
 static Function *function(Token **rest, Token *tok)
@@ -337,16 +338,8 @@ static Function *function(Token **rest, Token *tok)
   fn->params = read_func_params(&tok, tok);
   tok = skip(tok, "{");
 
-  Node head = {};
-  Node *cur = &head;
-  while (!equal(tok, "}"))
-  {
-    cur->next = stmt(&tok, tok);
-    cur = cur->next;
-  }
-  fn->node = head.next;
+  fn->node = compound_stmt(rest, tok)->body;
   fn->locals = locals;
-  *rest = tok->next;
 
   leave_scope();
   return fn;
@@ -383,6 +376,31 @@ static Node *declaration(Token **rest, Token *tok)
   return new_unary(ND_EXPR_STMT, node, tok);
 }
 
+// compound-stmt = (declaration | stmt)* "}"
+static Node *compound_stmt(Token **rest, Token *tok)
+{
+  Node *node = new_node(ND_BLOCK, tok);
+  Node head = {};
+  Node *cur = &head;
+
+  enter_scope();
+
+  while (!equal(tok, "}"))
+  {
+    if (is_typename(tok))
+      cur = cur->next = stmt(&tok, tok);
+    else
+      cur = cur->next = stmt(&tok, tok);
+    add_type(cur);
+  }
+
+  leave_scope();
+
+  node->body = head.next;
+  *rest = tok->next;
+  return node;
+}
+
 // expr-stmt = expr
 static Node *expr_stmt(Token **rest, Token *tok)
 {
@@ -399,7 +417,7 @@ Node *stmt(Token **rest, Token *tok)
 }
 
 // stmt = expr ";"
-//      | "{" stmt* "}"
+//      | "{" compound-stmt
 //      | "if" "(" expr ")" stmt ("else" stmt)?
 //      | "while" "(" expr ")" stmt
 //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
@@ -466,30 +484,7 @@ static Node *stmt2(Token **rest, Token *tok)
   }
 
   if (equal(tok, "{"))
-  {
-    enter_scope();
-    Node *node = new_node(ND_BLOCK, tok);
-    Node head = {};
-    Node *cur = &head;
-    tok = skip(tok, "{");
-    for (;;)
-    {
-      if (!equal(tok, "}"))
-      {
-        cur->next = stmt(&tok, tok);
-        cur = cur->next;
-      }
-      else
-      {
-        tok = skip(tok, "}");
-        node->body = head.next;
-        *rest = tok;
-        leave_scope();
-        return node;
-      }
-    }
-  }
-
+    return compound_stmt(rest, tok->next);
   if (is_typename(tok))
     return declaration(rest, tok);
 
@@ -683,24 +678,8 @@ static Node *primary(Token **rest, Token *tok)
     Node *node = new_node(ND_STMT_EXPR, tok);
     Node head = {};
     Node *cur = &head;
-    tok = skip(tok->next, "{");
-    enter_scope();
-    for (;;)
-    {
-      if (!equal(tok, "}"))
-      {
-        cur->next = stmt(&tok, tok);
-        cur = cur->next;
-      }
-      else
-      {
-        break;
-      }
-    }
-    tok = skip(tok, "}");
-    leave_scope();
+    node->body = compound_stmt(&tok, tok->next->next)->body;
     *rest = skip(tok, ")");
-    node->body = head.next;
 
     cur = node->body;
     while (cur->next)
