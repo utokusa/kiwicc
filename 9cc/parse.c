@@ -661,6 +661,35 @@ static Node *postfix(Token **rest, Token *tok)
   return node;
 }
 
+// funcall = ident "(" (assign ("," assign)*)? ")"
+static Node *funcall(Token **rest, Token *tok)
+{
+  Node *node = new_node(ND_FUNCALL, tok);
+  node->funcname = strndup(tok->loc, tok->len);
+  tok = tok->next;
+  if (!equal(tok->next, ")"))
+  {
+    // Function call arguments
+    Node head = {};
+    Node *cur = &head;
+    cur->next = expr(&tok, tok->next);
+    cur = cur->next;
+    while (equal(tok, ","))
+    {
+      cur->next = expr(&tok, tok->next);
+      cur = cur->next;
+    }
+    node->arg = head.next;
+    tok = skip(tok, ")");
+  }
+  else
+  {
+    tok = skip(tok->next, ")");
+  }
+  *rest = tok;
+  return node;
+}
+
 // primary = "(" "{" stmt stmt* "}" ")"
 //         | "(" expr ")"
 //         | num
@@ -698,33 +727,7 @@ static Node *primary(Token **rest, Token *tok)
   {
     // Function call
     if (equal(tok->next, "("))
-    {
-      Node *node = new_node(ND_FUNCALL, tok);
-      node->funcname = strndup(tok->loc, tok->len);
-      ;
-      tok = tok->next;
-      if (!equal(tok->next, ")"))
-      {
-        // Function call arguments
-        Node head = {};
-        Node *cur = &head;
-        cur->next = expr(&tok, tok->next);
-        cur = cur->next;
-        while (equal(tok, ","))
-        {
-          cur->next = expr(&tok, tok->next);
-          cur = cur->next;
-        }
-        node->arg = head.next;
-        tok = skip(tok, ")");
-      }
-      else
-      {
-        tok = skip(tok->next, ")");
-      }
-      *rest = tok;
-      return node;
-    }
+      return funcall(rest, tok);
 
     // Local variable
     Var *var = find_var(tok);
