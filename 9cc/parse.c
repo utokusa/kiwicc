@@ -421,7 +421,6 @@ Node *stmt(Token **rest, Token *tok)
 //      | "if" "(" expr ")" stmt ("else" stmt)?
 //      | "while" "(" expr ")" stmt
 //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
-//      | declaration
 //      | "return" expr ";"
 static Node *stmt2(Token **rest, Token *tok)
 {
