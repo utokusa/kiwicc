@@ -388,7 +388,7 @@ static Node *compound_stmt(Token **rest, Token *tok)
   while (!equal(tok, "}"))
   {
     if (is_typename(tok))
-      cur = cur->next = stmt(&tok, tok);
+      cur = cur->next = declaration(&tok, tok);
     else
       cur = cur->next = stmt(&tok, tok);
     add_type(cur);
@@ -485,8 +485,6 @@ static Node *stmt2(Token **rest, Token *tok)
 
   if (equal(tok, "{"))
     return compound_stmt(rest, tok->next);
-  if (is_typename(tok))
-    return declaration(rest, tok);
 
   Node *node = expr_stmt(&tok, tok);
   *rest = skip(tok, ";");
