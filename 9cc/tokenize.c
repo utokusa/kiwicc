@@ -25,7 +25,7 @@ void error(char *fmt, ...)
 //
 // foo.c:10: x = y + 1;
 //               ^ <error message here>
-static void verror_at(char *loc, char *fmt, va_list ap)
+static void verror_at(int line_no, char *loc, char *fmt, va_list ap)
 {
   // Find a line containing `loc`.
   char *line = loc;
@@ -47,12 +47,6 @@ static void verror_at(char *loc, char *fmt, va_list ap)
   // .     // The lines after the error
   // .
 
-  // Get a line number
-  int line_no = 1;
-  for (char *p = current_input; p < line; p++)
-    if (*p == '\n')
-      line_no++;
-
   // Print out the line.
   int indent = fprintf(stderr, "%s:%d:", current_filename, line_no);
   fprintf(stderr, "%.*s\n", (int)(end - line), line);
@@ -70,9 +64,15 @@ static void verror_at(char *loc, char *fmt, va_list ap)
 // Report an error position and exit
 void error_at(char *loc, char *fmt, ...)
 {
+  // Get a line number
+  int line_no = 1;
+  for (char *p = current_input; p < loc; p++)
+    if (*p == '\n')
+      line_no++;
+
   va_list ap;
   va_start(ap, fmt);
-  verror_at(loc, fmt, ap);
+  verror_at(line_no, loc, fmt, ap);
 }
 
 // Report an error position and exit
@@ -80,7 +80,7 @@ void error_tok(Token *tok, char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  verror_at(tok->loc, fmt, ap);
+  verror_at(tok->line_no, tok->loc, fmt, ap);
 }
 
 // Consumes the current token if it matches `s`.
@@ -286,6 +286,24 @@ static Token *read_string_literal(Token *cur, char *start)
   return tok;
 }
 
+// Initialize line info for all tokens.
+static void add_line_info(Token *tok)
+{
+  char *p = current_input;
+  int line_no = 1;
+
+  do
+  {
+    if (p == tok->loc)
+    {
+      tok->line_no = line_no;
+      tok = tok->next;
+    }
+    if (*p == '\n')
+      line_no++;
+  } while (*p++);
+}
+
 // Convert input 'user_input' to token
 static Token *tokenize(char *filename, char *p)
 {
@@ -373,6 +391,7 @@ static Token *tokenize(char *filename, char *p)
     error_at(p, "Can not tokenize.");
   }
   new_token(TK_EOF, cur, p, DUMMY_LEN);
+  add_line_info(head.next);
   return head.next;
 }
 
