@@ -27,6 +27,9 @@ int main(int argc, char **argv)
     fn->stack_size = offset;
   }
 
+  // Emit a .file directive for the assembler.
+  printf(".file 1 \"%s\"\n", argv[1]);
+
   // generate code
   codegen(prog);
 

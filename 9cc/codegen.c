@@ -74,6 +74,7 @@ static void gen_lval(Node *node)
 
 static void gen_expr(Node *node)
 {
+  printf(".loc 1 %d\n", node->tok->line_no);
   switch (node->kind)
   {
   case ND_NUM:
@@ -198,6 +199,8 @@ static void gen_expr(Node *node)
 
 static void gen_stmt(Node *node)
 {
+  printf(".loc 1 %d\n", node->tok->line_no);
+
   switch (node->kind)
   {
   case ND_IF:
