@@ -130,7 +130,6 @@ static void gen_expr(Node *node)
 
     // We should push r10 and r11 becouse they are caller saved registers.
     // RAX is set to 0 for varidic function.
-    int seq = labelseq++;
     printf("  push r10\n");
     printf("  push r11\n");
     printf("  mov rax, 0\n");
@@ -284,8 +283,6 @@ static void gen_stmt(Node *node)
   case ND_EXPR_STMT:
     gen_expr(node->lhs);
     top--;
-    return;
-  case ND_NULL:
     return;
   default:
     error_tok(node->tok, "invalid expression");
