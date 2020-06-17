@@ -82,7 +82,6 @@ typedef enum
   ND_DEREF,     // * dereference (indirection)
   ND_VAR,       // variable
   ND_NUM,       // integer
-  ND_NULL,      // nulls
   ND_SIZEOF,    // sizeof operator
   ND_IF,        // "if"
   ND_WHILE,     // "while"
