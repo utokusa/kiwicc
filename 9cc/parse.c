@@ -354,25 +354,71 @@ static void global_var(Token **rest, Token *tok)
   new_gvar(name, ty);
 }
 
-// declaration = basetype ident ("[" num "]")* ("=" expr)? ";"
-static Node *declaration(Token **rest, Token *tok)
+// typespec = "char" | "int"
+static Type *typespec(Token **rest, Token *tok)
 {
-  Type *ty = basetype(&tok, tok);
-  char *name = get_ident(tok);
-  ty = read_type_suffix(ty, &tok, tok->next);
-  Var *var = new_lvar(name, ty);
-  if (equal(tok, ";"))
+  if (equal(tok, "char"))
   {
     *rest = tok->next;
-    return new_node(ND_NULL, tok);
+    return char_type;
+  }
+  else if (equal(tok, "int"))
+  {
+    *rest = tok->next;
+    return int_type;
+  }
+  else
+  {
+    error_tok(tok, "expected type name");
+  }
+}
+
+// declarator = "*"* ident type-suffix
+static Type *declarator(Token **rest, Token *tok, Type *ty)
+{
+  while (equal(tok, "*"))
+  {
+    tok = tok->next;
+    ty = pointer_to(ty);
   }
 
-  tok = skip(tok, "=");
-  Node *lhs = new_node_var(var, tok);
-  Node *rhs = expr(&tok, tok);
-  *rest = skip(tok, ";");
-  Node *node = new_binary(ND_ASSIGN, lhs, rhs, tok);
-  return new_unary(ND_EXPR_STMT, node, tok);
+  if (tok->kind != TK_IDENT)
+    error_tok(tok, "expected a variable name");
+  ty = read_type_suffix(ty, rest, tok->next);
+  ty->name = tok;
+  return ty;
+}
+
+// declaration = typespec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
+static Node *declaration(Token **rest, Token *tok)
+{
+  Type *basety = typespec(&tok, tok);
+
+  Node head = {};
+  Node *cur = &head;
+  int cnt = 0;
+
+  while (!equal(tok, ";"))
+  {
+    if (cnt++ > 0)
+      tok = skip(tok, ",");
+
+    Type *ty = declarator(&tok, tok, basety);
+    Var *var = new_lvar(get_ident(ty->name), ty);
+
+    if (!equal(tok, "="))
+      continue;
+
+    Node *lhs = new_node_var(var, ty->name);
+    Node *rhs = expr(&tok, tok->next);
+    Node *node = new_binary(ND_ASSIGN, lhs, rhs, tok);
+    cur = cur->next = new_unary(ND_EXPR_STMT, node, tok);
+  }
+
+  Node *node = new_node(ND_BLOCK, tok);
+  node->body = head.next;
+  *rest = tok->next;
+  return node;
 }
 
 // compound-stmt = (declaration | stmt)* "}"

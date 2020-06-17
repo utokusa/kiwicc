@@ -158,6 +158,9 @@ struct Type
   Type *base;    // base type
   int size;      // sizeof() value
   int array_len; // number of elements in an array
+
+  // Declaration
+  Token *name;
 };
 
 /*********************************************

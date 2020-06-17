@@ -247,6 +247,18 @@ int main()
   assert(0, "\x00"[0], "\"\\x00\"[0]");
   assert(119, "\x77"[0], "\"\\x77\"[0]");
 
+  assert(10, ({ int x=1, y=9; x+y; }), "({ int x=1, y=9; x+y; })");
+  assert(10, ({ int x, y; x=1; y=9; x+y; }), "({ int x, y; x=1; y=9; x+y; })");
+  assert(10, ({ int x=1, y; x; y=9; x+y; }), "({ int x=1, y; x; y=9; x+y; })");
+  assert(10, ({ int x, y=9; x=1; x+y; }), "({ int x, y=9; x=1; x+y; })");
+  assert(10, ({int x[2], y=8; x[0]=1; x[1]=1; x[0]+x[1]+y; }), "({int x[2], y=8; x[0]=1; x[1]=1; x[0]+x[1]+y;})");
+  assert(10, ({ char x=1, y=9; x+y; }), "({ char x=1, y=9; x+y; })");
+  assert(10, ({ char x, y; x=1; y=9; x+y; }), "({ char x, y; x=1; y=9; x+y; })");
+  assert(10, ({ char x=1, y; x; y=9; x+y; }), "({ char x=1, y; x; y=9; x+y; })");
+  assert(10, ({ char x, y=9; x=1; x+y; }), "({ char x, y=9; x=1; x+y; })");
+  assert(10, ({char x[2], y=8; x[0]=1; x[1]=1; x[0]+x[1]+y; }), "({char x[2], y=8; x[0]=1; x[1]=1; x[0]+x[1]+y;})");
+  assert(10, ({ int x = 1, y = 8, z = 1; x + y + z; }), "({ int x = 1, y = 8, z = 1; x + y + z; })");
+
   printf("OK\n");
   return 0;
 }
