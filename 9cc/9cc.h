@@ -77,6 +77,7 @@ typedef enum
   ND_LT,        // <  less than
   ND_LE,        // <= less than or equal to
   ND_ASSIGN,    // = assignment
+  ND_COMMA,     // , commma operator
   ND_ADDR,      // & address-of
   ND_DEREF,     // * dereference (indirection)
   ND_VAR,       // variable

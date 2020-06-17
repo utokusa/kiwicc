@@ -59,6 +59,11 @@ static void gen_addr(Node *node)
   case ND_DEREF:
     gen_expr(node->lhs);
     return;
+  case ND_COMMA:
+    gen_expr(node->lhs);
+    top--;
+    gen_addr(node->rhs);
+    return;
   default:
     printf("node->kind : %d\n", node->kind);
     error_tok(node->tok, "The lvalue of the assignment is not a variable.");
@@ -105,6 +110,11 @@ static void gen_expr(Node *node)
     for (Node *n = node->body; n; n = n->next)
       gen_stmt(n);
     top++;
+    return;
+  case ND_COMMA:
+    gen_expr(node->lhs);
+    top--;
+    gen_expr(node->rhs);
     return;
   case ND_FUNCALL:
   {

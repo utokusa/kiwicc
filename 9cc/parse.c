@@ -410,7 +410,7 @@ static Node *declaration(Token **rest, Token *tok)
       continue;
 
     Node *lhs = new_node_var(var, ty->name);
-    Node *rhs = expr(&tok, tok->next);
+    Node *rhs = assign(&tok, tok->next);
     Node *node = new_binary(ND_ASSIGN, lhs, rhs, tok);
     cur = cur->next = new_unary(ND_EXPR_STMT, node, tok);
   }
@@ -528,10 +528,16 @@ static Node *stmt(Token **rest, Token *tok)
   return node;
 }
 
-// expr = assign
+// expr = assign ("," expr)?
 static Node *expr(Token **rest, Token *tok)
 {
-  return assign(rest, tok);
+  Node *node = assign(&tok, tok);
+
+  if (equal(tok, ","))
+    return new_binary(ND_COMMA, node, expr(rest, tok->next), tok);
+
+  *rest = tok;
+  return node;
 }
 
 // assign = eauality ("=" assign)?
@@ -710,11 +716,11 @@ static Node *funcall(Token **rest, Token *tok)
     // Function call arguments
     Node head = {};
     Node *cur = &head;
-    cur->next = expr(&tok, tok->next);
+    cur->next = assign(&tok, tok->next);
     cur = cur->next;
     while (equal(tok, ","))
     {
-      cur->next = expr(&tok, tok->next);
+      cur->next = assign(&tok, tok->next);
       cur = cur->next;
     }
     node->arg = head.next;
