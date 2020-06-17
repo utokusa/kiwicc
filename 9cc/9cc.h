@@ -91,6 +91,7 @@ typedef enum
   ND_FUNCALL,   // function call
   ND_EXPR_STMT, // Expression statement
   ND_STMT_EXPR, // Statement expression
+  ND_NULL_EXPR, // Do nothing
 } NodeKind;
 
 // Node of AST
@@ -118,7 +119,8 @@ struct Node
 
   // Function call
   char *funcname;
-  Node *arg;
+  Var **args;
+  int nargs;
 
   int val;  // Use only if kind is ND_NUM
   Var *var; // Use only if kind is ND_VAR

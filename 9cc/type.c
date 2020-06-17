@@ -54,8 +54,6 @@ void add_type(Node *node)
 
   for (Node *n = node->body; n; n = n->next)
     add_type(n);
-  for (Node *n = node->arg; n; n = n->next)
-    add_type(n);
 
   switch (node->kind)
   {

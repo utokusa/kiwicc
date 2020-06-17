@@ -111,6 +111,9 @@ static void gen_expr(Node *node)
       gen_stmt(n);
     top++;
     return;
+  case ND_NULL_EXPR:
+    top++;
+    return;
   case ND_COMMA:
     gen_expr(node->lhs);
     top--;
@@ -119,19 +122,22 @@ static void gen_expr(Node *node)
   case ND_FUNCALL:
   {
     // So far we only support up to 6 arguments.
-    int nargs = 0;
-    for (Node *arg = node->arg; arg && nargs < 6; arg = arg->next)
-    {
-      gen_expr(arg);
-      nargs++;
-    }
-    for (int i = nargs - 1; i >= 0; --i)
-      printf("  mov %s, %s\n", argreg64[i], reg(--top));
-
+    //
     // We should push r10 and r11 becouse they are caller saved registers.
     // RAX is set to 0 for varidic function.
     printf("  push r10\n");
     printf("  push r11\n");
+
+    // Load arguments from the stack.
+    for (int i = 0; i < node->nargs; i++)
+    {
+      Var *arg = node->args[i];
+      if (arg->ty->size == 1)
+        printf("  movsx %s, byte ptr [rbp-%d]\n", argreg64[i], arg->offset);
+      else
+        printf("  mov %s, [rbp-%d]\n", argreg64[i], arg->offset);
+    }
+
     printf("  mov rax, 0\n");
     printf("  call %s\n", node->funcname);
     printf("  pop r11\n");

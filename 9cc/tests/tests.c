@@ -62,6 +62,10 @@ int fib(int x)
 int sum_arr_elems(int *a) { return a[0] + a[1] + a[2]; }
 int add_char1(char a, char b, char c) { return a + b + c; }
 char add_char2(char a, char b, char c) { return a + b + c; }
+int add6(int a, int b, int c, int d, int e, int f)
+{
+  return a + b + c + d + e + f;
+}
 
 int main()
 {
@@ -262,6 +266,8 @@ int main()
   assert(3, (1, 2, 3), "(1, 2, 3)");
   assert(10, ({ int x, y=(x=1,9); x+y; }), "({ int x, y=(x=1,9); x+y; })");
   assert(10, ({ int x=0, y; (x=1, y)=9; x+y; }), "({ int x=0, y; (x=1, y)=9; x+y; })");
+
+  assert(21, add6(1, 2, 3, 4, 5, 6), "add6(1, 2, 3, 4, 5, 6)");
 
   printf("OK\n");
   return 0;
