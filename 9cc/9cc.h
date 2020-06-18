@@ -13,6 +13,7 @@
 *********************************************/
 
 typedef struct Type Type;
+typedef struct Member Member;
 
 typedef enum
 {
@@ -78,6 +79,7 @@ typedef enum
   ND_LE,        // <= less than or equal to
   ND_ASSIGN,    // = assignment
   ND_COMMA,     // , commma operator
+  ND_MEMBER,    // . struct member access
   ND_ADDR,      // & address-of
   ND_DEREF,     // * dereference (indirection)
   ND_VAR,       // variable
@@ -117,6 +119,9 @@ struct Node
   // Block or statement expression
   Node *body;
 
+  // Struct member access
+  Member *member;
+
   // Function call
   char *funcname;
   Var **args;
@@ -152,6 +157,7 @@ typedef enum
   TY_INT,
   TY_PTR,
   TY_ARR,
+  TY_STRUCT,
 } TypeKind;
 
 struct Type
@@ -163,6 +169,18 @@ struct Type
 
   // Declaration
   Token *name;
+
+  // Struct
+  Member *members;
+};
+
+// Struct member
+struct Member
+{
+  Member *next;
+  Type *ty;
+  Token *name;
+  int offset;
 };
 
 /*********************************************
