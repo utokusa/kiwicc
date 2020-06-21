@@ -4,8 +4,8 @@
 * ...type...
 *********************************************/
 
-Type *char_type = &(Type){TY_CHAR, NULL, 1};
-Type *int_type = &(Type){TY_INT, NULL, 8};
+Type *char_type = &(Type){TY_CHAR, 1};
+Type *int_type = &(Type){TY_INT, 8};
 
 static Type *new_type(TypeKind kind, int size)
 {
@@ -20,12 +20,27 @@ bool is_integer(Type *ty)
   return ty->kind == TY_CHAR || ty->kind == TY_INT;
 }
 
+Type *copy_type(Type *ty)
+{
+  Type *ret = malloc(sizeof(Type));
+  *ret = *ty;
+  return ret;
+}
+
 Type *pointer_to(Type *base)
 {
   Type *ty = calloc(1, sizeof(Type));
   ty->kind = TY_PTR;
   ty->base = base;
   ty->size = 8;
+  return ty;
+}
+
+Type *func_type(Type *return_ty)
+{
+  Type *ty = calloc(1, sizeof(Type));
+  ty->kind = TY_FUNC;
+  ty->return_ty = return_ty;
   return ty;
 }
 

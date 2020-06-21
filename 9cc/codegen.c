@@ -340,14 +340,17 @@ static void emit_text(Program *prog)
     printf("  mov [rbp-32], r15\n");
 
     // Save arguments to the stack
-    int nargs = 0;
-    for (VarList *param = fn->params; param && nargs < 6; param = param->next)
+    int i = 0;
+    for (VarList *param = fn->params; param; param = param->next)
+      i++;
+
+    for (VarList *param = fn->params; param; param = param->next)
     {
       Var *var = param->var;
       if (var->ty->size == 1)
-        printf("  mov [rbp-%d], %s\n", param->var->offset, argreg8[nargs++]);
+        printf("  mov [rbp-%d], %s\n", param->var->offset, argreg8[--i]);
       else
-        printf("  mov [rbp-%d], %s\n", param->var->offset, argreg64[nargs++]);
+        printf("  mov [rbp-%d], %s\n", param->var->offset, argreg64[--i]);
     }
 
     // Generate statements

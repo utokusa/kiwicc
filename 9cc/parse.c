@@ -25,10 +25,9 @@ static VarScope *var_scope;
 // by one at "}"
 static int scope_depth;
 
+static Type *typespec(Token **rest, Token *tok);
+static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Function *funcdef(Token **rest, Token *tok);
-static Type *basetype(Token **rest, Token *tok);
-static void global_var(Token **rest, Token *tok);
-
 static Node *declaration(Token **rest, Token *tok);
 static Node *compound_stmt(Token **Rest, Token *tok);
 static Node *stmt(Token **rest, Token *tok);
@@ -206,15 +205,6 @@ static int get_number(Token *tok)
   return tok->val;
 }
 
-// Determine wheter the next top-level is a function
-// or a global variable by looking ahead input tokens.
-static bool is_function(Token *tok)
-{
-  basetype(&tok, tok);
-  bool isfunc = get_ident(tok) && equal(tok->next, "(");
-  return isfunc;
-}
-
 // program = (global-var | funcdef)*
 Program *parse(Token *tok)
 {
@@ -224,14 +214,28 @@ Program *parse(Token *tok)
 
   while (tok->kind != TK_EOF)
   {
-    if (is_function(tok))
+    Token *start = tok;
+    Type *basety = typespec(&tok, tok);
+    Type *ty = declarator(&tok, tok, basety);
+
+    // Function
+    if (ty->kind == TY_FUNC)
     {
-      cur->next = funcdef(&tok, tok);
-      cur = cur->next;
+      cur = cur->next = funcdef(&tok, start);
+      continue;
     }
-    else
+
+    // Global variable
+    for (;;)
     {
-      global_var(&tok, tok);
+      new_gvar(get_ident(ty->name), ty);
+      if (equal(tok, ";"))
+      {
+        tok = tok->next;
+        break;
+      }
+      tok = skip(tok, ",");
+      ty = declarator(&tok, tok, basety);
     }
   }
 
@@ -241,118 +245,33 @@ Program *parse(Token *tok)
   return prog;
 }
 
-static Type *basetype(Token **rest, Token *tok)
-{
-  Type *ty;
-  if (equal(tok, "char"))
-  {
-    tok = tok->next;
-    ty = char_type;
-  }
-  else if (equal(tok, "int"))
-  {
-    tok = tok->next;
-    ty = int_type;
-  }
-  else
-  {
-    error_tok(tok, "expected type name");
-  }
-
-  while (equal(tok, "*"))
-  {
-    tok = tok->next;
-    ty = pointer_to(ty);
-  }
-  *rest = tok;
-  return ty;
-}
-
 // Returns true if a givin token represents a type
 static bool is_typename(Token *tok)
 {
   return equal(tok, "char") || equal(tok, "int") || equal(tok, "struct");
 }
 
-static Type *read_type_suffix(Type *base, Token **rest, Token *tok)
-{
-  if (!equal(tok, "["))
-  {
-    *rest = tok;
-    return base;
-  }
-  tok = skip(tok, "[");
-  int len = get_number(tok);
-  tok = skip(tok->next, "]");
-  base = read_type_suffix(base, &tok, tok);
-  *rest = tok;
-  return array_of(base, len);
-}
-
-static VarList *read_func_param(Token **rest, Token *tok)
-{
-  Type *ty = basetype(&tok, tok);
-  char *name = get_ident(tok);
-  ty = read_type_suffix(ty, &tok, tok->next);
-  VarList *vl = calloc(1, sizeof(VarList));
-  vl->var = new_lvar(name, ty);
-  *rest = tok;
-  return vl;
-}
-
-static VarList *read_func_params(Token **rest, Token *tok)
-{
-  if (equal(tok, ")"))
-  {
-    *rest = tok->next;
-    return NULL;
-  }
-
-  VarList head = {};
-  head.next = read_func_param(&tok, tok);
-  VarList *cur = head.next;
-  while (equal(tok, ","))
-  {
-    cur->next = read_func_param(&tok, tok->next);
-    cur = cur->next;
-  }
-  tok = skip(tok, ")");
-
-  *rest = tok;
-  return head.next;
-}
-
-// funcdef = basetype ident "(" params? ")" compound-stmt"
-// params = (param ",")*  param
-// param = basetype ident
+// funcdef = typespec declarator compound-stmt
 static Function *funcdef(Token **rest, Token *tok)
 {
   locals = NULL;
 
+  Type *ty = typespec(&tok, tok);
+  ty = declarator(&tok, tok, ty);
+
   Function *fn = calloc(1, sizeof(Function));
-  basetype(&tok, tok);
-  fn->name = get_ident(tok);
+  fn->name = get_ident(ty->name);
 
   enter_scope();
-  tok = skip(tok->next, "(");
-  fn->params = read_func_params(&tok, tok);
-  tok = skip(tok, "{");
+  for (Type *t = ty->params; t; t = t->next)
+    new_lvar(get_ident(t->name), t);
+  fn->params = locals;
 
+  tok = skip(tok, "{");
   fn->node = compound_stmt(rest, tok)->body;
   fn->locals = locals;
-
   leave_scope();
   return fn;
-}
-
-// global-var = basetype ident ("[" num "]")* ";"
-static void global_var(Token **rest, Token *tok)
-{
-  Type *ty = basetype(&tok, tok);
-  char *name = get_ident(tok);
-  ty = read_type_suffix(ty, &tok, tok->next);
-  *rest = skip(tok, ";");
-  new_gvar(name, ty);
 }
 
 // typespec = "char" | "int" | struct-decl
@@ -376,6 +295,48 @@ static Type *typespec(Token **rest, Token *tok)
   }
 }
 
+// func-params = (param ("," param)*)? ")"
+// param       = typespec declarator
+static Type *func_params(Token **rest, Token *tok, Type *ty)
+{
+  Type head = {};
+  Type *cur = &head;
+
+  while (!equal(tok, ")"))
+  {
+    if (cur != &head)
+      tok = skip(tok, ",");
+    Type *basety = typespec(&tok, tok);
+    Type *ty = declarator(&tok, tok, basety);
+    cur = cur->next = copy_type(ty);
+  }
+
+  ty = func_type(ty);
+  ty->params = head.next;
+  *rest = tok->next;
+  return ty;
+}
+
+// type-suffix = "(" func-params
+//             | "[" num "]" type-suffix
+//             | ε
+static Type *type_suffix(Token **rest, Token *tok, Type *ty)
+{
+  if (equal(tok, "("))
+    return func_params(rest, tok->next, ty);
+
+  if (equal(tok, "["))
+  {
+    int len = get_number(tok->next);
+    tok = skip(tok->next->next, "]");
+    ty = type_suffix(rest, tok, ty);
+    return array_of(ty, len);
+  }
+
+  *rest = tok;
+  return ty;
+}
+
 // declarator = "*"* ident type-suffix
 static Type *declarator(Token **rest, Token *tok, Type *ty)
 {
@@ -387,7 +348,7 @@ static Type *declarator(Token **rest, Token *tok, Type *ty)
 
   if (tok->kind != TK_IDENT)
     error_tok(tok, "expected a variable name");
-  ty = read_type_suffix(ty, rest, tok->next);
+  ty = type_suffix(rest, tok->next, ty);
   ty->name = tok;
   return ty;
 }

@@ -156,6 +156,7 @@ typedef enum
   TY_CHAR,
   TY_INT,
   TY_PTR,
+  TY_FUNC,
   TY_ARR,
   TY_STRUCT,
 } TypeKind;
@@ -163,15 +164,22 @@ typedef enum
 struct Type
 {
   TypeKind kind; // type kind
-  Type *base;    // base type
   int size;      // sizeof() value
-  int array_len; // number of elements in an array
+  Type *base;    // base type
 
   // Declaration
   Token *name;
 
+  // Array
+  int array_len; // number of elements in an array
+
   // Struct
   Member *members;
+
+  // Function type
+  Type *return_ty;
+  Type *params;
+  Type *next;
 };
 
 // Struct member
@@ -225,7 +233,11 @@ void codegen(Program *prog);
 
 bool is_integer(Type *ty);
 
+Type *copy_type(Type *ty);
+
 Type *pointer_to(Type *base);
+
+Type *func_type(Type *return_ty);
 
 Type *array_of(Type *base, int len);
 
