@@ -24,7 +24,7 @@ int main(int argc, char **argv)
       offset += vl->var->ty->size;
       vl->var->offset = offset;
     }
-    fn->stack_size = offset;
+    fn->stack_size = align_to(offset, 16);
   }
 
   // Emit a .file directive for the assembler.

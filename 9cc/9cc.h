@@ -235,6 +235,8 @@ bool is_integer(Type *ty);
 
 Type *copy_type(Type *ty);
 
+int align_to(int n, int align);
+
 Type *pointer_to(Type *base);
 
 Type *func_type(Type *return_ty);

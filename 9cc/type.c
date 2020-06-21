@@ -27,6 +27,11 @@ Type *copy_type(Type *ty)
   return ret;
 }
 
+int align_to(int n, int align)
+{
+  return (n + align - 1) & ~(align - 1);
+}
+
 Type *pointer_to(Type *base)
 {
   Type *ty = calloc(1, sizeof(Type));
