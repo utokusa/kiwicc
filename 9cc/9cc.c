@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   // Assign offsets to local variables.
   for (Function *fn = prog->fns; fn; fn = fn->next)
   {
-    int offset = 0;
+    int offset = 32; // 32 for callee-saved registers
     for (VarList *vl = fn->locals; vl; vl = vl->next)
     {
       offset += vl->var->ty->size;
