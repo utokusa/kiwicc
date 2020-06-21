@@ -4,14 +4,15 @@
 * ...type...
 *********************************************/
 
-Type *char_type = &(Type){TY_CHAR, 1};
-Type *int_type = &(Type){TY_INT, 8};
+Type *char_type = &(Type){TY_CHAR, 1, 1};
+Type *int_type = &(Type){TY_INT, 8, 8};
 
-static Type *new_type(TypeKind kind, int size)
+static Type *new_type(TypeKind kind, int size, int align)
 {
   Type *ty = malloc(sizeof(Type));
   ty->kind = kind;
   ty->size = size;
+  ty->align = align;
   return ty;
 }
 
@@ -34,10 +35,8 @@ int align_to(int n, int align)
 
 Type *pointer_to(Type *base)
 {
-  Type *ty = calloc(1, sizeof(Type));
-  ty->kind = TY_PTR;
+  Type *ty = new_type(TY_PTR, 8, 8);
   ty->base = base;
-  ty->size = 8;
   return ty;
 }
 
@@ -51,10 +50,8 @@ Type *func_type(Type *return_ty)
 
 Type *array_of(Type *base, int len)
 {
-  Type *ty = calloc(1, sizeof(Type));
-  ty->kind = TY_ARR;
+  Type *ty = new_type(TY_ARR, base->size * len, base->align);
   ty->base = base;
-  ty->size = base->size * len;
   ty->array_len = len;
   return ty;
 }

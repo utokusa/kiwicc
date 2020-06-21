@@ -165,6 +165,7 @@ struct Type
 {
   TypeKind kind; // type kind
   int size;      // sizeof() value
+  int align;     // alignment
   Type *base;    // base type
 
   // Declaration
