@@ -302,6 +302,11 @@ int main()
   assert(15, ({ int x; int y; char z; char *a=&y; char *b=&z; b-a; }), "({ int x; int y; char z; char *a=&y; char *b=&z; b-a; })");
   assert(1, ({ int x; char y; int z; char *a=&y; char *b=&z; b-a; }), "({ int x; char y; int z; char *a=&y; char *b=&z; b-a; })");
 
+  assert(16, ({ struct foo {int x, y;} x; struct foo y; sizeof(y); }), "({ struct foo {int x, y;} x; struct foo y; sizeof(y); })");
+  assert(5, ({ struct foo {int x, y;} x; struct foo y; y.y=5; y.y; }), "({ struct foo {int x, y;} x; struct foo y; y.y=5; y.y; })");
+  assert(5, ({ int; int x=5; x; }), "({ int; int x=5; x; })");
+  assert(16, ({ struct foo {int x, y;}; struct foo y; sizeof(y); }), "({ struct foo {int x, y;}; struct foo y; sizeof(y); })");
+
   printf("OK\n");
   return 0;
 }
