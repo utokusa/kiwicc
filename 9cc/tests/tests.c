@@ -316,6 +316,10 @@ int main()
   assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[2]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[2]; })");
   assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[3]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[3]; })");
 
+  assert(1, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; })");
+  assert(2, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; })");
+  assert(3, ({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; }), "({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; })");
+
   printf("OK\n");
   return 0;
 }

@@ -20,6 +20,9 @@ static char *reg(int idx)
 
 static void load(Type *ty)
 {
+  if (ty->kind == TY_ARR || ty->kind == TY_STRUCT)
+    return;
+
   char *r = reg(top - 1);
   if (ty->size == 1)
     printf("  movsx %s, byte ptr [%s]\n", r, r);
@@ -32,7 +35,15 @@ static void store(Type *ty)
   char *rd = reg(top - 1);
   char *rs = reg(top - 2);
 
-  if (ty->size == 1)
+  if (ty->kind == TY_STRUCT)
+  {
+    for (int i = 0; i < ty->size; i++)
+    {
+      printf("  mov al, [%s+%d]\n", rs, i);
+      printf("  mov [%s+%d], al\n", rd, i);
+    }
+  }
+  else if (ty->size == 1)
     printf("  mov [%s], %sb\n", rd, rs);
   else
     printf("  mov [%s], %s\n", rd, rs);
@@ -92,8 +103,7 @@ static void gen_expr(Node *node)
   case ND_VAR:
   case ND_MEMBER:
     gen_addr(node);
-    if (node->ty->kind != TY_ARR)
-      load(node->ty);
+    load(node->ty);
     return;
   case ND_SIZEOF:
     printf("  mov %s, %d\n", reg(top++), node->lhs->ty->size);
@@ -108,8 +118,7 @@ static void gen_expr(Node *node)
     return;
   case ND_DEREF:
     gen_expr(node->lhs);
-    if (node->ty->kind != TY_ARR)
-      load(node->ty);
+    load(node->ty);
     return;
   case ND_STMT_EXPR:
     for (Node *n = node->body; n; n = n->next)
