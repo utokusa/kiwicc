@@ -310,6 +310,12 @@ int main()
   assert(5, ({ struct foo {int x, y;}; struct foo y; y.y=5; struct foo *z=&y; z->y; }), "({ struct foo {int x, y;}; struct foo y; y.y=5; struct foo *z=&y; z->y; })");
   assert(5, ({ struct foo {int x, y;}; struct foo y; struct foo *z=&y; z->y=5; y.y=5; }), "({ struct foo {int x, y;}; struct foo y; struct foo *z=&y; z->y=5; y.y=5; })");
 
+  assert(8, ({union {int a; char b[6];}x; sizeof(x); }), "({union {int a; char b[6];}x; sizeof(x); })");
+  assert(3, ({union {int a; char b[4];}x; x.a = 515; x.b[0]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[0]; })");
+  assert(2, ({union {int a; char b[4];}x; x.a = 515; x.b[1]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[1]; })");
+  assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[2]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[2]; })");
+  assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[3]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[3]; })");
+
   printf("OK\n");
   return 0;
 }
