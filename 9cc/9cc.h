@@ -154,7 +154,9 @@ struct Program
 typedef enum
 {
   TY_CHAR,
+  TY_SHORT,
   TY_INT,
+  TY_LONG,
   TY_PTR,
   TY_FUNC,
   TY_ARR,
@@ -197,7 +199,9 @@ struct Member
 *********************************************/
 
 extern Type *char_type;
+extern Type *short_type;
 extern Type *int_type;
+extern Type *long_type;
 
 /*********************************************
 * ...function declarations...

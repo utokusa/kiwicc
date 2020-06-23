@@ -8,6 +8,7 @@ static int top;
 static int labelseq = 1;
 static char *funcname;
 static char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
+static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
@@ -27,6 +28,8 @@ static void load(Type *ty)
   char *r = reg(top - 1);
   if (ty->size == 1)
     printf("  movsx %s, byte ptr [%s]\n", r, r);
+  else if (ty->size == 2)
+    printf("  movsx %s, word ptr [%s]\n", r, r);
   else if (ty->size == 4)
     printf("  movsx %s, dword ptr [%s]\n", r, r);
   else
@@ -48,6 +51,8 @@ static void store(Type *ty)
   }
   else if (ty->size == 1)
     printf("  mov [%s], %sb\n", rd, rs);
+  else if (ty->size == 2)
+    printf("  mov [%s], %sw\n", rd, rs);
   else if (ty->size == 4)
     printf("  mov [%s], %sd\n", rd, rs);
   else
@@ -152,7 +157,11 @@ static void gen_expr(Node *node)
     {
       Var *arg = node->args[i];
       if (arg->ty->size == 1)
-        printf("  movsx %s, byte ptr [rbp-%d]\n", argreg64[i], arg->offset);
+        printf("  movsx %s, byte ptr [rbp-%d]\n", argreg32[i], arg->offset);
+      else if (arg->ty->size == 2)
+        printf("  movsx %s, word ptr [rbp-%d]\n", argreg32[i], arg->offset);
+      else if (arg->ty->size == 4)
+        printf("  mov %s, dword ptr [rbp-%d]\n", argreg32[i], arg->offset);
       else
         printf("  mov %s, [rbp-%d]\n", argreg64[i], arg->offset);
     }
@@ -339,6 +348,8 @@ static char *get_argreg(int sz, int idx)
 {
   if (sz == 1)
     return argreg8[idx];
+  if (sz == 2)
+    return argreg16[idx];
   if (sz == 4)
     return argreg32[idx];
   assert(sz == 8);

@@ -66,6 +66,14 @@ int add6(int a, int b, int c, int d, int e, int f)
 {
   return a + b + c + d + e + f;
 }
+int sub_short(short a, short b, short c)
+{
+  return a - b - c;
+}
+int sub_long(long a, long b, long c)
+{
+  return a - b - c;
+}
 
 int main()
 {
@@ -163,7 +171,7 @@ int main()
   assert(5, ({ int x = 3; (&x+5) - (&x); }), "({ int x = 3; (&x+5) - (&x); })");
 
   assert(4, ({ int x = 0; sizeof(x); }), "({ int x = 0; sizeof(x); })");
-  assert(4, ({ sizeof(1); }), "({ sizeof(1); })");
+  assert(8, ({ sizeof(1); }), "({ sizeof(1); })");
   assert(4, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
   assert(8, ({ int x = 0; sizeof(&x); }), "({ int x = 0; sizeof(&x); })");
   assert(8, ({ int x = 0; sizeof(&x + 2); }), "({ int x = 0; sizeof(&x + 2); })");
@@ -319,6 +327,13 @@ int main()
   assert(1, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; })");
   assert(2, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; })");
   assert(3, ({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; }), "({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; })");
+
+  assert(2, ({short x; sizeof(x); }), "({short x; sizeof(x); })");
+  assert(4, ({struct {char a; short b; } x; sizeof(x); }), "({struct {char a; short b; } x; sizeof(x); })");
+  assert(8, ({long x; sizeof(x); }), "({long x; sizeof(x); })");
+  assert(16, ({struct {char a; long b; } x; sizeof(x); }), "({struct {char a; long b; } x; sizeof(x); })");
+  assert(1, sub_short(3, 1, 1), "sub_short(3, 1, 1)");
+  assert(1, sub_long(3, 1, 1), "sub_long(3, 1, 1)");
 
   printf("OK\n");
   return 0;

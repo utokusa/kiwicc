@@ -284,7 +284,8 @@ Program *parse(Token *tok)
 // Returns true if a givin token represents a type
 static bool is_typename(Token *tok)
 {
-  return equal(tok, "char") || equal(tok, "int") ||
+  return equal(tok, "char") || equal(tok, "short") ||
+         equal(tok, "int") || equal(tok, "long") ||
          equal(tok, "struct") || equal(tok, "union");
 }
 
@@ -311,7 +312,7 @@ static Function *funcdef(Token **rest, Token *tok)
   return fn;
 }
 
-// typespec = "char" | "int" | struct-decl | union-decl
+// typespec = "char" | "short" | "int" | "long" | struct-decl | union-decl
 static Type *typespec(Token **rest, Token *tok)
 {
   if (equal(tok, "char"))
@@ -319,10 +320,20 @@ static Type *typespec(Token **rest, Token *tok)
     *rest = tok->next;
     return char_type;
   }
+  else if (equal(tok, "short"))
+  {
+    *rest = tok->next;
+    return short_type;
+  }
   else if (equal(tok, "int"))
   {
     *rest = tok->next;
     return int_type;
+  }
+  else if (equal(tok, "long"))
+  {
+    *rest = tok->next;
+    return long_type;
   }
   else if (equal(tok, "struct"))
     return struct_decl(rest, tok->next);
