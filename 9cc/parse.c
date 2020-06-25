@@ -387,13 +387,22 @@ static Type *type_suffix(Token **rest, Token *tok, Type *ty)
   return ty;
 }
 
-// declarator = "*"* ident type-suffix
+// declarator = "*"* ("(" declarator ")" | ident) type-suffix
 static Type *declarator(Token **rest, Token *tok, Type *ty)
 {
   while (equal(tok, "*"))
   {
     tok = tok->next;
     ty = pointer_to(ty);
+  }
+
+  if (equal(tok, "("))
+  {
+    Type *placeholder = calloc(1, sizeof(Type));
+    Type *new_ty = declarator(&tok, tok->next, placeholder);
+    tok = skip(tok, ")");
+    *placeholder = *type_suffix(rest, tok, ty);
+    return new_ty;
   }
 
   if (tok->kind != TK_IDENT)
