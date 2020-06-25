@@ -289,9 +289,21 @@ Program *parse(Token *tok)
 // Returns true if a givin token represents a type
 static bool is_typename(Token *tok)
 {
-  return equal(tok, "char") || equal(tok, "short") ||
-         equal(tok, "int") || equal(tok, "long") ||
-         equal(tok, "struct") || equal(tok, "union");
+  static char *kw[] =
+      {
+          "void",
+          "char",
+          "short",
+          "int",
+          "long",
+          "struct",
+          "union",
+      };
+
+  for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
+    if (equal(tok, kw[i]))
+      return true;
+  return false;
 }
 
 // funcdef = typespec declarator compound-stmt
@@ -317,10 +329,16 @@ static Function *funcdef(Token **rest, Token *tok)
   return fn;
 }
 
-// typespec = "char" | "short" | "int" | "long" | struct-decl | union-decl
+// typespec = "void" | "char" | "short" | "int" | "long"
+//          | struct-decl | union-decl
 static Type *typespec(Token **rest, Token *tok)
 {
-  if (equal(tok, "char"))
+  if (equal(tok, "void"))
+  {
+    *rest = tok->next;
+    return void_type;
+  }
+  else if (equal(tok, "char"))
   {
     *rest = tok->next;
     return char_type;
@@ -432,6 +450,9 @@ static Node *declaration(Token **rest, Token *tok)
       tok = skip(tok, ",");
 
     Type *ty = declarator(&tok, tok, basety);
+    if (ty->kind == TY_VOID)
+      error_tok(tok, "variable declared void");
+
     Var *var = new_lvar(get_ident(ty->name), ty);
 
     if (!equal(tok, "="))
@@ -786,7 +807,7 @@ static Type *struct_decl(Token **rest, Token *tok)
   {
     offset = align_to(offset, mem->ty->align);
     mem->offset = offset;
-    offset += mem->ty->size;
+    offset += size_of(mem->ty);
 
     if (ty->align < mem->ty->align)
       ty->align = mem->ty->align;
@@ -807,10 +828,10 @@ static Type *union_decl(Token **rest, Token *tok)
   {
     if (ty->align < mem->ty->align)
       ty->align = mem->ty->align;
-    if (ty->size < mem->ty->size)
-      ty->size = mem->ty->size;
+    if (ty->size < size_of(mem->ty))
+      ty->size = size_of(mem->ty);
   }
-  ty->size = align_to(ty->size, ty->align);
+  ty->size = align_to(size_of(ty), ty->align);
   return ty;
 }
 

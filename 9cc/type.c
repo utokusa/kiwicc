@@ -4,6 +4,7 @@
 * ...type...
 *********************************************/
 
+Type *void_type = &(Type){TY_VOID, 1, 1};
 Type *char_type = &(Type){TY_CHAR, 1, 1};
 Type *short_type = &(Type){TY_SHORT, 2, 2};
 Type *int_type = &(Type){TY_INT, 4, 4};
@@ -52,9 +53,16 @@ Type *func_type(Type *return_ty)
   return ty;
 }
 
+int size_of(Type *ty)
+{
+  if (ty->kind == TY_VOID)
+    error_tok(ty->name, "void type");
+  return ty->size;
+}
+
 Type *array_of(Type *base, int len)
 {
-  Type *ty = new_type(TY_ARR, base->size * len, base->align);
+  Type *ty = new_type(TY_ARR, size_of(base) * len, base->align);
   ty->base = base;
   ty->array_len = len;
   return ty;
@@ -112,10 +120,11 @@ void add_type(Node *node)
       node->ty = pointer_to(node->lhs->ty);
     return;
   case ND_DEREF:
-    if (node->lhs->ty->base)
-      node->ty = node->lhs->ty->base;
-    else
+    if (!node->lhs->ty->base)
       error_tok(node->tok, "invalid pointer dereference");
+    if (node->lhs->ty->base->kind == TY_VOID)
+      error_tok(node->tok, "dereferencing a void pointer");
+    node->ty = node->lhs->ty->base;
     return;
   case ND_SIZEOF:
     node->ty = int_type;

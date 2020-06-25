@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     for (VarList *vl = fn->locals; vl; vl = vl->next)
     {
       offset = align_to(offset, vl->var->ty->align);
-      offset += vl->var->ty->size;
+      offset += size_of(vl->var->ty);
       vl->var->offset = offset;
     }
     fn->stack_size = align_to(offset, 16);
