@@ -36,6 +36,7 @@ static TagScope *tag_scope;
 // by one at "}"
 static int scope_depth;
 
+static bool is_typename(Token *tok);
 static Type *typespec(Token **rest, Token *tok);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Function *funcdef(Token **rest, Token *tok);
@@ -333,39 +334,74 @@ static Function *funcdef(Token **rest, Token *tok)
 //          | struct-decl | union-decl
 static Type *typespec(Token **rest, Token *tok)
 {
-  if (equal(tok, "void"))
+  enum
   {
-    *rest = tok->next;
-    return void_type;
-  }
-  else if (equal(tok, "char"))
+    VOID = 1 << 0,
+    CHAR = 1 << 2,
+    SHORT = 1 << 4,
+    INT = 1 << 6,
+    LONG = 1 << 8,
+    OTHER = 1 << 10,
+  };
+
+  Type *ty = int_type;
+  int counter = 0;
+
+  while (is_typename(tok))
   {
-    *rest = tok->next;
-    return char_type;
+    // Handle user-defined types.
+    if (equal(tok, "struct") || equal(tok, "union"))
+    {
+      if (equal(tok, "struct"))
+        ty = struct_decl(&tok, tok->next);
+      else
+        ty = union_decl(&tok, tok->next);
+      counter += OTHER;
+      continue;
+    }
+
+    // Handle built-in types.
+    if (equal(tok, "void"))
+      counter += VOID;
+    else if (equal(tok, "char"))
+      counter += CHAR;
+    else if (equal(tok, "short"))
+      counter += SHORT;
+    else if (equal(tok, "int"))
+      counter += INT;
+    else if (equal(tok, "long"))
+      counter += LONG;
+    else
+      error_tok(tok, "internal error");
+
+    switch (counter)
+    {
+    case VOID:
+      ty = void_type;
+      break;
+    case CHAR:
+      ty = char_type;
+      break;
+    case SHORT:
+    case SHORT + INT:
+      ty = short_type;
+      break;
+    case INT:
+      ty = int_type;
+      break;
+    case LONG:
+    case LONG + INT:
+      ty = long_type;
+      break;
+    default:
+      error_tok(tok, "invalid type");
+    }
+
+    tok = tok->next;
   }
-  else if (equal(tok, "short"))
-  {
-    *rest = tok->next;
-    return short_type;
-  }
-  else if (equal(tok, "int"))
-  {
-    *rest = tok->next;
-    return int_type;
-  }
-  else if (equal(tok, "long"))
-  {
-    *rest = tok->next;
-    return long_type;
-  }
-  else if (equal(tok, "struct"))
-    return struct_decl(rest, tok->next);
-  else if (equal(tok, "union"))
-    return union_decl(rest, tok->next);
-  else
-  {
-    error_tok(tok, "expected type name");
-  }
+
+  *rest = tok;
+  return ty;
 }
 
 // func-params = (param ("," param)*)? ")"
