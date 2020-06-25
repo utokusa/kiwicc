@@ -257,6 +257,11 @@ Program *parse(Token *tok)
     // Function
     if (ty->kind == TY_FUNC)
     {
+      if (equal(tok, ";"))
+      {
+        tok = tok->next;
+        continue;
+      }
       cur = cur->next = funcdef(&tok, start);
       continue;
     }

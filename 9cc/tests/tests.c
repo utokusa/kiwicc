@@ -4,6 +4,10 @@
  * This is a block comment.
  */
 
+int printf();
+int exit();
+int ret_777();
+
 int g1;
 int g2[4];
 char g3;
@@ -339,6 +343,7 @@ int main()
   assert(8, ({int (*x)[3]; sizeof(x); }), "({int (*x)[3]; sizeof(x); })");
   assert(3, ({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; }), "({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; })");
   assert(4, ({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; }), "({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; })");
+  assert(777, ret_777(), "ret_777()");
 
   printf("OK\n");
   return 0;
