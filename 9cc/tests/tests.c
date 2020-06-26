@@ -387,6 +387,19 @@ int main()
   assert(24, ({ sizeof(int[2][3]); }), "({ sizeof(int[2][3]); })");
   assert(8, ({ sizeof(struct { int a; int b; }); }), "({ sizeof(struct { int a; int b; }); })");
 
+  assert(131586, (int)8590066178, "(int)8590066178");
+  assert(514, (short)8590066178, "(short)8590066178");
+  assert(2, (char)8590066178, "(char)8590066178");
+  assert(1, (char)1, "(char)1");
+  assert(1, (short)1, "(short)1");
+  assert(1, (int)1, "(int)1");
+  assert(1, (long)((int)1), "(long)((int)1)");
+  assert(1, (long)&*(int *)1, "(long)&*(int *)1");
+  assert(1, ({ int x = 8193; *(char *)(&x); }), "({ int x = 8193; *(char *)(&x); })");
+  assert(32, ({ int x = 8193; *((char *)(&x) + 1); }), "({ int x = 8193; *((char *)(&x) + 1); })");
+  assert(0, ({ int x = 8193; *((char *)(&x) + 2); }), "({ int x = 8193; *((char *)(&x) + 2); })");
+  assert(0, ({ int x = 8193; *((char *)(&x) + 3); }), "({ int x = 8193; *((char *)(&x) + 3); })");
+
   printf("OK\n");
   return 0;
 }

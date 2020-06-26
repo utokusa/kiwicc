@@ -63,6 +63,22 @@ static void store(Type *ty)
   top--;
 }
 
+static void cast(Type *ty)
+{
+  if (ty->kind == TY_VOID)
+    return;
+
+  char *r = reg(top - 1);
+
+  int sz = size_of(ty);
+  if (sz == 1)
+    printf("  movsx %s, %sb\n", r, r);
+  if (sz == 2)
+    printf("  movsx %s, %sw\n", r, r);
+  if (sz == 4)
+    printf("  movsx %s, %sd\n", r, r);
+}
+
 static void gen_expr(Node *node);
 static void gen_stmt(Node *node);
 
@@ -118,9 +134,6 @@ static void gen_expr(Node *node)
     gen_addr(node);
     load(node->ty);
     return;
-  case ND_SIZEOF:
-    printf("  mov %s, %d\n", reg(top++), size_of(node->lhs->ty));
-    return;
   case ND_ASSIGN:
     gen_expr(node->rhs);
     gen_lval(node->lhs);
@@ -145,6 +158,10 @@ static void gen_expr(Node *node)
     gen_expr(node->lhs);
     top--;
     gen_expr(node->rhs);
+    return;
+  case ND_CAST:
+    gen_expr(node->lhs);
+    cast(node->ty);
     return;
   case ND_FUNCALL:
   {

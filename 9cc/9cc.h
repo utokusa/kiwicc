@@ -84,16 +84,16 @@ typedef enum
   ND_DEREF,     // * dereference (indirection)
   ND_VAR,       // variable
   ND_NUM,       // integer
-  ND_SIZEOF,    // sizeof operator
+  ND_CAST,      // type cast
   ND_IF,        // "if"
   ND_WHILE,     // "while"
   ND_FOR,       // "for"
   ND_BLOCK,     // {...} block
   ND_RETURN,    // "return"
   ND_FUNCALL,   // function call
-  ND_EXPR_STMT, // Expression statement
-  ND_STMT_EXPR, // Statement expression
-  ND_NULL_EXPR, // Do nothing
+  ND_EXPR_STMT, // expression statement
+  ND_STMT_EXPR, // statement expression
+  ND_NULL_EXPR, // do nothing
 } NodeKind;
 
 // Node of AST
