@@ -530,6 +530,34 @@ static Type *declarator(Token **rest, Token *tok, Type *ty)
   return ty;
 }
 
+// abstract-declarator = "*"* ("(" abstract-declarator ")")? type-suffix
+static Type *abstract_declarator(Token **rest, Token *tok, Type *ty)
+{
+  while (equal(tok, "*"))
+  {
+    ty = pointer_to(ty);
+    tok = tok->next;
+  }
+
+  if (equal(tok, "("))
+  {
+    Type *placeholder = calloc(1, sizeof(Type));
+    Type *new_ty = abstract_declarator(&tok, tok->next, placeholder);
+    tok = skip(tok, ")");
+    *placeholder = *type_suffix(rest, tok, ty);
+    return new_ty;
+  }
+
+  return type_suffix(rest, tok, ty);
+}
+
+// type-name = typespec abstract-declarator
+static Type *typename(Token **rest, Token *tok)
+{
+  Type *ty = typespec(&tok, tok, NULL);
+  return abstract_declarator(rest, tok, ty);
+}
+
 // declaration = typespec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
 static Node *declaration(Token **rest, Token *tok)
 {
@@ -823,9 +851,17 @@ static Node *mul(Token **rest, Token *tok)
 }
 
 // unary = ("sizeof" | "+" | "-" | "*" | "&")? unary
+//       | "sizeof" "(" type-name ")"
 //       | postfix
 static Node *unary(Token **rest, Token *tok)
 {
+  if (equal(tok, "sizeof") && equal(tok->next, "(") &&
+      is_typename(tok->next->next))
+  {
+    Type *ty = typename(&tok, tok->next->next);
+    *rest = skip(tok, ")");
+    return new_node_num(size_of(ty), tok);
+  }
   if (equal(tok, "sizeof"))
   {
     Node *node = unary(rest, tok->next);
