@@ -178,10 +178,10 @@ int main()
 
   assert(4, ({ int x = 0; sizeof(x); }), "({ int x = 0; sizeof(x); })");
   assert(8, ({ sizeof(1); }), "({ sizeof(1); })");
-  assert(4, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
+  assert(8, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
   assert(8, ({ int x = 0; sizeof(&x); }), "({ int x = 0; sizeof(&x); })");
   assert(8, ({ int x = 0; sizeof(&x + 2); }), "({ int x = 0; sizeof(&x + 2); })");
-  assert(4, ({ int x = 0; sizeof(sizeof(&x)); }), "({ int x = 0; sizeof(sizeof(&x)); })");
+  assert(8, ({ int x = 0; sizeof(sizeof(&x)); }), "({ int x = 0; sizeof(sizeof(&x)); })");
   assert(11, ({ int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); *(a+2); }), "({ int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); *(a+2); })");
   assert(11, ({ int a[3]; int *b=a+2; *b=11; *(a+2); }), "({ int a[3]; int *b=a+2; *b=11; *(a+2); })");
   assert(32, ({ int a[8]; sizeof(a); }), "({ int a[8]; sizeof(a); })");

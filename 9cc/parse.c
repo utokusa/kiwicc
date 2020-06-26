@@ -827,7 +827,11 @@ static Node *mul(Token **rest, Token *tok)
 static Node *unary(Token **rest, Token *tok)
 {
   if (equal(tok, "sizeof"))
-    return new_unary(ND_SIZEOF, unary(rest, tok->next), tok);
+  {
+    Node *node = unary(rest, tok->next);
+    add_type(node);
+    return new_node_num(size_of(node->ty), tok);
+  }
   if (equal(tok, "+"))
     return unary(rest, tok->next);
   if (equal(tok, "-"))

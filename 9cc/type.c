@@ -126,9 +126,6 @@ void add_type(Node *node)
       error_tok(node->tok, "dereferencing a void pointer");
     node->ty = node->lhs->ty->base;
     return;
-  case ND_SIZEOF:
-    node->ty = int_type;
-    return;
   case ND_STMT_EXPR:
   {
     Node *stmt = node->body;
