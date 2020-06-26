@@ -4,7 +4,7 @@
 * ...parser...
 *********************************************/
 
-// Scope for local or global variables.
+// Scope for local, global variables or typedefs..
 typedef struct VarScope VarScope;
 struct VarScope
 {
@@ -12,6 +12,7 @@ struct VarScope
   char *name;
   int depth;
   Var *var;
+  Type *type_def;
 };
 
 // Scope for struct or union tags
@@ -24,11 +25,19 @@ struct TagScope
   Type *ty;
 };
 
+// Variable attributes such as typedef or extern.
+typedef struct
+{
+  bool is_typedef;
+} VarAttr;
+
 // Local variables
 static VarList *locals;
 // Global variables
 static VarList *globals;
 
+// C has two block scopes; one is for variables/typedefs
+// and the other is for struct tags.
 static VarScope *var_scope;
 static TagScope *tag_scope;
 
@@ -37,7 +46,7 @@ static TagScope *tag_scope;
 static int scope_depth;
 
 static bool is_typename(Token *tok);
-static Type *typespec(Token **rest, Token *tok);
+static Type *typespec(Token **rest, Token *tok, VarAttr *attr);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Function *funcdef(Token **rest, Token *tok);
 static Node *declaration(Token **rest, Token *tok);
@@ -135,13 +144,13 @@ static void leave_scope()
     tag_scope = tag_scope->next;
 }
 
-// Search variable by name. Return NULL if not found.
-static Var *find_var(Token *tok)
+// Search variable or a typedef by name. Return NULL if not found.
+static VarScope *find_var(Token *tok)
 {
   for (VarScope *sc = var_scope; sc; sc = sc->next)
   {
     if (strlen(sc->name) == tok->len && !strncmp(tok->loc, sc->name, tok->len))
-      return sc->var;
+      return sc;
   }
   return NULL;
 }
@@ -157,12 +166,11 @@ static TagScope *find_tag(Token *tok)
   return NULL;
 }
 
-static VarScope *push_scope(char *name, Var *var)
+static VarScope *push_scope(char *name)
 {
   VarScope *sc = calloc(1, sizeof(VarScope));
   sc->next = var_scope;
   sc->name = name;
-  sc->var = var;
   sc->depth = scope_depth;
   var_scope = sc;
   return sc;
@@ -196,7 +204,7 @@ static Var *new_lvar(char *name, Type *ty)
   vl->var = var;
   vl->next = locals;
   locals = vl;
-  push_scope(name, var);
+  push_scope(name)->var = var;
   return var;
 }
 
@@ -208,7 +216,7 @@ static Var *new_gvar(char *name, Type *ty)
   vl->var = var;
   vl->next = globals;
   globals = vl;
-  push_scope(name, var);
+  push_scope(name)->var = var;
   return var;
 }
 
@@ -235,6 +243,17 @@ static char *get_ident(Token *tok)
   return strndup(tok->loc, tok->len);
 }
 
+static Type *find_typedef(Token *tok)
+{
+  if (tok->kind == TK_IDENT)
+  {
+    VarScope *sc = find_var(tok);
+    if (sc)
+      return sc->type_def;
+  }
+  return NULL;
+}
+
 static int get_number(Token *tok)
 {
   if (tok->kind != TK_NUM)
@@ -252,8 +271,26 @@ Program *parse(Token *tok)
   while (tok->kind != TK_EOF)
   {
     Token *start = tok;
-    Type *basety = typespec(&tok, tok);
+    VarAttr attr = {};
+    Type *basety = typespec(&tok, tok, &attr);
     Type *ty = declarator(&tok, tok, basety);
+
+    // Typedef
+    if (attr.is_typedef)
+    {
+      for (;;)
+      {
+        push_scope(get_ident(ty->name))->type_def = ty;
+        if (equal(tok, ";"))
+        {
+          tok = tok->next;
+          break;
+        }
+        tok = skip(tok, ",");
+        ty = declarator(&tok, tok, basety);
+      }
+      continue;
+    }
 
     // Function
     if (ty->kind == TY_FUNC)
@@ -299,12 +336,13 @@ static bool is_typename(Token *tok)
           "long",
           "struct",
           "union",
+          "typedef",
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
     if (equal(tok, kw[i]))
       return true;
-  return false;
+  return find_typedef(tok);
 }
 
 // funcdef = typespec declarator compound-stmt
@@ -312,7 +350,7 @@ static Function *funcdef(Token **rest, Token *tok)
 {
   locals = NULL;
 
-  Type *ty = typespec(&tok, tok);
+  Type *ty = typespec(&tok, tok, NULL);
   ty = declarator(&tok, tok, ty);
 
   Function *fn = calloc(1, sizeof(Function));
@@ -331,8 +369,8 @@ static Function *funcdef(Token **rest, Token *tok)
 }
 
 // typespec = "void" | "char" | "short" | "int" | "long"
-//          | struct-decl | union-decl
-static Type *typespec(Token **rest, Token *tok)
+//          | struct-decl | union-decl | typedef-name
+static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
 {
   enum
   {
@@ -349,13 +387,32 @@ static Type *typespec(Token **rest, Token *tok)
 
   while (is_typename(tok))
   {
-    // Handle user-defined types.
-    if (equal(tok, "struct") || equal(tok, "union"))
+    // Handle "typedef" keyword.
+    if (equal(tok, "typedef"))
     {
+      if (!attr)
+        error_tok(tok, "storage class specifier is not allowed in this context.");
+      attr->is_typedef = true;
+      tok = tok->next;
+      continue;
+    }
+
+    // Handle user-defined types.
+    Type *ty2 = find_typedef(tok);
+    if (equal(tok, "struct") || equal(tok, "union") || ty2)
+    {
+      if (counter)
+        break;
+
       if (equal(tok, "struct"))
         ty = struct_decl(&tok, tok->next);
-      else
+      else if (equal(tok, "union"))
         ty = union_decl(&tok, tok->next);
+      else
+      {
+        ty = ty2;
+        tok = tok->next;
+      }
       counter += OTHER;
       continue;
     }
@@ -417,7 +474,7 @@ static Type *func_params(Token **rest, Token *tok, Type *ty)
   {
     if (cur != &head)
       tok = skip(tok, ",");
-    Type *basety = typespec(&tok, tok);
+    Type *basety = typespec(&tok, tok, NULL);
     Type *ty = declarator(&tok, tok, basety);
     cur = cur->next = copy_type(ty);
   }
@@ -476,7 +533,8 @@ static Type *declarator(Token **rest, Token *tok, Type *ty)
 // declaration = typespec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
 static Node *declaration(Token **rest, Token *tok)
 {
-  Type *basety = typespec(&tok, tok);
+  VarAttr attr = {};
+  Type *basety = typespec(&tok, tok, &attr);
 
   Node head = {};
   Node *cur = &head;
@@ -490,6 +548,12 @@ static Node *declaration(Token **rest, Token *tok)
     Type *ty = declarator(&tok, tok, basety);
     if (ty->kind == TY_VOID)
       error_tok(tok, "variable declared void");
+
+    if (attr.is_typedef)
+    {
+      push_scope(get_ident(ty->name))->type_def = ty;
+      continue;
+    }
 
     Var *var = new_lvar(get_ident(ty->name), ty);
 
@@ -783,7 +847,7 @@ static Member *struct_members(Token **rest, Token *tok)
 
   while (!equal(tok, "}"))
   {
-    Type *basety = typespec(&tok, tok);
+    Type *basety = typespec(&tok, tok, NULL);
     int cnt = 0;
 
     while (!equal(tok, ";"))
@@ -1013,12 +1077,12 @@ static Node *primary(Token **rest, Token *tok)
     if (equal(tok->next, "("))
       return funcall(rest, tok);
 
-    // Local variable
-    Var *var = find_var(tok);
-    if (!var)
+    // Variable
+    VarScope *sc = find_var(tok);
+    if (!sc || !sc->var)
       error_tok(tok, "undefind variable");
     *rest = tok->next;
-    return new_node_var(var, tok);
+    return new_node_var(sc->var, tok);
   }
 
   // String literal
