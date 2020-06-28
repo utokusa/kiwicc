@@ -26,6 +26,11 @@ bool is_integer(Type *ty)
          k == TY_INT || k == TY_LONG;
 }
 
+static bool is_scalar(Type *ty)
+{
+  return is_integer(ty) || ty->base;
+}
+
 Type *copy_type(Type *ty)
 {
   Type *ret = malloc(sizeof(Type));
@@ -60,6 +65,23 @@ int size_of(Type *ty)
   return ty->size;
 }
 
+static Type *get_common_type(Type *ty1, Type *ty2)
+{
+  if (ty1->base)
+    return pointer_to(ty1->base);
+  if (size_of(ty1) == 8 || size_of(ty2) == 8)
+    return long_type;
+  return int_type;
+}
+
+// Usual arithmettic conversion
+static void usual_arith_conv(Node **lhs, Node **rhs)
+{
+  Type *ty = get_common_type((*lhs)->ty, (*rhs)->ty);
+  *lhs = new_cast(*lhs, ty);
+  *rhs = new_cast(*rhs, ty);
+}
+
 Type *array_of(Type *base, int len)
 {
   Type *ty = new_type(TY_ARR, size_of(base) * len, base->align);
@@ -86,22 +108,34 @@ void add_type(Node *node)
 
   switch (node->kind)
   {
+  case ND_NUM:
+    node->ty = (node->val == (int)node->val) ? int_type : long_type;
+    return;
   case ND_ADD:
   case ND_SUB:
-  case ND_PTR_DIFF:
   case ND_MUL:
   case ND_DIV:
+    usual_arith_conv(&node->lhs, &node->rhs);
+    node->ty = node->lhs->ty;
+    return;
   case ND_EQ:
   case ND_NE:
   case ND_LT:
   case ND_LE:
+    usual_arith_conv(&node->lhs, &node->rhs);
+    node->ty = int_type;
+    return;
   case ND_FUNCALL:
-  case ND_NUM:
+  case ND_PTR_DIFF:
     node->ty = long_type;
     return;
   case ND_PTR_ADD:
   case ND_PTR_SUB:
+    node->ty = node->lhs->ty;
+    return;
   case ND_ASSIGN:
+    if (is_scalar(node->rhs->ty))
+      node->rhs = new_cast(node->rhs, node->lhs->ty);
     node->ty = node->lhs->ty;
     return;
   case ND_VAR:

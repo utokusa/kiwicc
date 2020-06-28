@@ -177,11 +177,11 @@ int main()
   assert(5, ({ int x = 3; (&x+5) - (&x); }), "({ int x = 3; (&x+5) - (&x); })");
 
   assert(4, ({ int x = 0; sizeof(x); }), "({ int x = 0; sizeof(x); })");
-  assert(8, ({ sizeof(1); }), "({ sizeof(1); })");
-  assert(8, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
+  assert(4, ({ sizeof(1); }), "({ sizeof(1); })");
+  assert(4, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
   assert(8, ({ int x = 0; sizeof(&x); }), "({ int x = 0; sizeof(&x); })");
   assert(8, ({ int x = 0; sizeof(&x + 2); }), "({ int x = 0; sizeof(&x + 2); })");
-  assert(8, ({ int x = 0; sizeof(sizeof(&x)); }), "({ int x = 0; sizeof(sizeof(&x)); })");
+  assert(4, ({ int x = 0; sizeof(sizeof(&x)); }), "({ int x = 0; sizeof(sizeof(&x)); })");
   assert(11, ({ int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); *(a+2); }), "({ int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); *(a+2); })");
   assert(11, ({ int a[3]; int *b=a+2; *b=11; *(a+2); }), "({ int a[3]; int *b=a+2; *b=11; *(a+2); })");
   assert(32, ({ int a[8]; sizeof(a); }), "({ int a[8]; sizeof(a); })");
@@ -399,6 +399,20 @@ int main()
   assert(32, ({ int x = 8193; *((char *)(&x) + 1); }), "({ int x = 8193; *((char *)(&x) + 1); })");
   assert(0, ({ int x = 8193; *((char *)(&x) + 2); }), "({ int x = 8193; *((char *)(&x) + 2); })");
   assert(0, ({ int x = 8193; *((char *)(&x) + 3); }), "({ int x = 8193; *((char *)(&x) + 3); })");
+
+  assert(4, sizeof(-10 + 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 - 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 * 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 / 5), "sizeof(-10 + 5)");
+
+  assert(8, sizeof(-10 + (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 - (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 * (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 / (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 + 5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 - 5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 * 5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 / 5), "sizeof(-10 + 5)");
 
   printf("OK\n");
   return 0;

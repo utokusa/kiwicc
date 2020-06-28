@@ -230,6 +230,8 @@ bool is_number();
 Token *tokenize_file(char *filename);
 
 // ********** parse.c *************
+Node *new_cast(Node *expr, Type *ty);
+
 Program *parse(Token *tok);
 
 // ********** codegen.c *************

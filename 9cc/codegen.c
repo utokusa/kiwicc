@@ -20,22 +20,34 @@ static char *reg(int idx)
   return r[idx];
 }
 
+static char *xreg(Type *ty, int idx)
+{
+  if (ty->base || size_of(ty) == 8)
+    return reg(idx);
+
+  static char *r[] = {"r10d", "r11d", "r12d", "r13d", "r14d", "r15d"};
+  if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
+    error("register out of range: %d", idx);
+  return r[idx];
+}
+
 static void load(Type *ty)
 {
   if (ty->kind == TY_ARR || ty->kind == TY_STRUCT)
     return;
 
-  char *r = reg(top - 1);
+  char *rs = reg(top - 1);
+  char *rd = xreg(ty, top - 1);
   int sz = size_of(ty);
 
   if (sz == 1)
-    printf("  movsx %s, byte ptr [%s]\n", r, r);
+    printf("  movsx %s, byte ptr [%s]\n", rd, rs);
   else if (sz == 2)
-    printf("  movsx %s, word ptr [%s]\n", r, r);
+    printf("  movsx %s, word ptr [%s]\n", rd, rs);
   else if (sz == 4)
-    printf("  movsx %s, dword ptr [%s]\n", r, r);
+    printf("  mov %s, dword ptr [%s]\n", rd, rs);
   else
-    printf("  mov %s, [%s]\n", r, r);
+    printf("  mov %s, [%s]\n", rd, rs);
 }
 
 static void store(Type *ty)
@@ -63,19 +75,20 @@ static void store(Type *ty)
   top--;
 }
 
-static void cast(Type *ty)
+static void cast(Type *from, Type *to)
 {
-  if (ty->kind == TY_VOID)
+  if (to->kind == TY_VOID)
     return;
 
   char *r = reg(top - 1);
 
-  int sz = size_of(ty);
-  if (sz == 1)
+  if (size_of(to) == 1)
     printf("  movsx %s, %sb\n", r, r);
-  if (sz == 2)
+  if (size_of(to) == 2)
     printf("  movsx %s, %sw\n", r, r);
-  if (sz == 4)
+  if (size_of(to) == 4)
+    printf("  mov %sd, %sd\n", r, r);
+  if (is_integer(from) && size_of(from) < 8)
     printf("  movsx %s, %sd\n", r, r);
 }
 
@@ -161,7 +174,7 @@ static void gen_expr(Node *node)
     return;
   case ND_CAST:
     gen_expr(node->lhs);
-    cast(node->ty);
+    cast(node->lhs->ty, node->ty);
     return;
   case ND_FUNCALL:
   {
@@ -199,8 +212,8 @@ static void gen_expr(Node *node)
   gen_expr(node->lhs);
   gen_expr(node->rhs);
 
-  char *rd = reg(top - 2);
-  char *rs = reg(top - 1);
+  char *rd = xreg(node->lhs->ty, top - 2);
+  char *rs = xreg(node->lhs->ty, top - 1);
   top--;
 
   switch (node->kind)
@@ -231,10 +244,20 @@ static void gen_expr(Node *node)
     printf("  imul %s, %s\n", rd, rs);
     break;
   case ND_DIV:
-    printf("  mov rax, %s\n", rd);
-    printf("  cqo\n");
-    printf("  idiv %s\n", rs);
-    printf("  mov %s, rax\n", rd);
+    if (size_of(node->ty) == 8)
+    {
+      printf("  mov rax, %s\n", rd);
+      printf("  cqo\n");
+      printf("  idiv %s\n", rs);
+      printf("  mov %s, rax\n", rd);
+    }
+    else
+    {
+      printf("  mov eax, %s\n", rd);
+      printf("  cdq\n");
+      printf("  idiv %s\n", rs);
+      printf("  mov %s, eax\n", rd);
+    }
     break;
   case ND_EQ:
     printf("  cmp %s, %s\n", rd, rs);
