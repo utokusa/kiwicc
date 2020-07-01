@@ -220,6 +220,8 @@ void error_at(char *loc, char *fmt, ...);
 
 void error_tok(Token *tok, char *fmt, ...);
 
+void warn_tok(Token *tok, char *fmt, ...);
+
 bool equal(Token *tok, char *s);
 
 Token *skip(Token *tok, char *s);

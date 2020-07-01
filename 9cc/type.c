@@ -125,7 +125,6 @@ void add_type(Node *node)
     usual_arith_conv(&node->lhs, &node->rhs);
     node->ty = int_type;
     return;
-  case ND_FUNCALL:
   case ND_PTR_DIFF:
     node->ty = long_type;
     return;
