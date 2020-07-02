@@ -92,6 +92,10 @@ int int_to_int(int x)
 {
   return x;
 }
+int div_long(long a, long b)
+{
+  return a / b;
+}
 
 int main()
 {
@@ -431,6 +435,8 @@ int main()
   assert(261, ({ int x = int_to_int(261); x; }), "({ int x = int_to_int(261); x; })");
   assert(5, int_to_char(261), "int_to_char(261)");
   assert(5, ({ int x = int_to_char(261); x; }), "({ int x = int_to_char(261); x; })");
+
+  assert(-5, div_long(-10, 2), "div_long(-10, 2)");
 
   printf("OK\n");
   return 0;
