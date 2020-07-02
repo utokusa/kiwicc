@@ -349,6 +349,7 @@ static bool is_typename(Token *tok)
   static char *kw[] =
       {
           "void",
+          "_Bool",
           "char",
           "short",
           "int",
@@ -394,11 +395,12 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
   enum
   {
     VOID = 1 << 0,
-    CHAR = 1 << 2,
-    SHORT = 1 << 4,
-    INT = 1 << 6,
-    LONG = 1 << 8,
-    OTHER = 1 << 10,
+    BOOL = 1 << 2,
+    CHAR = 1 << 4,
+    SHORT = 1 << 6,
+    INT = 1 << 8,
+    LONG = 1 << 10,
+    OTHER = 1 << 12,
   };
 
   Type *ty = int_type;
@@ -439,6 +441,8 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     // Handle built-in types.
     if (equal(tok, "void"))
       counter += VOID;
+    else if (equal(tok, "_Bool"))
+      counter += BOOL;
     else if (equal(tok, "char"))
       counter += CHAR;
     else if (equal(tok, "short"))
@@ -454,6 +458,9 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     {
     case VOID:
       ty = void_type;
+      break;
+    case BOOL:
+      ty = bool_type;
       break;
     case CHAR:
       ty = char_type;

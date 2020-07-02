@@ -159,7 +159,7 @@ static char *starts_with_reserved(char *p)
       "return", "if", "else",
       "while", "for", "sizeof",
       "int", "char", "struct", "union",
-      "short", "long", "void", "typedef"};
+      "short", "long", "void", "_Bool", "typedef"};
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)
   {
