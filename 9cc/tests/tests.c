@@ -80,6 +80,18 @@ int sub_long(long a, long b, long c)
 {
   return a - b - c;
 }
+int *g1_ptr()
+{
+  return &g1;
+}
+char int_to_char(int x)
+{
+  return x;
+}
+int int_to_int(int x)
+{
+  return x;
+}
 
 int main()
 {
@@ -413,6 +425,12 @@ int main()
   assert(8, sizeof((long)-10 - 5), "sizeof(-10 + 5)");
   assert(8, sizeof((long)-10 * 5), "sizeof(-10 + 5)");
   assert(8, sizeof((long)-10 / 5), "sizeof(-10 + 5)");
+
+  assert(3, ({ g1 = 3; *g1_ptr(); }), "({ g1 = 3; *g1_ptr(); })");
+  assert(261, int_to_int(261), "int_to_int(261)");
+  assert(261, ({ int x = int_to_int(261); x; }), "({ int x = int_to_int(261); x; })");
+  assert(5, int_to_char(261), "int_to_char(261)");
+  assert(5, ({ int x = int_to_char(261); x; }), "({ int x = int_to_char(261); x; })");
 
   printf("OK\n");
   return 0;
