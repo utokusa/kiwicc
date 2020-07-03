@@ -463,6 +463,20 @@ int main()
   assert(10, '\n', "'\\n'");
   assert(4, sizeof('a'), "sizeof('a')");
 
+  assert(0, ({ enum {zero, one, two}; zero; }), "({ enum {zero, one, two}; zero; })");
+  assert(1, ({ enum {zero, one, two}; one; }), "({ enum {zero, one, two}; one; })");
+  assert(2, ({ enum {zero, one, two}; two; }), "({ enum {zero, one, two}; two; })");
+  assert(5, ({ enum {five = 5, six, seven}; five; }), "({ enum {five = 5, six, seven}; five; })");
+  assert(6, ({ enum {five = 5, six, seven}; six; }), "({ enum {five = 5, six, seven}; six; })");
+  assert(7, ({ enum {five = 5, six, seven}; seven; }), "({ enum {five = 5, six, seven}; seven; })");
+  assert(0, ({ enum {zero, five=5, six}; zero; }), "({ enum {zero, five=5, six}; zero; })");
+  assert(5, ({ enum {zero, five=5, six}; five; }), "({ enum {zero, five=5, six}; five; })");
+  assert(6, ({ enum {zero, five=5, six}; six; }), "({ enum {zero, five=5, six}; six; })");
+  assert(3, ({ enum {zero, five=5, three=3, four}; three; }), "({ enum {zero, five=5, three=3, four}; three; })");
+  assert(4, ({ enum {zero, five=5, three=3, four}; four; }), "({ enum {zero, five=5, three=3, four}; four; })");
+  assert(4, ({ enum {zero, one, two} x; sizeof(x); }), "({ enum {zero, one, two} x; sizeof(x); })");
+  assert(4, ({ enum t {zero, one, two}; enum t x; sizeof(x); }), "({ enum t {zero, one, two}; t x; sizeof(x); })");
+
   printf("OK\n");
   return 0;
 }

@@ -158,7 +158,7 @@ static char *starts_with_reserved(char *p)
   static char *kw[] = {
       "return", "if", "else",
       "while", "for", "sizeof",
-      "int", "char", "struct", "union",
+      "int", "char", "struct", "union", "enum",
       "short", "long", "void", "_Bool", "typedef"};
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)
