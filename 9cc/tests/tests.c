@@ -104,6 +104,10 @@ _Bool bool_fn_sub(_Bool x)
 {
   return x - 1;
 }
+static int static_fn()
+{
+  return 3;
+}
 
 int main()
 {
@@ -476,6 +480,8 @@ int main()
   assert(4, ({ enum {zero, five=5, three=3, four}; four; }), "({ enum {zero, five=5, three=3, four}; four; })");
   assert(4, ({ enum {zero, one, two} x; sizeof(x); }), "({ enum {zero, one, two} x; sizeof(x); })");
   assert(4, ({ enum t {zero, one, two}; enum t x; sizeof(x); }), "({ enum t {zero, one, two}; t x; sizeof(x); })");
+
+  assert(3, static_fn(), "static_fn()");
 
   printf("OK\n");
   return 0;

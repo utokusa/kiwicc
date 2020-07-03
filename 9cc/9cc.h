@@ -141,6 +141,7 @@ struct Function
   Node *node;
   VarList *locals;
   VarList *params;
+  bool is_static;
   int stack_size;
 };
 

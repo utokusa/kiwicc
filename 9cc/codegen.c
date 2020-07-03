@@ -414,7 +414,8 @@ static void emit_text(Program *prog)
   for (Function *fn = prog->fns; fn; fn = fn->next)
   {
     funcname = fn->name;
-    printf(".global %s\n", fn->name);
+    if (!fn->is_static)
+      printf(".global %s\n", fn->name);
     printf("%s:\n", fn->name);
 
     // Prologue. r12-15 are callee-saved registers.
