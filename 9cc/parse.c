@@ -740,7 +740,7 @@ static Node *expr_stmt(Token **rest, Token *tok)
 //      | "{" compound-stmt
 //      | "if" "(" expr ")" stmt ("else" stmt)?
 //      | "while" "(" expr ")" stmt
-//      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//      | "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
 //      | "return" expr ";"
 static Node *stmt(Token **rest, Token *tok)
 {
@@ -785,9 +785,18 @@ static Node *stmt(Token **rest, Token *tok)
     Node *node = new_node(ND_FOR, tok);
     tok = skip(tok->next, "(");
 
-    if (!equal(tok, ";"))
-      node->init = expr_stmt(&tok, tok);
-    tok = skip(tok, ";");
+    enter_scope();
+
+    if (is_typename(tok))
+    {
+      node->init = declaration(&tok, tok);
+    }
+    else
+    {
+      if (!equal(tok, ";"))
+        node->init = expr_stmt(&tok, tok);
+      tok = skip(tok, ";");
+    }
 
     // For "for (a; b; c) {...}" we regard b as true if b is empty.
     node->cond = new_node_num(1, tok);
@@ -801,6 +810,7 @@ static Node *stmt(Token **rest, Token *tok)
 
     node->then = stmt(&tok, tok);
 
+    leave_scope();
     *rest = tok;
     return node;
   }
