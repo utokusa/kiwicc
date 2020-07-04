@@ -494,6 +494,11 @@ int main()
   assert(4, ({ int i=6; i-=2; }), "({ int i=6; i-=2; })");
   assert(12, ({ int i=6; i*=2; }), "({ int i=6; i*=2; })");
   assert(3, ({ int i=6; i/=2; }), "({ int i=6; i/=2; })");
+  assert(2, ({ int i=1; ++i; }), "({ int i=1; ++i; })");
+  assert(0, ({ int i=1; --i; }), "({ int i=1; --i; })");
+  assert(3, ({ int i=1; 1+(++i); }), "({ int i=1; 1+(++i); })");
+  assert(21, ({ int a[3]; a[0]=10; a[1]=20; a[2]=30; int *p=a+1; ++*p; }), "({ int a[3]; a[0]=10; a[1]=20; a[2]=30; int *p=a+1; ++*p; })");
+  assert(19, ({ int a[3]; a[0]=10; a[1]=20; a[2]=30; int *p=a+1; --*p; }), "({ int a[3]; a[0]=10; a[1]=20; a[2]=30; int *p=a+1; --*p; })");
 
   printf("OK\n");
   return 0;
