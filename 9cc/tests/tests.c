@@ -521,6 +521,9 @@ int main()
   assert(4, sizeof(!(char)0), "sizeof(!(char)0)");
   assert(4, sizeof(!(long)5), "sizeof(!(long)5)");
 
+  assert(-1, ~0, "~0");
+  assert(0, ~-1, "~-1");
+
   printf("OK\n");
   return 0;
 }

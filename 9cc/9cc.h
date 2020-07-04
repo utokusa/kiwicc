@@ -84,6 +84,7 @@ typedef enum
   ND_ADDR,      // & address-of
   ND_DEREF,     // * dereference (indirection)
   ND_NOT,       // ! not
+  ND_BITNOT,    // ~ bitwise not
   ND_VAR,       // variable
   ND_NUM,       // integer
   ND_CAST,      // type cast
