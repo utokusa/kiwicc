@@ -83,6 +83,7 @@ typedef enum
   ND_MEMBER,    // . struct member access
   ND_ADDR,      // & address-of
   ND_DEREF,     // * dereference (indirection)
+  ND_NOT,       // ! not
   ND_VAR,       // variable
   ND_NUM,       // integer
   ND_CAST,      // type cast

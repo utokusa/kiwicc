@@ -513,6 +513,14 @@ int main()
   assert(13, 0B1101, "0b1101");
   assert(668, 01234, "01234");
 
+  assert(0, !1, "!1");
+  assert(0, !2, "!2");
+  assert(1, !0, "!0");
+  assert(1, !(char)0, "!(char)0");
+  assert(0, !(long)5, "!(long)5");
+  assert(4, sizeof(!(char)0), "sizeof(!(char)0)");
+  assert(4, sizeof(!(long)5), "sizeof(!(long)5)");
+
   printf("OK\n");
   return 0;
 }
