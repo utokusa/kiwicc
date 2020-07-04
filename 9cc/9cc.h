@@ -74,6 +74,7 @@ typedef enum
   ND_PTR_DIFF,  // ptr - ptr
   ND_MUL,       // *
   ND_DIV,       // /
+  ND_MOD,       // %
   ND_EQ,        // == equal to
   ND_NE,        // != not equal to
   ND_LT,        // <  less than

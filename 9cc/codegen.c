@@ -142,6 +142,24 @@ static void gen_lval(Node *node)
   gen_addr(node);
 }
 
+static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
+{
+  if (size_of(node->ty) == 8)
+  {
+    printf("  mov rax, %s\n", rd);
+    printf("  cqo\n");
+    printf("  idiv %s\n", rs);
+    printf("  mov %s, %s\n", rd, r64);
+  }
+  else
+  {
+    printf("  mov eax, %s\n", rd);
+    printf("  cdq\n");
+    printf("  idiv %s\n", rs);
+    printf("  mov %s, %s\n", rd, r32);
+  }
+}
+
 static void gen_expr(Node *node)
 {
   printf(".loc 1 %d\n", node->tok->line_no);
@@ -262,21 +280,11 @@ static void gen_expr(Node *node)
     printf("  imul %s, %s\n", rd, rs);
     break;
   case ND_DIV:
-    if (size_of(node->ty) == 8)
-    {
-      printf("  mov rax, %s\n", rd);
-      printf("  cqo\n");
-      printf("  idiv %s\n", rs);
-      printf("  mov %s, rax\n", rd);
-    }
-    else
-    {
-      printf("  mov eax, %s\n", rd);
-      printf("  cdq\n");
-      printf("  idiv %s\n", rs);
-      printf("  mov %s, eax\n", rd);
-    }
+    divmod(node, rd, rs, "rax", "eax");
     break;
+  case ND_MOD:
+    divmod(node, rd, rs, "rdx", "edx");
+    return;
   case ND_EQ:
     printf("  cmp %s, %s\n", rd, rs);
     printf("  sete al\n");

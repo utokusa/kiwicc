@@ -171,7 +171,7 @@ static char *starts_with_reserved(char *p)
 
   // Multi-letter symbols
   static char *ops[] = {"==", "!=", "<=", ">=", "->", "+=", "-=", "*=", "/=",
-                        "++", "--"};
+                        "%=", "++", "--"};
   for (int i = 0; i < sizeof(ops) / sizeof(*ops); ++i)
   {
     if (startswith(p, ops[i]))
@@ -420,7 +420,7 @@ static Token *tokenize(char *filename, char *p)
         *p == '(' || *p == ')' || *p == '{' || *p == '}' ||
         *p == '<' || *p == '>' || *p == '=' || *p == ';' ||
         *p == ',' || *p == '.' || *p == '&' || *p == '[' ||
-        *p == ']' || *p == '!' || *p == '~')
+        *p == ']' || *p == '!' || *p == '~' || *p == '%')
     {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
