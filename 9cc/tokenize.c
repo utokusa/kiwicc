@@ -339,6 +339,35 @@ static void add_line_info(Token *tok)
   } while (*p++);
 }
 
+static Token *read_int_literal(Token *cur, char *start)
+{
+  char *p = start;
+
+  int base = 10;
+  if (!strncasecmp(p, "0x", 2) && is_alnum(p[2]))
+  {
+    p += 2;
+    base = 16;
+  }
+  else if (!strncasecmp(p, "0b", 2) && is_alnum(p[2]))
+  {
+    p += 2;
+    base = 2;
+  }
+  else if (*p == '0')
+  {
+    base = 8;
+  }
+
+  long val = strtoul(p, &p, base);
+  if (is_alnum(*p))
+    error_at(p, "invalid digit");
+
+  Token *tok = new_token(TK_NUM, cur, start, p - start);
+  tok->val = val;
+  return tok;
+}
+
 // Convert input 'user_input' to token
 static Token *tokenize(char *filename, char *p)
 {
@@ -417,10 +446,8 @@ static Token *tokenize(char *filename, char *p)
     // Numeric literal
     if (isdigit(*p))
     {
-      cur = new_token(TK_NUM, cur, p, DUMMY_LEN);
-      char *prev_p = p;
-      cur->val = strtol(p, &p, 10);
-      cur->len = (int)(prev_p - p);
+      cur = read_int_literal(cur, p);
+      p += cur->len;
       continue;
     }
 
