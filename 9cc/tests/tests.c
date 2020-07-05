@@ -565,6 +565,11 @@ int main()
 
   assert(2, ({ int x[2]; x[0]=2; param_decay(x); }), "({ int x[2]; x[0]=2; param_decay(x); })");
 
+  assert(8, ({ struct foo *bar; sizeof(bar); }), "({ struct foo *bar; sizeof(bar); })");
+  assert(4, ({ struct T *foo; struct T {int x; }; sizeof(struct T); }), "({ struct T *foo; struct T {int x; }; sizeof(struct T); })");
+  assert(12, ({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); }), "({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); })");
+  assert(14, ({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; }), "({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; })");
+
   printf("OK\n");
   return 0;
 }

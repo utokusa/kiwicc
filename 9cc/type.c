@@ -98,6 +98,11 @@ Type *enum_type()
   return new_type(TY_ENUM, 4, 4);
 }
 
+Type *struct_type()
+{
+  return new_type(TY_STRUCT, 0, 1);
+}
+
 void add_type(Node *node)
 {
   if (!node || node->ty)

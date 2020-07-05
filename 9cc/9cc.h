@@ -272,6 +272,8 @@ Type *array_of(Type *base, int len);
 
 Type *enum_type();
 
+Type *struct_type();
+
 int size_of(Type *ty);
 
 void add_type(Node *node);
