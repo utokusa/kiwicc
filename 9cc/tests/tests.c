@@ -108,6 +108,10 @@ static int static_fn()
 {
   return 3;
 }
+int param_decay(int x[])
+{
+  return x[0];
+}
 
 int main()
 {
@@ -558,6 +562,8 @@ int main()
 
   assert(8, sizeof(int(*)[10]), "sizeof(int(*)[10])");
   assert(8, sizeof(int(*)[][10]), "sizeof(int(*)[][10])");
+
+  assert(2, ({ int x[2]; x[0]=2; param_decay(x); }), "({ int x[2]; x[0]=2; param_decay(x); })");
 
   printf("OK\n");
   return 0;
