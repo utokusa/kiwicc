@@ -570,6 +570,11 @@ int main()
   assert(12, ({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); }), "({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); })");
   assert(14, ({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; }), "({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; })");
 
+  assert(15, ({ int j=0; for (int i=0;i<100;i++) { j+=i; if (i==5) break; } j; }), "({ int j=0; for (int i=0;i<100;i++) { j+=i; if (i==5) break; } j; })");
+  assert(9, ({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) sum+=i*j; sum; }), "({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) sum+=i*j; sum; })");
+  assert(15, ({ int i=0, j=0; while(1) {j+=++i; if (i==5) break;} j; }), "({ int i=0, j=0; while(1) {j+=++i; if (i==5) break;} j; })");
+  assert(1, ({ int i=1; for(;;)break; i; }), "({ int i=1; for(;;)break; i; })");
+
   printf("OK\n");
   return 0;
 }

@@ -774,6 +774,7 @@ static Node *expr_stmt(Token **rest, Token *tok)
 //      | "if" "(" expr ")" stmt ("else" stmt)?
 //      | "while" "(" expr ")" stmt
 //      | "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
+//      | "break" ";"
 //      | "return" expr ";"
 static Node *stmt(Token **rest, Token *tok)
 {
@@ -811,6 +812,12 @@ static Node *stmt(Token **rest, Token *tok)
     node->then = stmt(&tok, tok);
     *rest = tok;
     return node;
+  }
+
+  if (equal(tok, "break"))
+  {
+    *rest = skip(tok->next, ";");
+    return new_node(ND_BREAK, tok);
   }
 
   if (equal(tok, "for"))

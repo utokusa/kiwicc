@@ -98,6 +98,7 @@ typedef enum
   ND_WHILE,     // "while"
   ND_FOR,       // "for"
   ND_BLOCK,     // {...} block
+  ND_BREAK,     // "break"
   ND_RETURN,    // "return"
   ND_FUNCALL,   // function call
   ND_EXPR_STMT, // expression statement
