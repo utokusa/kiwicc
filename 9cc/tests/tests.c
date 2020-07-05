@@ -574,6 +574,11 @@ int main()
   assert(9, ({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) sum+=i*j; sum; }), "({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) sum+=i*j; sum; })");
   assert(15, ({ int i=0, j=0; while(1) {j+=++i; if (i==5) break;} j; }), "({ int i=0, j=0; while(1) {j+=++i; if (i==5) break;} j; })");
   assert(1, ({ int i=1; for(;;)break; i; }), "({ int i=1; for(;;)break; i; })");
+  assert(11, ({ int j=0; for (int i=0;i<=5;i++) { if (i==4) continue; j+=i; } j; }), "({ int j=0; for (int i=0;i<=5;i++) { if (i==4) continue; j+=i; } j; })");
+  assert(7, ({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) { if(i==1 && j==2)continue; sum+=i*j; } sum; }),
+         "({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) { if(i==1 && j==2)continue; sum+=i*j; } sum; })");
+  assert(11, ({ int i=0, j=0; while(1) {i++; if(i==4)continue; j+=i; if (i==5) break;} j; }),
+         "({ int i=0, j=0; while(1) {i++; if(i==4)continue; j+=i; if (i==5) break;} j; })");
 
   printf("OK\n");
   return 0;
