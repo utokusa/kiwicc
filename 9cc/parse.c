@@ -776,6 +776,8 @@ static Node *expr_stmt(Token **rest, Token *tok)
 //      | "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
 //      | "break" ";"
 //      | "continue" ";"
+//      | "goto" ident ";"
+//      | ident ";" stmt
 //      | "return" expr ";"
 static Node *stmt(Token **rest, Token *tok)
 {
@@ -815,18 +817,6 @@ static Node *stmt(Token **rest, Token *tok)
     return node;
   }
 
-  if (equal(tok, "break"))
-  {
-    *rest = skip(tok->next, ";");
-    return new_node(ND_BREAK, tok);
-  }
-
-  if (equal(tok, "continue"))
-  {
-    *rest = skip(tok->next, ";");
-    return new_node(ND_CONTINUE, tok);
-  }
-
   if (equal(tok, "for"))
   {
     Node *node = new_node(ND_FOR, tok);
@@ -859,6 +849,34 @@ static Node *stmt(Token **rest, Token *tok)
 
     leave_scope();
     *rest = tok;
+    return node;
+  }
+
+  if (equal(tok, "break"))
+  {
+    *rest = skip(tok->next, ";");
+    return new_node(ND_BREAK, tok);
+  }
+
+  if (equal(tok, "continue"))
+  {
+    *rest = skip(tok->next, ";");
+    return new_node(ND_CONTINUE, tok);
+  }
+
+  if (equal(tok, "goto"))
+  {
+    Node *node = new_node(ND_GOTO, tok);
+    node->label_name = get_ident(tok->next);
+    *rest = skip(tok->next->next, ";");
+    return node;
+  }
+
+  if (tok->kind == TK_IDENT && equal(tok->next, ":"))
+  {
+    Node *node = new_node(ND_LABEL, tok);
+    node->label_name = strndup(tok->loc, tok->len);
+    node->lhs = stmt(rest, tok->next->next);
     return node;
   }
 
