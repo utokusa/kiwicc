@@ -56,6 +56,7 @@ static Var *current_fn;
 static bool is_typename(Token *tok);
 static Type *typespec(Token **rest, Token *tok, VarAttr *attr);
 static Type *enum_specifier(Token **rest, Token *tok);
+static Type *type_suffix(Token **rest, Token *tok, Type *ty);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Function *funcdef(Token **rest, Token *tok);
 static Node *declaration(Token **rest, Token *tok);
@@ -595,8 +596,25 @@ static Type *func_params(Token **rest, Token *tok, Type *ty)
   return ty;
 }
 
+// array-dimensions = num? "]" type-suffix
+static Type *array_dimensions(Token **rest, Token *tok, Type *ty)
+{
+  if (equal(tok, "]"))
+  {
+    ty = type_suffix(rest, tok->next, ty);
+    ty = array_of(ty, 0);
+    ty->is_incomplete = true;
+    return ty;
+  }
+
+  int len = get_number(tok);
+  tok = skip(tok->next, "]");
+  ty = type_suffix(rest, tok, ty);
+  return array_of(ty, len);
+}
+
 // type-suffix = "(" func-params
-//             | "[" num "]" type-suffix
+//             | "[" array-dimensions
 //             | ε
 static Type *type_suffix(Token **rest, Token *tok, Type *ty)
 {
@@ -605,10 +623,7 @@ static Type *type_suffix(Token **rest, Token *tok, Type *ty)
 
   if (equal(tok, "["))
   {
-    int len = get_number(tok->next);
-    tok = skip(tok->next->next, "]");
-    ty = type_suffix(rest, tok, ty);
-    return array_of(ty, len);
+    return array_dimensions(rest, tok->next, ty);
   }
 
   *rest = tok;

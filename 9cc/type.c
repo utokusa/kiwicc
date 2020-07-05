@@ -63,6 +63,8 @@ int size_of(Type *ty)
 {
   if (ty->kind == TY_VOID)
     error_tok(ty->name, "void type");
+  if (ty->is_incomplete)
+    error_tok(ty->name, "incomplete type"); // e.g. "int a[]; sizeof(a);"
   return ty->size;
 }
 

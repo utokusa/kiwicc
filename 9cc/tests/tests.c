@@ -556,6 +556,9 @@ int main()
   assert(1, 2 || 1, "2 || 1");
   assert(1, (1 - 1) || 1, "(1 - 1) || 1");
 
+  assert(8, sizeof(int(*)[10]), "sizeof(int(*)[10])");
+  assert(8, sizeof(int(*)[][10]), "sizeof(int(*)[][10])");
+
   printf("OK\n");
   return 0;
 }

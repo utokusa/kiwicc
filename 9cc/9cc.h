@@ -179,10 +179,11 @@ typedef enum
 
 struct Type
 {
-  TypeKind kind; // type kind
-  int size;      // sizeof() value
-  int align;     // alignment
-  Type *base;    // base type
+  TypeKind kind;      // type kind
+  int size;           // sizeof() value
+  int align;          // alignment
+  bool is_incomplete; // incomplete type
+  Type *base;         // base type
 
   // Declaration
   Token *name;
@@ -204,6 +205,7 @@ struct Member
 {
   Member *next;
   Type *ty;
+  Token *tok; // for error message
   Token *name;
   int offset;
 };
