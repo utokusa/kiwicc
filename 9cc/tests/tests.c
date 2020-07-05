@@ -531,6 +531,22 @@ int main()
   assert(2, ({ short i=10; i%=4; i; }), "({ short i=10; i%=4; i; })");
   assert(2, ({ long i=10; i%=4; i; }), "({ long i=10; i%=4; i; })");
 
+  assert(0, 0 & 1, "0&1");
+  assert(1, 3 & 1, "3&1");
+  assert(3, 7 & 3, "7&3");
+  assert(10, -1 & 10, "-1 & 10");
+
+  assert(1, 0 | 1, "0 | 1");
+  assert(0b101010, 0b101000 | 0b000010, "0b101000 | 0b000010");
+
+  assert(1, 0 ^ 1, "0 ^ 1");
+  assert(0, 1 ^ 1, "1 ^ 1");
+  assert(0b100010, 0b101000 ^ 0b001010, "0b101000 ^ 0b000010");
+
+  assert(1, ({ int i = 5; i &= 3; }), "({ int i = 5; i &= 3; })");
+  assert(7, ({ int i = 5; i |= 3; }), "({ int i = 5; i |= 3; })");
+  assert(6, ({ int i = 5; i ^= 3; }), "({ int i = 5; i ^= 3; })");
+
   printf("OK\n");
   return 0;
 }
