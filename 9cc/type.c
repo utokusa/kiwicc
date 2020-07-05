@@ -148,6 +148,8 @@ void add_type(Node *node)
     node->ty = node->lhs->ty;
     return;
   case ND_NOT:
+  case ND_LOGAND:
+  case ND_LOGOR:
     node->ty = int_type;
     return;
   case ND_BITNOT:

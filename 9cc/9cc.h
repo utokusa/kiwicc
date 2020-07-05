@@ -78,6 +78,8 @@ typedef enum
   ND_BITAND,    // &
   ND_BITOR,     // |
   ND_BITXOR,    // ^
+  ND_LOGAND,    // &&
+  ND_LOGOR,     // ||
   ND_EQ,        // == equal to
   ND_NE,        // != not equal to
   ND_LT,        // <  less than
