@@ -170,13 +170,22 @@ static char *starts_with_reserved(char *p)
       return kw[i];
   }
 
-  // Multi-letter symbols
-  static char *ops[] = {"==", "!=", "<=", ">=", "->", "+=", "-=", "*=", "/=",
-                        "%=", "++", "--", "&=", "|=", "^=", "&&", "||"};
-  for (int i = 0; i < sizeof(ops) / sizeof(*ops); ++i)
+  // Three-letter punctuators
+  static char *ops3[] = {"<<=", ">>="};
+  for (int i = 0; i < sizeof(ops3) / sizeof(*ops3); ++i)
   {
-    if (startswith(p, ops[i]))
-      return ops[i];
+    if (startswith(p, ops3[i]))
+      return ops3[i];
+  }
+
+  // Two-letter punctuators
+  static char *ops2[] = {"==", "!=", "<=", ">=", "->", "+=", "-=", "*=", "/=",
+                         "%=", "++", "--", "&=", "|=", "^=", "&&", "||",
+                         "<<", ">>"};
+  for (int i = 0; i < sizeof(ops2) / sizeof(*ops2); ++i)
+  {
+    if (startswith(p, ops2[i]))
+      return ops2[i];
   }
 
   return NULL;
