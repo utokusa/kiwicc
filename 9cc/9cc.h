@@ -97,6 +97,8 @@ typedef enum
   ND_IF,        // "if"
   ND_WHILE,     // "while"
   ND_FOR,       // "for"
+  ND_SWITCH,    // "switch"
+  ND_CASE,      // "case"
   ND_BLOCK,     // {...} block
   ND_BREAK,     // "break"
   ND_CONTINUE,  // "continue"
@@ -144,8 +146,16 @@ struct Node
   // Goto or labeled statement
   char *label_name;
 
-  int val;  // Use only if kind is ND_NUM
-  Var *var; // Use only if kind is ND_VAR
+  // Switch-cases
+  Node *case_next;
+  Node *default_case;
+  int case_label;
+
+  // Variable
+  Var *var;
+
+  // Numeric
+  int val;
 };
 
 // Function
