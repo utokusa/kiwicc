@@ -94,7 +94,7 @@ static Node *new_node(NodeKind kind, Token *tok)
   return node;
 }
 
-static Node *new_node_num(int val, Token *tok)
+static Node *new_node_num(long val, Token *tok)
 {
   Node *node = new_node(ND_NUM, tok);
   node->val = val;
@@ -291,7 +291,7 @@ static Type *find_typedef(Token *tok)
   return NULL;
 }
 
-static int get_number(Token *tok)
+static long get_number(Token *tok)
 {
   if (tok->kind != TK_NUM)
     error_tok(tok, "expected a number");

@@ -31,7 +31,7 @@ struct Token
 {
   TokenKind kind; // Token kind
   Token *next;    // Next token
-  int val;        // If kind is TK_NUM, its value
+  long val;       // If kind is TK_NUM, its value
   char *loc;      // Token location
   int len;        // Length of the token
 
@@ -155,7 +155,7 @@ struct Node
   Var *var;
 
   // Numeric
-  int val;
+  long val;
 };
 
 // Function

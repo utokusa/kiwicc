@@ -168,7 +168,7 @@ static void gen_expr(Node *node)
   switch (node->kind)
   {
   case ND_NUM:
-    printf("  mov %s, %d\n", reg(top++), node->val);
+    printf("  mov %s, %ld\n", reg(top++), node->val);
     return;
   case ND_VAR:
   case ND_MEMBER:
@@ -442,7 +442,7 @@ static void gen_stmt(Node *node)
     for (Node *n = node->case_next; n; n = n->case_next)
     {
       n->case_label = labelseq++;
-      printf("  cmp %s, %d\n", reg(top - 1), n->val);
+      printf("  cmp %s, %ld\n", reg(top - 1), n->val);
       printf("  je .L.case.%d\n", n->case_label);
     }
     top--;
