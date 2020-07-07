@@ -96,6 +96,7 @@ static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Function *funcdef(Token **rest, Token *tok);
 static Node *declaration(Token **rest, Token *tok);
 static Initializer *initializer(Token **rest, Token *tok, Type *ty);
+static Initializer *initializer2(Token **rest, Token *tok, Type *ty);
 static Node *lvar_initializer(Token **rest, Token *tok, Var *var);
 static Node *compound_stmt(Token **Rest, Token *tok);
 static Node *stmt(Token **rest, Token *tok);
@@ -662,7 +663,7 @@ static Type *array_dimensions(Token **rest, Token *tok, Type *ty)
   if (equal(tok, "]"))
   {
     ty = type_suffix(rest, tok->next, ty);
-    ty = array_of(ty, 0);
+    ty = array_of(ty, -1);
     ty->is_incomplete = true;
     return ty;
   }
@@ -775,6 +776,11 @@ static Node *declaration(Token **rest, Token *tok)
       Node *expr = lvar_initializer(&tok, tok->next, var);
       cur = cur->next = new_unary(ND_EXPR_STMT, expr, tok);
     }
+
+    if (ty->size < 0)
+      error_tok(ty->name, "variable has incomplete type");
+    if (ty->kind == TY_VOID)
+      error_tok(ty->name, "variable declared void");
   }
 
   Node *node = new_node(ND_BLOCK, tok);
@@ -802,6 +808,20 @@ static Token *skip_end(Token *tok)
     return tok->next;
   warn_tok(tok, "excess elements in initializer");
   return skip(skip_excess_elements(tok), "}");
+}
+
+static int count_array_init_elements(Token *tok, Type *ty)
+{
+  tok = skip(tok, "{");
+  int len = 0;
+  while (!equal(tok, "}"))
+  {
+    if (len++ > 0)
+      tok = skip(tok, ",");
+    initializer(&tok, tok, ty->base);
+  }
+
+  return len;
 }
 
 // string_initializer =  string-literal
@@ -842,8 +862,7 @@ static Initializer *array_initializer(Token **rest, Token *tok, Type *ty)
   return init;
 }
 
-// initializer = string_initializer | array_initializer | assign
-static Initializer *initializer(Token **rest, Token *tok, Type *ty)
+static Initializer *initializer2(Token **rest, Token *tok, Type *ty)
 {
   if (ty->kind == TY_ARR && ty->base->kind == TY_CHAR && tok->kind == TK_STR)
     return string_initializer(rest, tok, ty);
@@ -852,6 +871,26 @@ static Initializer *initializer(Token **rest, Token *tok, Type *ty)
     return array_initializer(rest, tok, ty);
 
   return new_init(ty, 0, assign(rest, tok), tok);
+}
+
+// initializer = string_initializer | array_initializer | assign
+static Initializer *initializer(Token **rest, Token *tok, Type *ty)
+{
+  // An array length can be omitted if an array has an initializer
+  // (e.g. `int x[] = {1,2,3}`). If it's omitted, count the number of
+  // initializer elements.
+  if (ty->kind == TY_ARR && ty->size < 0)
+  {
+    int len;
+    if (ty->base->kind == TY_CHAR && tok->kind == TK_STR)
+      len = tok->cont_len;
+    else
+      len = count_array_init_elements(tok, ty);
+    *ty = *array_of(ty->base, len);
+    ty->is_incomplete = false;
+  }
+
+  return initializer2(rest, tok, ty);
 }
 
 static Node *init_desg_expr(InitDesg *desg, Token *tok)
