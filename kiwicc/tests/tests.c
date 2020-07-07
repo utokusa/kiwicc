@@ -664,6 +664,15 @@ int main()
   assert(8, ({ int x[2][2] = {{6,7},{8}}; x[1][0]; }), "({ int x[2][2] = {{6,7},{8}}; x[1][0]; })");
   assert(0, ({ int x[2][2] = {{6,7},{8}}; x[1][1]; }), "({ int x[2][2] = {{6,7},{8}}; x[1][1]; })");
 
+  assert('a', ({ char x[4]="abc"; x[0]; }), "({ char x[4]=\"abc\"; x[0]; })");
+  assert('b', ({ char x[4]="abc"; x[1]; }), "({ char x[4]=\"abc\"; x[1]; })");
+  assert('c', ({ char x[4]="abc"; x[2]; }), "({ char x[4]=\"abc\"; x[2]; })");
+  assert('a', ({ char x[4]="ab"; x[0]; }), "({ char x[4]=\"ab\"; x[0]; })");
+  assert('b', ({ char x[4]="ab"; x[1]; }), "({ char x[4]=\"ab\"; x[1]; })");
+  assert('a', ({ char x[2][4] = {"abc","def"}; x[0][0]; }), "({ int x[2][4] = {{\"abc\",\"def\"}}; x[0][0]; })");
+  assert('e', ({ char x[2][4] = {"abc","def"}; x[1][1]; }), "({ int x[2][4] = {{\"abc\",\"def\"}}; x[1][1]; })");
+  assert('f', ({ char x[2][4] = {"abc","def"}; x[1][2]; }), "({ int x[2][4] = {{\"abc\",\"def\"}}; x[1][2]; })");
+
   printf("OK\n");
   return 0;
 }
