@@ -645,6 +645,13 @@ int main()
   assert(0x10f, ({ char x[(short)0xffff010f]; sizeof(x); }), "({ char x[(short)0xffff010f]; sizeof(x); })");
   assert(4, ({ char x[(int)0xfffffffffff + 5]; sizeof(x); }), "({ char x[(int)0xfffffffffff + 5]; sizeof(x); })");
 
+  assert(4, ({ int x[2] = {4,5}; x[0]; }), "({ int x[2] = {4,5}; x[0]; })");
+  assert(5, ({ int x[2] = {4,5}; x[1]; }), "({ int x[2] = {4,5}; x[1]; })");
+  assert(6, ({ int x[2][2] = {{6,7},{8,9}}; x[0][0]; }), "({ int x[2][2] = {{6,7},{8,9}}; x[0][0]; })");
+  assert(7, ({ int x[2][2] = {{6,7},{8,9}}; x[0][1]; }), "({ int x[2][2] = {{6,7},{8,9}}; x[0][1]; })");
+  assert(8, ({ int x[2][2] = {{6,7},{8,9}}; x[1][0]; }), "({ int x[2][2] = {{6,7},{8,9}}; x[1][0]; })");
+  assert(9, ({ int x[2][2] = {{6,7},{8,9}}; x[1][1]; }), "({ int x[2][2] = {{6,7},{8,9}}; x[1][1]; })");
+
   printf("OK\n");
   return 0;
 }
