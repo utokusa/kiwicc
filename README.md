@@ -1,4 +1,11 @@
-# c9cc
-c9cc is a hobby compilor.
+# kiwicc
+kiwicc is a hobby compilor.
 
-Reference : https://www.sigbus.info/compilerbook
+## Reference
+https://www.sigbus.info/compilerbook
+
+## Setup
+```bash
+docker build -t kiwicc_dev docker
+```
+

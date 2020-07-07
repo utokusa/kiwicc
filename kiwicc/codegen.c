@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "kiwicc.h"
 
 /*********************************************
 * ...code generator...
