@@ -678,6 +678,31 @@ int main()
   assert(16, ({ int x[] = {3,4,5,6}; sizeof(x); }), "({ int x[] = {3,4,5,6}; sizeof(x); })");
   assert(4, ({ char x[] = "foo"; sizeof(x); }), "({ char x[] = \"foo\"; sizeof(x); })");
 
+  assert(1, ({ struct {int a; int b; int c; } x={1,2,3}; x.a; }), "({ struct {int a; int b; int c; } x={1,2,3}; x.a; })");
+  assert(2, ({ struct {int a; int b; int c; } x={1,2,3}; x.b; }), "({ struct {int a; int b; int c; } x={1,2,3}; x.b; })");
+  assert(3, ({ struct {int a; int b; int c; } x={1,2,3}; x.c; }), "({ struct {int a; int b; int c; } x={1,2,3}; x.c; })");
+  assert(0, ({ struct {int a; int b; int c; } x={1}; x.b; }), "({ struct {int a; int b; int c; } x={1}; x.b; })");
+  assert(0, ({ struct {int a; int b; int c; } x={1}; x.c; }), "({ struct {int a; int b; int c; } x={1}; x.c; })");
+  assert(0, ({ struct {int a; int b; int c; } x={0}; x.a; }), "({ struct {int a; int b; int c; } x={0}; x.a; })");
+
+  assert(1, ({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[0].a; }), "({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[0].a; })");
+  assert(2, ({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[0].b; }), "({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[0].b; })");
+  assert(3, ({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[1].a; }), "({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[1].a; })");
+  assert(4, ({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[1].b; }), "({ struct {int a,b;} x[2]={{1,2},{3,4}}; x[1].b; })");
+
+  assert(1, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; x.a; }),
+         "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; x.a; })");
+  assert(2, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; x.b; }),
+         "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; x.b; })");
+  assert(3, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; x.c; }),
+         "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; x.c; })");
+  assert(1, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.a; }),
+         "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.a; })");
+  assert(2, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.b; }),
+         "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.b; })");
+  assert(3, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.c; }),
+         "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.c; })");
+
   printf("OK\n");
   return 0;
 }
