@@ -19,6 +19,17 @@ int g7 = 7;
 long g8 = 8;
 
 char g9[] = "abc";
+int g10[3] = {0, 1, 2};
+struct
+{
+  char a;
+  int b;
+} g11[2] = {{1, 2}, {3, 4}};
+
+struct
+{
+  int a[2];
+} g12[2] = {{{1, 2}}};
 
 typedef int MyInt, MyInt2[4];
 
@@ -716,6 +727,18 @@ int main()
   assert(97, g9[0], "g9[0]");
   assert(98, g9[1], "g9[1]");
   assert(99, g9[2], "g9[2]");
+
+  assert(0, g10[0], "g10[0]");
+  assert(1, g10[1], "g10[1]");
+  assert(2, g10[2], "g10[2]");
+  assert(1, g11[0].a, "g11[0].a");
+  assert(2, g11[0].b, "g11[0].b");
+  assert(3, g11[1].a, "g11[1].a");
+  assert(4, g11[1].b, "g11[1].b");
+  assert(1, g12[0].a[0], "g12[0].a[0]");
+  assert(2, g12[0].a[1], "g12[0].a[1]");
+  assert(0, g12[1].a[0], "g12[1].a[0]");
+  assert(0, g12[1].a[1], "g12[1].a[1]");
 
   printf("OK\n");
   return 0;
