@@ -13,17 +13,24 @@ int g2[4];
 char g3;
 char g4[4];
 
+char g5 = 5;
+short g6 = 6;
+int g7 = 7;
+long g8 = 8;
+
+char g9[] = "abc";
+
 typedef int MyInt, MyInt2[4];
 
-int assert(int expected, int actual, char *code)
+int assert(long expected, long actual, char *code)
 {
   if (expected == actual)
   {
-    printf("%s => %d\n", code, actual);
+    printf("%s => %ld\n", code, actual);
   }
   else
   {
-    printf("%s => %d expected but got %d\n", code, expected, actual);
+    printf("%s => %ld expected but got %ld\n", code, expected, actual);
     exit(1);
   }
 }
@@ -702,6 +709,13 @@ int main()
          "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.b; })");
   assert(3, ({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.c; }),
          "({ typedef struct {int a; int b; int c; } T; T x={1,2,3}; T y=x; y.c; })");
+  assert(5, g5, "g5");
+  assert(6, g6, "g6");
+  assert(7, g7, "g7");
+  assert(8, g8, "g8");
+  assert(97, g9[0], "g9[0]");
+  assert(98, g9[1], "g9[1]");
+  assert(99, g9[2], "g9[2]");
 
   printf("OK\n");
   return 0;
