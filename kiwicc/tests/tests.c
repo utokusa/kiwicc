@@ -6,6 +6,9 @@
 
 int printf();
 int exit();
+int strcmp(char *p, char *q);
+int memcmp(char *p, char *q, long n);
+
 int ret_777();
 
 int g1;
@@ -30,6 +33,23 @@ struct
 {
   int a[2];
 } g12[2] = {{{1, 2}}};
+
+char g13[] = "foobar";
+char g14[10] = "foobar";
+char g15[3] = "foobar";
+char *g16 = g13 + 3;
+char *g17 = g13 + 0;
+char *g18 = &g13 - 3;
+char *g19[] = {g13 + 0, g13 + 3, g13 - 3};
+int g20 = 5;
+int *g21 = &g20;
+int g22[] = {2, 4, 6};
+int *g23 = g22 + 1;
+int **g24 = &g23;
+int *g25 = &g11[1].a;
+int g26[2][2] = {{1, 2}, {3, 4}};
+int *g27 = &g26[1][1];
+int *g28[2] = {&g26[0][1], &g26[1][0]};
 
 typedef int MyInt, MyInt2[4];
 
@@ -739,6 +759,22 @@ int main()
   assert(2, g12[0].a[1], "g12[0].a[1]");
   assert(0, g12[1].a[0], "g12[1].a[0]");
   assert(0, g12[1].a[1], "g12[1].a[1]");
+
+  assert(7, sizeof(g13), "sizeof(g13)");
+  assert(10, sizeof(g14), "sizeof(g14)");
+  assert(3, sizeof(g15), "sizeof(g15)");
+  assert(0, memcmp(g13, "foobar", 7), "memcmp(g13, \"foobar\", 7)");
+  assert(0, memcmp(g14, "foobar\0\0\0", 10), "memcmp(g14, \"foobar\0\0\0\", 10)");
+  assert(0, memcmp(g15, "foo", 3), "memcmp(g15, \"foo\", 3)");
+  assert(0, strcmp(g16, "bar"), "strcmp(g16, \"bar\")");
+  assert(0, strcmp(g17, "foobar"), "strcmp(g17, \"foobar\")");
+  assert(0, strcmp(g18 + 3, "foobar"), "strcmp(g18 + 3, \"foobar\")");
+  assert(5, *g21, "*g21");
+  assert(4, *g23, "*g23");
+  assert(4, **g24, "**g24");
+  assert(3, *g25, "g25");
+  assert(4, *g27, "*g27");
+  assert(3, *g28[1], "*g28[1]");
 
   printf("OK\n");
   return 0;
