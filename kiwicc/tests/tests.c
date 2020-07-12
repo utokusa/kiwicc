@@ -50,6 +50,15 @@ int *g25 = &g11[1].a;
 int g26[2][2] = {{1, 2}, {3, 4}};
 int *g27 = &g26[1][1];
 int *g28[2] = {&g26[0][1], &g26[1][0]};
+struct
+{
+  int a[2];
+} g29[2] = {1, 2, 3, 4};
+struct
+{
+  int a[2];
+} g30[2] = {1, 2, 3, 4};
+char g31[][4] = {'f', 'o', 'o', 0, 'b', 'a', 'r', 0};
 
 typedef int MyInt, MyInt2[4];
 
@@ -775,6 +784,17 @@ int main()
   assert(3, *g25, "g25");
   assert(4, *g27, "*g27");
   assert(3, *g28[1], "*g28[1]");
+
+  assert(1, g29[0].a[0], "g29[0].a[0]");
+  assert(2, g29[0].a[1], "g29[0].a[1]");
+  assert(3, g29[1].a[0], "g29[1].a[0]");
+  assert(4, g29[1].a[1], "g29[1].a[1]");
+  assert(1, g30[0].a[0], "g30[0].a[0]");
+  assert(2, g30[0].a[1], "g30[0].a[1]");
+  assert(3, g30[1].a[0], "g30[1].a[0]");
+  assert(4, g30[1].a[1], "g30[1].a[1]");
+  assert(0, strcmp(g31[0], "foo"), "strcmp(g31[0], \"foo\")");
+  assert(0, strcmp(g31[1], "bar"), "strcmp(g31[1], \"bar\")");
 
   printf("OK\n");
   return 0;
