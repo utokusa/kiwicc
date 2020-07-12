@@ -14,7 +14,20 @@ test: kiwicc
 	gcc -static -o tmp tmp.s tmp2.o
 	./tmp
 
-clean:
-	rm -rf kiwicc *.o *~ tmp* test/*~ tests/*.o
+tmp-kiwicc: kiwicc
+	./kiwicc tests/tmp_test.c > tmp.s
+	gcc -static -o tmp tmp.s
+	echo './tmp ; echo $$?' | sh -
 
-.PHONY: test clean
+tmp-as:
+	gcc -static -o tmp tmp.s
+	echo './tmp ; echo $$?' | sh -
+
+tmp-gcc:
+	gcc -static -o tmp tests/tmp_test.c
+	echo './tmp ; echo $$?' | sh -
+
+clean:
+	rm -rf kiwicc *.o *~ tmp* tests/*~ tests/*.o tests/tmp*
+
+.PHONY: test tmp-kiwicc tmp-as tmp-gcc clean
