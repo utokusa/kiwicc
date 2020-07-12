@@ -1016,11 +1016,19 @@ static Initializer *initializer2(Token **rest, Token *tok, Type *ty)
   if (ty->kind == TY_STRUCT)
     return struct_initializer(rest, tok, ty);
 
-  return new_init(ty, 0, assign(rest, tok), tok);
+  Token *start = tok;
+  bool has_paren = equal(tok, "{");
+  if (has_paren)
+    tok = tok->next;
+  Initializer *init = new_init(ty, 0, assign(&tok, tok), tok);
+  if (has_paren)
+    tok = skip_end(tok);
+  *rest = tok;
+  return init;
 }
 
 // initializer = string-initializer | array-initializer | struct-initializer
-//             | assign
+//             | assign | "{" assign "}"
 static Initializer *initializer(Token **rest, Token *tok, Type *ty)
 {
   // An array length can be omitted if an array has an initializer

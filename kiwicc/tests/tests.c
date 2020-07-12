@@ -59,6 +59,7 @@ struct
   int a[2];
 } g30[2] = {1, 2, 3, 4};
 char g31[][4] = {'f', 'o', 'o', 0, 'b', 'a', 'r', 0};
+char *g32 = {"foobar"};
 
 typedef int MyInt, MyInt2[4];
 
@@ -795,6 +796,9 @@ int main()
   assert(4, g30[1].a[1], "g30[1].a[1]");
   assert(0, strcmp(g31[0], "foo"), "strcmp(g31[0], \"foo\")");
   assert(0, strcmp(g31[1], "bar"), "strcmp(g31[1], \"bar\")");
+
+  assert(0, ({ char *str={"foo"}; strcmp(str, "foo"); }), "({ char *str={\"foo\"}; strcmp(str, \"foo\"); })");
+  assert(0, strcmp(g32, "foobar"), "strcmp(g32, \"foobar\")");
 
   printf("OK\n");
   return 0;
