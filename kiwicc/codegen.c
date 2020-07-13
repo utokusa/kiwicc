@@ -524,20 +524,30 @@ static void gen_stmt(Node *node)
   }
 }
 
+static void emit_bss(Program *prog)
+{
+  printf(".bss\n");
+  for (VarList *vl = prog->globals; vl; vl = vl->next)
+  {
+    Var *var = vl->var;
+    if (var->init_data)
+      continue;
+
+    printf("%s:\n", var->name);
+    printf("  .zero %d\n", size_of(var->ty));
+  }
+}
+
 static void emit_data(Program *prog)
 {
   printf(".data\n");
   for (VarList *vl = prog->globals; vl; vl = vl->next)
   {
     Var *var = vl->var;
-    printf("%s:\n", var->name);
-
     if (!var->init_data)
-    {
-      printf("  .zero %d\n", size_of(var->ty));
       continue;
-    }
 
+    printf("%s:\n", var->name);
     Relocation *rel = var->rel;
     int pos = 0;
     while (pos < var->ty->size)
@@ -623,6 +633,7 @@ void codegen(Program *prog)
 {
   // Output the assembly code.
   printf(".intel_syntax noprefix\n");
+  emit_bss(prog);
   emit_data(prog);
   emit_text(prog);
 }
