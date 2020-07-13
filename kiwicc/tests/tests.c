@@ -800,6 +800,10 @@ int main()
   assert(0, ({ char *str={"foo"}; strcmp(str, "foo"); }), "({ char *str={\"foo\"}; strcmp(str, \"foo\"); })");
   assert(0, strcmp(g32, "foobar"), "strcmp(g32, \"foobar\")");
 
+  assert(2, ({ enum {a, b, c,}; c; }), "({ enum {a, b, c,}; c; })");
+  assert(3, ({ int x[3]={1,2,3,}; x[2]; }), "({ int x[3]={1,2,3,}; x[2]; })");
+  assert(5, ({ struct {int a,b; char c; } x ={1,3,5}; x.c; }), "({ struct {int a,b; char c; } x ={1,3,5}; x.c; })");
+
   printf("OK\n");
   return 0;
 }
