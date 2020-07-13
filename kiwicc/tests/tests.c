@@ -77,7 +77,7 @@ int assert(long expected, long actual, char *code)
 }
 
 int ret3() { return 3; }
-int ret5() { return 5; }
+int ret5(void) { return 5; }
 int return_1() { return 1; }
 int add(int x, int y) { return x + y; }
 int sub(int x, int y) { return x - y; }

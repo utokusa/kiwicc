@@ -736,10 +736,16 @@ static Type *enum_specifier(Token **rest, Token *tok)
   return ty;
 }
 
-// func-params = (param ("," param)*)? ")"
+// func-params = ("void" | param ("," param)*)? ")"
 // param       = typespec declarator
 static Type *func_params(Token **rest, Token *tok, Type *ty)
 {
+  if (equal(tok, "void") && equal(tok->next, ")"))
+  {
+    *rest = tok->next->next;
+    return func_type(ty);
+  }
+
   Type head = {};
   Type *cur = &head;
 
