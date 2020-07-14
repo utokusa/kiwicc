@@ -9,9 +9,9 @@ $(OBJS): kiwicc.h
 
 test: kiwicc
 	./kiwicc tests/tests.c > tmp.s
-	echo 'int ret_777() { return 777; } int static_fn() { return 5; }' | \
+	echo 'int ext1 = 3; int *ext2; int ret_777() { return 777; } int static_fn() { return 5; }' | \
 			gcc -xc -c -o tmp2.o -
-	gcc -static -o tmp tmp.s tmp2.o
+	gcc -static -fno-common -o tmp tmp.s tmp2.o
 	./tmp
 
 tmp-kiwicc: kiwicc

@@ -530,6 +530,10 @@ static void emit_bss(Program *prog)
   for (VarList *vl = prog->globals; vl; vl = vl->next)
   {
     Var *var = vl->var;
+
+    if (var->is_extern)
+      continue;
+
     if (var->init_data)
       continue;
 

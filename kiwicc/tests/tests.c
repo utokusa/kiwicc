@@ -61,6 +61,9 @@ struct
 char g31[][4] = {'f', 'o', 'o', 0, 'b', 'a', 'r', 0};
 char *g32 = {"foobar"};
 
+extern int ext1;
+extern int *ext2;
+
 typedef int MyInt, MyInt2[4];
 
 int assert(long expected, long actual, char *code)
@@ -803,6 +806,10 @@ int main()
   assert(2, ({ enum {a, b, c,}; c; }), "({ enum {a, b, c,}; c; })");
   assert(3, ({ int x[3]={1,2,3,}; x[2]; }), "({ int x[3]={1,2,3,}; x[2]; })");
   assert(5, ({ struct {int a,b; char c; } x ={1,3,5}; x.c; }), "({ struct {int a,b; char c; } x ={1,3,5}; x.c; })");
+
+  assert(3, ext1, "ext1");
+  ext2 = &ext1;
+  assert(3, *ext2, "*ext2");
 
   printf("OK\n");
   return 0;
