@@ -1812,6 +1812,7 @@ static Node *cast(Token **rest, Token *tok)
 // unary = ("sizeof" | "+" | "-" | "*" | "&" | "!" | "~")? cast
 //       | ("++" | "--") unary
 //       | "sizeof" "(" type-name ")"
+//       | "_Alignof" "(" type-name ")"
 //       | postfix
 static Node *unary(Token **rest, Token *tok)
 {
@@ -1827,6 +1828,13 @@ static Node *unary(Token **rest, Token *tok)
     Node *node = cast(rest, tok->next);
     add_type(node);
     return new_node_num(size_of(node->ty), tok);
+  }
+  if (equal(tok, "_Alignof"))
+  {
+    tok = skip(tok->next, "(");
+    Type *ty = typename(&tok, tok);
+    *rest = skip(tok, ")");
+    return new_node_num(ty->align, tok);
   }
   if (equal(tok, "+"))
     return cast(rest, tok->next);
