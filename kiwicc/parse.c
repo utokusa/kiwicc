@@ -365,6 +365,12 @@ Program *parse(Token *tok)
     Token *start = tok;
     VarAttr attr = {};
     Type *basety = typespec(&tok, tok, &attr);
+    // Typename-only declarations
+    if (equal(tok, ";"))
+    {
+      tok = tok->next;
+      continue;
+    }
     Type *ty = declarator(&tok, tok, basety);
 
     // Typedef

@@ -64,6 +64,18 @@ char *g32 = {"foobar"};
 extern int ext1;
 extern int *ext2;
 
+int;
+struct
+{
+  char a;
+  char b;
+};
+typedef struct
+{
+  char a;
+  int b;
+} Ty1;
+
 typedef int MyInt, MyInt2[4];
 
 int assert(long expected, long actual, char *code)
@@ -810,6 +822,8 @@ int main()
   assert(3, ext1, "ext1");
   ext2 = &ext1;
   assert(3, *ext2, "*ext2");
+
+  assert(6, ({ Ty1 x = {2, 6}; x.b; }), "({ Ty1 x = {2, 6}; x.b; })");
 
   printf("OK\n");
   return 0;
