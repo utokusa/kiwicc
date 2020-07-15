@@ -49,6 +49,7 @@ struct Var
   char *name;    // The name of the local variable.
   Type *ty;      // Type
   bool is_local; // local or global
+  int align;     // alignment
 
   // Local variable
   int offset; // The offset from RBP.
@@ -241,6 +242,7 @@ struct Member
   Type *ty;
   Token *tok; // for error message
   Token *name;
+  int align;
   int offset;
 };
 

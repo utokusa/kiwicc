@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     int offset = 32; // 32 for callee-saved registers
     for (VarList *vl = fn->locals; vl; vl = vl->next)
     {
-      offset = align_to(offset, vl->var->ty->align);
+      offset = align_to(offset, vl->var->align);
       offset += size_of(vl->var->ty);
       vl->var->offset = offset;
     }
