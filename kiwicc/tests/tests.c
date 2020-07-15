@@ -61,6 +61,15 @@ struct
 char g31[][4] = {'f', 'o', 'o', 0, 'b', 'a', 'r', 0};
 char *g32 = {"foobar"};
 
+typedef struct Tree
+{
+  int val;
+  struct Tree *lhs;
+  struct Tree *rhs;
+} Tree;
+
+Tree *tree = &(Tree){1, &(Tree){2, &(Tree){3, 0, 0}, &(Tree){4, 0, 0}}, 0};
+
 extern int ext1;
 extern int *ext2;
 
@@ -859,6 +868,16 @@ int main()
   assert(5, counter(), "counter()");
   assert(6, counter(), "counter()");
   assert(7, counter(), "counter()");
+
+  assert(1, (int){1}, "(int){1}");
+  assert(2, ((int[]){1, 2})[1], "((int[]){1, 2})[1]");
+  assert('a', ((struct {char a; int b; }){'a', 3}).a, "((struct {char a; int b; }){'a', 3}).a");
+  assert(5, ({ int x=5; (int){x}; }), "({ int x=5; (int){x}; })");
+
+  assert(1, tree->val, "tree->val");
+  assert(2, tree->lhs->val, "tree->lhs->val");
+  assert(3, tree->lhs->lhs->val, "tree->lhs->lhs->val");
+  assert(4, tree->lhs->rhs->val, "tree->lhs->rhs->val");
 
   printf("OK\n");
   return 0;
