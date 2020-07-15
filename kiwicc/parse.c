@@ -921,14 +921,25 @@ static Node *declaration(Token **rest, Token *tok)
       continue;
     }
 
-    Var *var = new_lvar(get_ident(ty->name), ty);
-    if (attr.align)
-      var->align = attr.align;
-
-    if (equal(tok, "="))
+    if (attr.is_static)
     {
-      Node *expr = lvar_initializer(&tok, tok->next, var);
-      cur = cur->next = new_unary(ND_EXPR_STMT, expr, tok);
+      // static local variable
+      Var *var = new_gvar(new_gvar_name(), ty, true);
+      push_scope(get_ident(ty->name))->var = var;
+      if (equal(tok, "="))
+        gvar_initializer(&tok, tok->next, var);
+    }
+    else
+    {
+      Var *var = new_lvar(get_ident(ty->name), ty);
+      if (attr.align)
+        var->align = attr.align;
+
+      if (equal(tok, "="))
+      {
+        Node *expr = lvar_initializer(&tok, tok->next, var);
+        cur = cur->next = new_unary(ND_EXPR_STMT, expr, tok);
+      }
     }
 
     if (ty->size < 0)

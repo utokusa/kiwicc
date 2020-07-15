@@ -179,6 +179,12 @@ int param_decay(int x[])
 {
   return x[0];
 }
+int counter()
+{
+  static int i;
+  static int a = 5;
+  return i++ + a;
+}
 
 int main()
 {
@@ -849,6 +855,10 @@ int main()
   assert(9, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; &a.z - &a.x; }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; &a.z - &a.x; })");
   assert(16, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; sizeof(a); }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } sizeof(a); })");
   assert(16, ({ struct T { _Alignas(16) char x, y; }; _Alignof(struct T); }), "({ struct T { _Alignas(16) char x, y; } _Alignof(struct T); })");
+
+  assert(5, counter(), "counter()");
+  assert(6, counter(), "counter()");
+  assert(7, counter(), "counter()");
 
   printf("OK\n");
   return 0;
