@@ -200,6 +200,8 @@ int ret_none()
   3;
   return;
 }
+_Bool true_fn();
+_Bool false_fn();
 
 int main()
 {
@@ -886,6 +888,9 @@ int main()
   assert(4, tree->lhs->rhs->val, "tree->lhs->rhs->val");
 
   assert(3, ext3, "ext3");
+
+  assert(0, false_fn(), "false_fn()");
+  assert(1, true_fn(), "true_fn()");
 
   ret_none();
 

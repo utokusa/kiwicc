@@ -286,6 +286,13 @@ static void gen_expr(Node *node)
 
     printf("  mov rax, 0\n");
     printf("  call %s\n", node->funcname);
+
+    // The System V x86-64 ABI has a special rule regarding a boolean return
+    // value that onlyu the lower 8 bits are valid for it and the upper
+    // 56 bits may contain garbage. Here, we clear the upper 56 bits.
+    if (node->ty->kind == TY_BOOL)
+      printf("  movzx rax, al\n");
+
     printf("  pop r11\n");
     printf("  pop r10\n");
     printf("  mov %s, rax\n", reg(top++));
