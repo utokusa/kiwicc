@@ -409,11 +409,9 @@ Program *parse(Token *tok)
     // Global variable
     for (;;)
     {
-      Var *var = new_gvar(get_ident(ty->name), ty, attr.is_static, true);
+      Var *var = new_gvar(get_ident(ty->name), ty, attr.is_static, !attr.is_extern);
       if (attr.align)
         var->align = attr.align;
-
-      var->is_extern = attr.is_extern;
 
       if (equal(tok, "="))
         gvar_initializer(&tok, tok->next, var);

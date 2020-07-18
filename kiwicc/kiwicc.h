@@ -58,7 +58,6 @@ struct Var
   char *init_data;
   Relocation *rel;
   bool is_static;
-  bool is_extern;
 };
 
 // Global variable can be initialized either by a constant expression
