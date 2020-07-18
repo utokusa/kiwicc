@@ -1220,7 +1220,7 @@ static Node *expr_stmt(Token **rest, Token *tok)
   return node;
 }
 
-// stmt = expr ";"
+// stmt = "return" expr? ";"
 //      | "{" compound-stmt
 //      | "if" "(" expr ")" stmt ("else" stmt)?
 //      | "switch" "(" expr ")" stmt
@@ -1232,12 +1232,18 @@ static Node *expr_stmt(Token **rest, Token *tok)
 //      | "continue" ";"
 //      | "goto" ident ";"
 //      | ident ";" stmt
-//      | "return" expr ";"
+//      | expr ";"
 static Node *stmt(Token **rest, Token *tok)
 {
   if (equal(tok, "return"))
   {
     Node *node = new_node(ND_RETURN, tok);
+    if (equal(tok->next, ";"))
+    {
+      *rest = tok->next->next;
+      return node;
+    }
+
     Node *exp = expr(&tok, tok->next);
     *rest = skip(tok, ";");
 

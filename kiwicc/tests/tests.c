@@ -194,6 +194,11 @@ int counter()
   static int a = 5;
   return i++ + a;
 }
+int ret_none()
+{
+  3;
+  return;
+}
 
 int main()
 {
@@ -878,6 +883,8 @@ int main()
   assert(2, tree->lhs->val, "tree->lhs->val");
   assert(3, tree->lhs->lhs->val, "tree->lhs->lhs->val");
   assert(4, tree->lhs->rhs->val, "tree->lhs->rhs->val");
+
+  ret_none();
 
   printf("OK\n");
   return 0;
