@@ -72,6 +72,7 @@ Tree *tree = &(Tree){1, &(Tree){2, &(Tree){3, 0, 0}, &(Tree){4, 0, 0}}, 0};
 
 extern int ext1;
 extern int *ext2;
+static int ext3 = 3;
 
 int;
 struct
@@ -883,6 +884,8 @@ int main()
   assert(2, tree->lhs->val, "tree->lhs->val");
   assert(3, tree->lhs->lhs->val, "tree->lhs->lhs->val");
   assert(4, tree->lhs->rhs->val, "tree->lhs->rhs->val");
+
+  assert(3, ext3, "ext3");
 
   ret_none();
 
