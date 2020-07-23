@@ -360,6 +360,10 @@ static long get_number(Token *tok)
 // program = (global-var | funcdef)*
 Program *parse(Token *tok)
 {
+  // Add build-in function types
+  new_gvar("__builtin_va_start", func_type(void_type), true, false);
+
+  // Read source code until EOF.
   Function head = {};
   Function *cur = &head;
   globals = NULL;
@@ -555,6 +559,7 @@ static Function *funcdef(Token **rest, Token *tok)
   Function *fn = calloc(1, sizeof(Function));
   fn->name = get_ident(ty->name);
   fn->is_static = attr.is_static;
+  fn->is_variadic = ty->is_variadic;
 
   enter_scope();
   for (Type *t = ty->params; t; t = t->next)

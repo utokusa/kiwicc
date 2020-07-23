@@ -8,7 +8,7 @@ static int top;
 static int labelseq = 1;
 static int brkseq;
 static int contseq;
-static char *funcname;
+static Function *current_fn;
 static char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
@@ -162,6 +162,19 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
   }
 }
 
+static void builtint_va_start(Node *node)
+{
+  int n = 0;
+  for (VarList *vl = current_fn->params; vl; vl = vl->next)
+    n++;
+
+  printf("  mov rax, [rbp-%d]\n", node->args[0]->offset);
+  printf("  movq [rax], %d\n", n * 8);
+  printf("  mov [rax+16], rbp\n");
+  printf("  subq [rax+16], 80\n");
+  top++;
+}
+
 static void gen_expr(Node *node)
 {
   printf(".loc 1 %d\n", node->tok->line_no);
@@ -262,6 +275,12 @@ static void gen_expr(Node *node)
   }
   case ND_FUNCALL:
   {
+    if (!strcmp(node->funcname, "__builtin_va_start"))
+    {
+      builtint_va_start(node);
+      return;
+    }
+
     // So far we only support up to 6 arguments.
     //
     // We should push r10 and r11 becouse they are caller saved registers.
@@ -511,10 +530,10 @@ static void gen_stmt(Node *node)
     printf("  jmp .L.continue.%d\n", contseq);
     return;
   case ND_GOTO:
-    printf("  jmp .L.label.%s.%s\n", funcname, node->label_name);
+    printf("  jmp .L.label.%s.%s\n", current_fn->name, node->label_name);
     return;
   case ND_LABEL:
-    printf(".L.label.%s.%s:\n", funcname, node->label_name);
+    printf(".L.label.%s.%s:\n", current_fn->name, node->label_name);
     gen_stmt(node->lhs);
     return;
   case ND_RETURN:
@@ -523,7 +542,7 @@ static void gen_stmt(Node *node)
       gen_expr(node->lhs);
       printf("  mov rax, %s\n", reg(--top));
     }
-    printf("  jmp .L.return.%s\n", funcname);
+    printf("  jmp .L.return.%s\n", current_fn->name);
     return;
   case ND_EXPR_STMT:
     gen_expr(node->lhs);
@@ -598,7 +617,7 @@ static void emit_text(Program *prog)
   printf(".text\n");
   for (Function *fn = prog->fns; fn; fn = fn->next)
   {
-    funcname = fn->name;
+    current_fn = fn;
     if (!fn->is_static)
       printf(".global %s\n", fn->name);
     printf("%s:\n", fn->name);
@@ -611,6 +630,17 @@ static void emit_text(Program *prog)
     printf("  mov [rbp-16], r13\n");
     printf("  mov [rbp-24], r14\n");
     printf("  mov [rbp-32], r15\n");
+
+    // Save arg registers if the function is the variadic
+    if (fn->is_variadic)
+    {
+      printf("  mov [rbp-80], rdi\n");
+      printf("  mov [rbp-72], rsi\n");
+      printf("  mov [rbp-64], rdx\n");
+      printf("  mov [rbp-56], rcx\n");
+      printf("  mov [rbp-48], r8\n");
+      printf("  mov [rbp-40], r9\n");
+    }
 
     // Save arguments to the stack
     int i = 0;
