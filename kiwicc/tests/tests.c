@@ -202,6 +202,8 @@ int ret_none()
 }
 _Bool true_fn();
 _Bool false_fn();
+int add_all1(int x, ...);
+int add_all3(int x, int y, int z, ...);
 
 int main()
 {
@@ -893,6 +895,14 @@ int main()
   assert(1, true_fn(), "true_fn()");
 
   ret_none();
+
+  assert(6, add_all1(1, 2, 3, 0), "add_all1(1, 2, 3, 0)");
+  assert(10, add_all1(1, 2, 3, 4, 0), "add_all1(1, 2, 3, 4, 0)");
+  assert(15, add_all1(1, 2, 3, 4, 5, 0), "add_all1(1, 2, 3, 4, 5, 0)");
+
+  assert(6, add_all3(1, 2, 3, 0), "add_all3(1, 2, 3, 0)");
+  assert(10, add_all3(1, 2, 3, 4, 0), "add_all3(1, 2, 3, 4, 0)");
+  assert(15, add_all3(1, 2, 3, 4, 5, 0), "add_all3(1, 2, 3, 4, 5, 0)");
 
   printf("OK\n");
   return 0;

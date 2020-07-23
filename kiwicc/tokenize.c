@@ -171,7 +171,7 @@ static char *starts_with_reserved(char *p)
   }
 
   // Three-letter punctuators
-  static char *ops3[] = {"<<=", ">>="};
+  static char *ops3[] = {"<<=", ">>=", "..."};
   for (int i = 0; i < sizeof(ops3) / sizeof(*ops3); ++i)
   {
     if (startswith(p, ops3[i]))

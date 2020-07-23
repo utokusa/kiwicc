@@ -186,6 +186,7 @@ struct Function
   VarList *locals;
   VarList *params;
   bool is_static;
+  bool is_variadic;
   int stack_size;
 };
 
@@ -232,6 +233,7 @@ struct Type
   // Function type
   Type *return_ty;
   Type *params;
+  bool is_variadic;
   Type *next;
 };
 
