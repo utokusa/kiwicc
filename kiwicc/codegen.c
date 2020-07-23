@@ -162,7 +162,7 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
   }
 }
 
-static void builtint_va_start(Node *node)
+static void builtin_va_start(Node *node)
 {
   int n = 0;
   for (VarList *vl = current_fn->params; vl; vl = vl->next)
@@ -277,7 +277,7 @@ static void gen_expr(Node *node)
   {
     if (!strcmp(node->funcname, "__builtin_va_start"))
     {
-      builtint_va_start(node);
+      builtin_va_start(node);
       return;
     }
 
