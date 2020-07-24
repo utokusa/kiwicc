@@ -162,14 +162,26 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
   }
 }
 
+// Initialize va_list.
+// Currently we only support up to 6 arguments
+// so only initialize gp_offset and reg_save_area
 static void builtin_va_start(Node *node)
 {
+  // For gp_offset.
   int n = 0;
   for (VarList *vl = current_fn->params; vl; vl = vl->next)
     n++;
 
+  // Store the pointer to va_list in rax.
+  // Now node->args[0] should be va_list.
+  // Note that the pointer to va_list and the pointer to gp_offset are equal.
   printf("  mov rax, [rbp-%d]\n", node->args[0]->offset);
+  // Initialize gp_offset.
+  // gp_offset holds the byte offset from reg_save_area to where
+  // the next available general purpose argument register is saved.
   printf("  movq [rax], %d\n", n * 8);
+  // Initialize reg_save_area.
+  // reg_save_area points to the start of the register save area.
   printf("  mov [rax+16], rbp\n");
   printf("  subq [rax+16], 80\n");
   top++;
@@ -631,7 +643,8 @@ static void emit_text(Program *prog)
     printf("  mov [rbp-24], r14\n");
     printf("  mov [rbp-32], r15\n");
 
-    // Save arg registers if the function is the variadic
+    // Save arg registers to the register save area
+    // if the function is the variadic
     if (fn->is_variadic)
     {
       printf("  mov [rbp-80], rdi\n");
