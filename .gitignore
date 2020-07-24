@@ -7,3 +7,4 @@ kiwicc/kiwicc
 .vscode
 core
 work/
+kiwicc-stage*

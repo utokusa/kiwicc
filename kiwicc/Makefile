@@ -7,8 +7,17 @@ kiwicc: $(OBJS)
 
 $(OBJS): kiwicc.h
 
+kiwicc-stage2: kiwicc $(SRCS) kiwicc.h self.sh
+	./self.sh tmp-stage2 ./kiwicc kiwicc-stage2
+
 test: kiwicc
 	./kiwicc tests/tests.c > tmp.s
+	gcc -xc -c -o tmp2.o tests/extern.c
+	gcc -static -fno-common -o tmp tmp.s tmp2.o
+	./tmp
+
+test-stage2: kiwicc-stage2
+	./kiwicc-stage2 tests/tests.c > tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -fno-common -o tmp tmp.s tmp2.o
 	./tmp
@@ -27,6 +36,6 @@ tmp-gcc:
 	echo './tmp ; echo $$?' | sh -
 
 clean:
-	rm -rf kiwicc *.o *~ tmp* tests/*~ tests/*.o tests/tmp*
+	rm -rf kiwicc kiwicc-stage* *.o *~ tmp* tests/*~ tests/*.o tests/tmp*
 
 .PHONY: test tmp-kiwicc tmp-as tmp-gcc clean
