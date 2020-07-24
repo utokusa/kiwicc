@@ -141,8 +141,7 @@ static int from_hex(char c)
 static int var_len(char *p)
 {
   if (!is_alpha(*p))
-    error("Internal error at var_len : "
-          "*p should be an alphabet or underscore.");
+    error("Internal error at var_len : *p should be an alphabet or underscore.");
   int cnt_len = 1;
   ++p;
   // When *p is a '\0', the following condition is false
