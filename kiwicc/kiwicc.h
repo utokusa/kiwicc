@@ -114,6 +114,7 @@ typedef enum
   ND_CAST,      // type cast
   ND_IF,        // "if"
   ND_WHILE,     // "while"
+  ND_DO,        // "do"
   ND_FOR,       // "for"
   ND_SWITCH,    // "switch"
   ND_CASE,      // "case"

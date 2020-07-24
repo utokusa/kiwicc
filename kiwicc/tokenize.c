@@ -157,7 +157,7 @@ static char *starts_with_reserved(char *p)
   // Keywords
   static char *kw[] = {
       "return", "if", "else",
-      "while", "for", "sizeof",
+      "while", "do", "for", "sizeof",
       "int", "char", "struct", "union", "enum",
       "short", "long", "void", "_Bool", "typedef",
       "static", "extern", "break", "continue", "goto",

@@ -1241,6 +1241,7 @@ static Node *expr_stmt(Token **rest, Token *tok)
 //      | "case" const-expr ":" stmt
 //      | "default" ":" stmt
 //      | "while" "(" expr ")" stmt
+//      | "do" stmt "while" "(" expr ")" ";"
 //      | "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
 //      | "break" ";"
 //      | "continue" ";"
@@ -1329,6 +1330,18 @@ static Node *stmt(Token **rest, Token *tok)
 
     node->then = stmt(&tok, tok);
     *rest = tok;
+    return node;
+  }
+
+  if (equal(tok, "do"))
+  {
+    Node *node = new_node(ND_DO, tok);
+    node->then = stmt(&tok, tok->next);
+    tok = skip(tok, "while");
+    tok = skip(tok, "(");
+    node->cond = expr(&tok, tok);
+    tok = skip(tok, ")");
+    *rest = skip(tok, ";");
     return node;
   }
 
