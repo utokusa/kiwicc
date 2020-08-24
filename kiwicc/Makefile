@@ -10,6 +10,9 @@ $(OBJS): kiwicc.h
 kiwicc-stage2: kiwicc $(SRCS) kiwicc.h self.sh
 	./self.sh tmp-stage2 ./kiwicc kiwicc-stage2
 
+kiwicc-stage3: kiwicc-stage2
+	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
+
 test: kiwicc
 	./kiwicc tests/tests.c > tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
@@ -21,6 +24,11 @@ test-stage2: kiwicc-stage2
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -fno-common -o tmp tmp.s tmp2.o
 	./tmp
+
+test-stage3: kiwicc-stage3
+	diff kiwicc-stage2 kiwicc-stage3
+
+test-all: test test-stage2 test-stage3
 
 tmp-kiwicc: kiwicc
 	./kiwicc tests/tmp_test.c > tmp.s
