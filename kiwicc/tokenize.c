@@ -407,6 +407,13 @@ static Token *tokenize(char *filename, char *p)
       continue;
     }
 
+    // New line
+    if (*p == '\n')
+    {
+      cur = new_token(TK_RESERVED, cur, p++, 1);
+      continue;
+    }
+
     // Spaces
     if (isspace(*p))
     {
@@ -430,7 +437,8 @@ static Token *tokenize(char *filename, char *p)
         *p == '<' || *p == '>' || *p == '=' || *p == ';' ||
         *p == ',' || *p == '.' || *p == '&' || *p == '[' ||
         *p == ']' || *p == '!' || *p == '~' || *p == '%' ||
-        *p == '|' || *p == '^' || *p == ':' || *p == '?')
+        *p == '|' || *p == '^' || *p == ':' || *p == '?' ||
+        *p == '#')
     {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;

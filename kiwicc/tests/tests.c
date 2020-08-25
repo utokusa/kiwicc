@@ -4,6 +4,11 @@
  * This is a block comment.
  */
 
+// Null directive
+#
+#// comment
+#/* comment */
+
 int printf();
 int exit();
 int strcmp(char *p, char *q);

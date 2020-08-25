@@ -11,7 +11,10 @@ int main(int argc, char **argv)
   // Tokenize
   Token *token = tokenize_file(argv[1]);
 
-  // parse
+  // Preprocess
+  token = preprocess(token);
+
+  // Parse
   // Program *prog = program_old();
   Program *prog = parse(token);
 

@@ -286,6 +286,9 @@ bool is_number();
 // convert input 'user_input' to token
 Token *tokenize_file(char *filename);
 
+// ********** preprocess.c *************
+Token *preprocess(Token *tok);
+
 // ********** parse.c *************
 Node *new_cast(Node *expr, Type *ty);
 

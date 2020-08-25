@@ -63,6 +63,7 @@ EOF
 }
 
 kiwicc main.c
+kiwicc preprocess.c
 kiwicc parse.c
 kiwicc codegen.c
 kiwicc tokenize.c
