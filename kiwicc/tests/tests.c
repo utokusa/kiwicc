@@ -66,6 +66,9 @@ struct
 char g31[][4] = {'f', 'o', 'o', 0, 'b', 'a', 'r', 0};
 char *g32 = {"foobar"};
 
+// g33, ret7()
+#include "include.h"
+
 typedef struct Tree
 {
   int val;
@@ -931,6 +934,9 @@ int main()
 
   assert(15, ({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; })");
   assert(10, ({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; })");
+
+  // #include directive
+  assert(17, g33 + ret7(), "g33 + ret7()");
 
   printf("OK\n");
   return 0;

@@ -259,6 +259,7 @@ extern Type *char_type;
 extern Type *short_type;
 extern Type *int_type;
 extern Type *long_type;
+extern char *file_dir;
 
 /*********************************************
 * ...function declarations...
@@ -288,6 +289,8 @@ Token *tokenize_file(char *filename);
 
 // ********** preprocess.c *************
 Token *preprocess(Token *tok);
+
+char *get_dir(char *path);
 
 // ********** parse.c *************
 Node *new_cast(Node *expr, Type *ty);

@@ -1,5 +1,7 @@
 #include "kiwicc.h"
 
+char *file_dir;
+
 int main(int argc, char **argv)
 {
   if (argc != 2)
@@ -7,6 +9,9 @@ int main(int argc, char **argv)
     fprintf(stderr, "Invalid number of argments.");
     return 1;
   }
+
+  // Get file directory
+  file_dir = get_dir(argv[1]);
 
   // Tokenize
   Token *token = tokenize_file(argv[1]);
