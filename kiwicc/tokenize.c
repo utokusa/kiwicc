@@ -106,6 +106,13 @@ Token *skip(Token *tok, char *s)
   return tok->next;
 }
 
+Token *copy_token(Token *tok)
+{
+  Token *ret = malloc(sizeof(Token));
+  *ret = *tok;
+  return ret;
+}
+
 static bool startswith(char *tgt, char *ref)
 {
   return strncmp(tgt, ref, strlen(ref)) == 0;

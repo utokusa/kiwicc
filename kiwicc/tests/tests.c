@@ -68,6 +68,9 @@ char *g32 = {"foobar"};
 
 // g33, ret7()
 #include "include.h"
+#define MACRO_2020 2020
+#define MY_INT int
+#define RET3 ret3()
 
 typedef struct Tree
 {
@@ -937,6 +940,9 @@ int main()
 
   // #include directive
   assert(17, g33 + ret7(), "g33 + ret7()");
+
+  assert(2020, ({MY_INT x = MACRO_2020; x; }), "({MY_INT x = MACRO_2020; x;})");
+  assert(3, ret3(), "ret3()");
 
   printf("OK\n");
   return 0;

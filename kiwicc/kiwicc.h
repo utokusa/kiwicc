@@ -282,7 +282,7 @@ bool equal(Token *tok, char *s);
 
 Token *skip(Token *tok, char *s);
 
-bool is_number();
+Token *copy_token(Token *tok);
 
 // convert input 'user_input' to token
 Token *tokenize_file(char *filename);
