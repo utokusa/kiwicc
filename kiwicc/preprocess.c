@@ -58,9 +58,10 @@ Token *push_macro(Token *tok, Macro **macros)
   m->next = *macros;
   *macros = m;
 
-  while (!equal(tok, "\n"))
+  while (!tok->at_bol)
     tok = tok->next;
-  return tok->next;
+
+  return tok;
 }
 
 Macro *find_macro(Token *tok, Macro *macros)
@@ -83,7 +84,7 @@ Token *copy_macro_body(Token *body, Token **last)
 {
   Token head = {};
   Token *cur = &head;
-  while (body && *(body->loc) != '\n')
+  while (body && !body->at_bol)
   {
     cur->next = copy_token(body);
     cur = cur->next;
@@ -106,13 +107,12 @@ Token *preprocess(Token *tok)
 {
   Token *start = tok;
   Token *prev = NULL;
-  bool line_head = true;
   Macro *macros = NULL;
 
   while (tok->kind != TK_EOF)
   {
     // Preprocessing directive
-    if (line_head && equal(tok, "#"))
+    if (tok->at_bol && equal(tok, "#"))
     {
       // Object-like macro
       if (equal(tok->next, "define"))
@@ -123,7 +123,6 @@ Token *preprocess(Token *tok)
         else
           start = push_macro(tok, &macros);
         tok = prev ? prev->next : start;
-        line_head = true;
         continue;
       }
 
@@ -157,8 +156,12 @@ Token *preprocess(Token *tok)
       }
 
       // Null directive
-      if (!equal(tok->next, "\n"))
+      if (!tok->next->at_bol)
         error_tok(tok->next, "expected a new line");
+      if (prev)
+        prev->next = tok->next;
+      else
+        start = tok->next;
       tok = tok->next;
       continue;
     }
@@ -179,24 +182,8 @@ Token *preprocess(Token *tok)
       continue;
     }
 
-    if (equal(tok, "\n"))
-    {
-      while (equal(tok, "\n"))
-        tok = tok->next;
-      if (prev)
-        prev->next = tok;
-      else
-        start = tok;
-
-      line_head = true;
-    }
-    else
-    {
-      prev = tok;
-      tok = tok->next;
-
-      line_head = false;
-    }
+    prev = tok;
+    tok = tok->next;
   }
   return start;
 }

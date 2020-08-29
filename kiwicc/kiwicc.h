@@ -40,6 +40,7 @@ struct Token
   int cont_len;   // String literal length
 
   int line_no; // Line number
+  bool at_bol; // True if this token is at beginning of line
 };
 
 // Variable

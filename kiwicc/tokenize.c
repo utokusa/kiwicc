@@ -7,6 +7,9 @@
 // Input filename
 static char *current_filename;
 
+// True if the current position is at the biggining of a line.
+static bool at_bol;
+
 // Input string
 char *current_input;
 
@@ -204,6 +207,8 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   tok->kind = kind;
   tok->loc = str;
   tok->len = len;
+  tok->at_bol = at_bol;
+  at_bol = false;
   cur->next = tok;
   return tok;
 }
@@ -393,6 +398,9 @@ static Token *tokenize(char *filename, char *p)
   head.next = NULL;
   Token *cur = &head;
   int DUMMY_LEN = 1;
+
+  at_bol = true;
+
   while (*p)
   {
     // Skip line comments.
@@ -417,7 +425,8 @@ static Token *tokenize(char *filename, char *p)
     // New line
     if (*p == '\n')
     {
-      cur = new_token(TK_RESERVED, cur, p++, 1);
+      ++p;
+      at_bol = true;
       continue;
     }
 
