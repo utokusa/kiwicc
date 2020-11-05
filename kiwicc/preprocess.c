@@ -103,6 +103,17 @@ Token *replace(Token *prev, Token *tok, Macro *m)
   return last;
 }
 
+// Some processor directives such as #include allow extraneous
+// tokens before newline. This function skips such tokens.
+static Token *skip_line(Token *tok) {
+  if (tok->at_bol)
+    return tok;
+  warn_tok(tok, "extra token");
+  while (!tok->at_bol)
+    tok = tok->next;
+  return tok;
+}
+
 Token *preprocess(Token *tok)
 {
   Token *start = tok;
@@ -153,7 +164,7 @@ Token *preprocess(Token *tok)
           included = included->next;
 
         prev = included;
-        included->next = tok = tok->next;
+        included->next = tok = skip_line(tok->next);
         continue;
       }
 
