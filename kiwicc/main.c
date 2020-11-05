@@ -15,6 +15,8 @@ int main(int argc, char **argv)
 
   // Tokenize
   Token *token = tokenize_file(argv[1]);
+  if (!token)
+    error("cannot open %s: %s", argv[1], strerror(errno));
 
   // Preprocess
   token = preprocess(token);
@@ -38,9 +40,6 @@ int main(int argc, char **argv)
     }
     fn->stack_size = align_to(offset, 16);
   }
-
-  // Emit a .file directive for the assembler.
-  printf(".file 1 \"%s\"\n", argv[1]);
 
   // generate code
   codegen(prog);

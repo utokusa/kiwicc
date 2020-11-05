@@ -13,6 +13,9 @@ static bool at_bol;
 // Input string
 char *current_input;
 
+// A list of all input files.
+static char **input_files;
+
 // Report error
 // Take the same arguments as printf()
 void error(char *fmt, ...)
@@ -28,11 +31,11 @@ void error(char *fmt, ...)
 //
 // foo.c:10: x = y + 1;
 //               ^ <error message here>
-static void verror_at(int line_no, char *loc, char *fmt, va_list ap)
+static void verror_at(char *filename, char *input, int line_no, char *loc, char *fmt, va_list ap)
 {
   // Find a line containing `loc`.
   char *line = loc;
-  while (current_input < line && line[-1] != '\n')
+  while (input < line && line[-1] != '\n')
     line--;
 
   char *end = loc;
@@ -51,7 +54,7 @@ static void verror_at(int line_no, char *loc, char *fmt, va_list ap)
   // .
 
   // Print out the line.
-  int indent = fprintf(stderr, "%s:%d:", current_filename, line_no);
+  int indent = fprintf(stderr, "%s:%d:", filename, line_no);
   fprintf(stderr, "%.*s\n", (int)(end - line), line);
 
   // Show the error message.
@@ -74,7 +77,7 @@ void error_at(char *loc, char *fmt, ...)
 
   va_list ap;
   va_start(ap, fmt);
-  verror_at(line_no, loc, fmt, ap);
+  verror_at(current_filename, current_input, line_no, loc, fmt, ap);
   exit(1);
 }
 
@@ -83,7 +86,7 @@ void error_tok(Token *tok, char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  verror_at(tok->line_no, tok->loc, fmt, ap);
+  verror_at(tok->filename, tok->input, tok->line_no, tok->loc, fmt, ap);
   exit(1);
 }
 
@@ -91,7 +94,7 @@ void warn_tok(Token *tok, char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  verror_at(tok->line_no, tok->loc, fmt, ap);
+  verror_at(tok->filename, tok->input, tok->line_no, tok->loc, fmt, ap);
 }
 
 // Consumes the current token if it matches `s`.
@@ -207,6 +210,8 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   tok->kind = kind;
   tok->loc = str;
   tok->len = len;
+  tok->filename = current_filename;
+  tok->input = current_input;
   tok->at_bol = at_bol;
   at_bol = false;
   cur->next = tok;
@@ -343,7 +348,7 @@ static Token *read_char_literal(Token *cur, char *start)
 }
 
 // Initialize line info for all tokens.
-static void add_line_info(Token *tok)
+static void add_line_numbers(Token *tok)
 {
   char *p = current_input;
   int line_no = 1;
@@ -390,7 +395,7 @@ static Token *read_int_literal(Token *cur, char *start)
 }
 
 // Convert input 'user_input' to token
-static Token *tokenize(char *filename, char *p)
+static Token *tokenize(char *filename, int file_no, char *p)
 {
   current_filename = filename;
   current_input = p;
@@ -496,7 +501,9 @@ static Token *tokenize(char *filename, char *p)
     error_at(p, "Can not tokenize.");
   }
   new_token(TK_EOF, cur, p, DUMMY_LEN);
-  add_line_info(head.next);
+  for (Token *t = head.next; t; t = t->next)
+    t->file_no = file_no;
+  add_line_numbers(head.next);
   return head.next;
 }
 
@@ -514,7 +521,7 @@ static char *read_file(char *path)
   {
     fp = fopen(path, "r");
     if (!fp)
-      error("cannot open %s: %s", path, strerror(errno));
+      return NULL;
   }
 
   int buflen = 4096;
@@ -547,7 +554,22 @@ static char *read_file(char *path)
   return buf;
 }
 
+char **get_input_files() {
+  return input_files;
+}
+
 Token *tokenize_file(char *path)
 {
-  return tokenize(path, read_file(path));
+  char *p = read_file(path);
+  if (!p)
+    return NULL;
+  
+  // Save the filename for assembler .file directive.
+  static int file_no;
+  input_files = realloc(input_files, sizeof(char *) * (file_no + 2));
+  input_files[file_no] = path;
+  input_files[file_no + 1] = NULL;
+  file_no++;
+
+  return tokenize(path, file_no, p);
 }

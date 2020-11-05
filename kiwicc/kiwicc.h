@@ -39,6 +39,9 @@ struct Token
   char *contents; // String literal contents including terminating '\0'
   int cont_len;   // String literal length
 
+  char *filename; // input filename
+  char *input; // Entire input string
+  int file_no; // File number for .loc directive
   int line_no; // Line number
   bool at_bol; // True if this token is at beginning of line
 };
@@ -284,6 +287,8 @@ bool equal(Token *tok, char *s);
 Token *skip(Token *tok, char *s);
 
 Token *copy_token(Token *tok);
+
+char **get_input_files();
 
 // convert input 'user_input' to token
 Token *tokenize_file(char *filename);

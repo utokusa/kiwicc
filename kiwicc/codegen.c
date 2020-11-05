@@ -189,7 +189,7 @@ static void builtin_va_start(Node *node)
 
 static void gen_expr(Node *node)
 {
-  printf(".loc 1 %d\n", node->tok->line_no);
+  printf("  .loc %d %d\n", node->tok->file_no, node->tok->line_no);
   switch (node->kind)
   {
   case ND_NUM:
@@ -415,7 +415,7 @@ static void gen_expr(Node *node)
 
 static void gen_stmt(Node *node)
 {
-  printf(".loc 1 %d\n", node->tok->line_no);
+  printf("  .loc %d %d\n", node->tok->file_no, node->tok->line_no);
 
   switch (node->kind)
   {
@@ -712,6 +712,11 @@ void codegen(Program *prog)
 {
   // Output the assembly code.
   printf(".intel_syntax noprefix\n");
+
+  char **paths = get_input_files();
+  for (int i = 0; paths[i]; i++)
+    printf("  .file %d \"%s\"\n", i + 1, paths[i]);
+
   emit_bss(prog);
   emit_data(prog);
   emit_text(prog);

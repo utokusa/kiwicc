@@ -940,7 +940,9 @@ int main()
 
   // #include directive
   assert(17, g33 + ret7(), "g33 + ret7()");
+  assert(8, ret8(), "ret8()");
 
+  // Object-like macro
   assert(2020, ({MY_INT x = MACRO_2020; x; }), "({MY_INT x = MACRO_2020; x;})");
   assert(3, ret3(), "ret3()");
 
