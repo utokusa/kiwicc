@@ -136,6 +136,8 @@ Token *preprocess(Token *tok)
         char *file_path = concat(file_dir, file_name);
         // Tokenize
         Token *included = tokenize_file(file_path);
+        if (!included)
+          error_tok(tok, "%s", strerror(errno));
         // Preprocess
         included = preprocess(included);
 
