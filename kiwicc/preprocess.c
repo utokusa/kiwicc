@@ -13,6 +13,8 @@ struct Macro
   Macro *next;
 };
 
+Macro *macros = NULL;
+
 // Get file directory from full file path.
 // e.g. "foo/bar.txt" --> "foo/"
 char *get_dir(char *path)
@@ -114,14 +116,33 @@ static Token *skip_line(Token *tok) {
   return tok;
 }
 
+static bool expand_macro(Token **rest, Token **prev, Token *tok)
+{
+  if (tok->kind == TK_IDENT)
+  {
+    Macro *m = NULL;
+    if (m = find_macro(tok, macros))
+    {
+      *prev = replace(*prev, tok, m);
+      *rest = (*prev)->next;
+      return true;
+    }
+  }
+
+  return false;
+}
+
 Token *preprocess(Token *tok)
 {
   Token *start = tok;
   Token *prev = NULL;
-  Macro *macros = NULL;
 
-  while (tok->kind != TK_EOF)
+  while (tok && tok->kind != TK_EOF)
   {
+    // Macro replacement
+    if (expand_macro(&tok, &prev, tok))
+      continue;
+
     // Preprocessing directive
     if (tok->at_bol && equal(tok, "#"))
     {
@@ -175,22 +196,6 @@ Token *preprocess(Token *tok)
         prev->next = tok->next;
       else
         start = tok->next;
-      tok = tok->next;
-      continue;
-    }
-
-    // Macro replacement
-    if (tok->kind == TK_IDENT)
-    {
-      Macro *m = NULL;
-      if (m = find_macro(tok, macros))
-      {
-        prev = replace(prev, tok, m);
-        tok = prev->next;
-        continue;
-      }
-
-      prev = tok;
       tok = tok->next;
       continue;
     }
