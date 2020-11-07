@@ -50,7 +50,7 @@ static char *concat(char *s1, char *s2)
   return s;
 }
 
-Token *push_macro(Token *tok, Macro **macros)
+static Token *push_macro(Token *tok, Macro **macros)
 {
   if (tok->kind != TK_IDENT)
     error_tok(tok, "expected an identifier");
@@ -66,7 +66,7 @@ Token *push_macro(Token *tok, Macro **macros)
   return tok;
 }
 
-Macro *find_macro(Token *tok, Macro *macros)
+static Macro *find_macro(Token *tok, Macro *macros)
 {
   char *name = strndup(tok->loc, tok->len);
   Macro *m = macros;
@@ -82,7 +82,7 @@ Macro *find_macro(Token *tok, Macro *macros)
 // Duplicate macro body
 // `last` is an output argument which represents
 // the last token of the macro body
-Token *copy_macro_body(Token *body, Token **last)
+static Token *copy_macro_body(Token *body, Token **last)
 {
   Token head = {};
   Token *cur = &head;
@@ -97,7 +97,7 @@ Token *copy_macro_body(Token *body, Token **last)
 }
 
 // Replace macro
-void replace(Token *tok, Macro *m)
+static void replace(Token *tok, Macro *m)
 {
   Token *last = NULL;
   Token *next = tok->next;
