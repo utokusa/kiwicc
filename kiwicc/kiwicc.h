@@ -14,6 +14,7 @@
 *********************************************/
 
 typedef struct Type Type;
+typedef struct Hideset Hideset;
 typedef struct Member Member;
 typedef struct Relocation Relocation;
 
@@ -39,11 +40,12 @@ struct Token
   char *contents; // String literal contents including terminating '\0'
   int cont_len;   // String literal length
 
-  char *filename; // input filename
-  char *input; // Entire input string
-  int file_no; // File number for .loc directive
-  int line_no; // Line number
-  bool at_bol; // True if this token is at beginning of line
+  char *filename;   // input filename
+  char *input;      // Entire input string
+  int file_no;      // File number for .loc directive
+  int line_no;      // Line number
+  bool at_bol;      // True if this token is at beginning of line
+  Hideset *hideset; // For macro expansionl
 };
 
 // Variable

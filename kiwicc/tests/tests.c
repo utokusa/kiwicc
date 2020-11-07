@@ -68,7 +68,7 @@ char *g32 = {"foobar"};
 
 // g33, ret7()
 #include "include.h"
-#define MACRO_2020 2020
+#define M1 2020
 #define MY_INT int
 #define RET3 ret3()
 
@@ -943,8 +943,24 @@ int main()
   assert(8, ret8(), "ret8()");
 
   // Object-like macro
-  assert(2020, ({MY_INT x = MACRO_2020; x; }), "({MY_INT x = MACRO_2020; x;})");
+  assert(2020, ({MY_INT x = M1; x; }), "({MY_INT x = M1; x;})");
   assert(3, ret3(), "ret3()");
+  int M2 = 6;
+  #define M2 M2 + 3
+  assert(9, M2, "M2");
+
+  #define M3 M2 + 3
+  assert(12, M3, "M3");
+
+  int M4 = 3;
+  #define M4 M5 * 5
+  #define M5 M4 + 2
+  // M4 -> M5 * 5      -> M4 + 2 * 5   -> 3 + 2 * 5
+  //    ^ M4 exppand   ^ M5 expand       ^ M4 = 3
+  assert(13, M4, "M4");
+
+
+  
 
   printf("OK\n");
   return 0;
