@@ -96,13 +96,17 @@ Token *copy_macro_body(Token *body, Token **last)
   return head.next;
 }
 
-// Replace macro and return the last token of the macro body.
-Token *replace(Token *prev, Token *tok, Macro *m)
+// Replace macro
+void replace(Token *tok, Macro *m)
 {
   Token *last = NULL;
-  prev->next = copy_macro_body(m->body, &last);
-  last->next = tok->next;
-  return last;
+  Token *next = tok->next;
+  Token *body_head = copy_macro_body(m->body, &last);
+  *tok = *body_head;
+  if (body_head == last)
+    tok->next = next;
+  else
+    last->next = next;
 }
 
 // Some processor directives such as #include allow extraneous
@@ -116,33 +120,35 @@ static Token *skip_line(Token *tok) {
   return tok;
 }
 
-static bool expand_macro(Token **rest, Token **prev, Token *tok)
+static bool expand_macro(Token **rest, Token *tok)
 {
   if (tok->kind == TK_IDENT)
   {
     Macro *m = NULL;
     if (m = find_macro(tok, macros))
     {
-      *prev = replace(*prev, tok, m);
-      *rest = (*prev)->next;
+      replace(tok, m);
+      *rest = tok;
       return true;
     }
   }
 
+  *rest = tok;
   return false;
 }
 
 Token *preprocess(Token *tok)
 {
-  Token *start = tok;
-  Token *prev = NULL;
+  Token head = {};
+  Token *cur = &head;
 
   while (tok && tok->kind != TK_EOF)
   {
     // Macro replacement
-    if (expand_macro(&tok, &prev, tok))
+    if (expand_macro(&tok, tok)) {
+      cur->next = tok;
       continue;
-
+    }
     // Preprocessing directive
     if (tok->at_bol && equal(tok, "#"))
     {
@@ -150,11 +156,7 @@ Token *preprocess(Token *tok)
       if (equal(tok->next, "define"))
       {
         tok = tok->next->next;
-        if (prev)
-          prev->next = push_macro(tok, &macros);
-        else
-          start = push_macro(tok, &macros);
-        tok = prev ? prev->next : start;
+        tok = cur->next = push_macro(tok, &macros);
         continue;
       }
 
@@ -176,15 +178,12 @@ Token *preprocess(Token *tok)
         if (included->kind == TK_EOF)
           continue;
 
-        if (prev)
-          prev->next = included;
-        else
-          start = included;
+        cur->next = included;
 
         while (included->next->kind != TK_EOF)
           included = included->next;
 
-        prev = included;
+        cur = included;
         included->next = tok = skip_line(tok->next);
         continue;
       }
@@ -192,16 +191,12 @@ Token *preprocess(Token *tok)
       // Null directive
       if (!tok->next->at_bol)
         error_tok(tok->next, "expected a new line");
-      if (prev)
-        prev->next = tok->next;
-      else
-        start = tok->next;
       tok = tok->next;
       continue;
     }
 
-    prev = tok;
+    cur = cur->next = tok;
     tok = tok->next;
   }
-  return start;
+  return head.next;
 }
