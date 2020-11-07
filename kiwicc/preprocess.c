@@ -111,7 +111,8 @@ void replace(Token *tok, Macro *m)
 
 // Some processor directives such as #include allow extraneous
 // tokens before newline. This function skips such tokens.
-static Token *skip_line(Token *tok) {
+static Token *skip_line(Token *tok)
+{
   if (tok->at_bol)
     return tok;
   warn_tok(tok, "extra token");
@@ -145,58 +146,61 @@ Token *preprocess(Token *tok)
   while (tok && tok->kind != TK_EOF)
   {
     // Macro replacement
-    if (expand_macro(&tok, tok)) {
+    if (expand_macro(&tok, tok))
+    {
       cur->next = tok;
       continue;
     }
     // Preprocessing directive
-    if (tok->at_bol && equal(tok, "#"))
+    if (!tok->at_bol || !equal(tok, "#"))
     {
-      // Object-like macro
-      if (equal(tok->next, "define"))
-      {
-        tok = tok->next->next;
-        tok = cur->next = push_macro(tok, &macros);
-        continue;
-      }
-
-      // #include directive
-      if (equal(tok->next, "include"))
-      {
-        tok = tok->next->next;
-        if (tok->kind != TK_STR)
-          error_tok(tok, "expected a string literal");
-        char *file_name = tok->contents;
-        char *file_path = concat(file_dir, file_name);
-        // Tokenize
-        Token *included = tokenize_file(file_path);
-        if (!included)
-          error_tok(tok, "%s", strerror(errno));
-        // Preprocess
-        included = preprocess(included);
-
-        if (included->kind == TK_EOF)
-          continue;
-
-        cur->next = included;
-
-        while (included->next->kind != TK_EOF)
-          included = included->next;
-
-        cur = included;
-        included->next = tok = skip_line(tok->next);
-        continue;
-      }
-
-      // Null directive
-      if (!tok->next->at_bol)
-        error_tok(tok->next, "expected a new line");
+      cur = cur->next = tok;
       tok = tok->next;
       continue;
     }
 
-    cur = cur->next = tok;
+    // Object-like macro
+    if (equal(tok->next, "define"))
+    {
+      tok = tok->next->next;
+      tok = cur->next = push_macro(tok, &macros);
+      continue;
+    }
+
     tok = tok->next;
+
+    // #include directive
+    if (equal(tok, "include"))
+    {
+      tok = tok->next;
+      if (tok->kind != TK_STR)
+        error_tok(tok, "expected a string literal");
+      char *file_name = tok->contents;
+      char *file_path = concat(file_dir, file_name);
+      // Tokenize
+      Token *included = tokenize_file(file_path);
+      if (!included)
+        error_tok(tok, "%s", strerror(errno));
+      // Preprocess
+      included = preprocess(included);
+
+      if (included->kind == TK_EOF)
+        continue;
+
+      cur->next = included;
+
+      while (included->next->kind != TK_EOF)
+        included = included->next;
+
+      cur = included;
+      included->next = tok = skip_line(tok->next);
+      continue;
+    }
+
+    // Null directive
+    if (!tok->at_bol)
+      error_tok(tok->next, "expected a new line");
+    continue;
   }
   return head.next;
 }
