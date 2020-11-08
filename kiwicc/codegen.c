@@ -43,13 +43,13 @@ static void load(Type *ty)
   int sz = size_of(ty);
 
   if (sz == 1)
-    printf("  movsx %s, byte ptr [%s]\n", rd, rs);
+    printf("  movsxb (%%%s), %%%s\n", rs, rd);
   else if (sz == 2)
-    printf("  movsx %s, word ptr [%s]\n", rd, rs);
+    printf("  movsxw (%%%s), %%%s\n", rs, rd);
   else if (sz == 4)
-    printf("  mov %s, dword ptr [%s]\n", rd, rs);
+    printf("  movl (%%%s), %%%s\n", rs, rd);
   else
-    printf("  mov %s, [%s]\n", rd, rs);
+    printf("  mov (%%%s), %%%s\n", rs, rd);
 }
 
 static void store(Type *ty)
@@ -62,18 +62,18 @@ static void store(Type *ty)
   {
     for (int i = 0; i < sz; i++)
     {
-      printf("  mov al, [%s+%d]\n", rs, i);
-      printf("  mov [%s+%d], al\n", rd, i);
+      printf("  mov %d(%%%s), %%al\n", i, rs);
+      printf("  mov %%al, %d(%%%s)\n", i, rd);
     }
   }
   else if (sz == 1)
-    printf("  mov [%s], %sb\n", rd, rs);
+    printf("  mov %%%sb, (%%%s)\n", rs, rd);
   else if (sz == 2)
-    printf("  mov [%s], %sw\n", rd, rs);
+    printf("  mov %%%sw, (%%%s)\n", rs, rd);
   else if (sz == 4)
-    printf("  mov [%s], %sd\n", rd, rs);
+    printf("  mov %%%sd, (%%%s)\n", rs, rd);
   else
-    printf("  mov [%s], %s\n", rd, rs);
+    printf("  mov %%%s, (%%%s)\n", rs, rd);
   top--;
 }
 
@@ -86,20 +86,20 @@ static void cast(Type *from, Type *to)
 
   if (to->kind == TY_BOOL)
   {
-    printf("  cmp %s, 0\n", r);
-    printf("  setne %sb\n", r);
-    printf("  movzx %s, %sb\n", r, r);
+    printf("  cmp $0, %%%s\n", r);
+    printf("  setne %%%sb\n", r);
+    printf("  movzx %%%sb, %%%s\n", r, r);
     return;
   }
 
   if (size_of(to) == 1)
-    printf("  movsx %s, %sb\n", r, r);
+    printf("  movsx %%%sb, %%%s\n", r, r);
   if (size_of(to) == 2)
-    printf("  movsx %s, %sw\n", r, r);
+    printf("  movsx %%%sw, %%%s\n", r, r);
   if (size_of(to) == 4)
-    printf("  mov %sd, %sd\n", r, r);
+    printf("  mov %%%sd, %%%sd\n", r, r);
   if (is_integer(from) && size_of(from) < 8)
-    printf("  movsx %s, %sd\n", r, r);
+    printf("  movsx %%%sd, %%%s\n", r, r);
 }
 
 static void gen_expr(Node *node);
@@ -114,9 +114,9 @@ static void gen_addr(Node *node)
   {
     Var *var = node->var;
     if (var->is_local)
-      printf("  lea %s, [rbp-%d]\n", reg(top++), node->var->offset);
+      printf("  lea -%d(%%rbp), %%%s\n", node->var->offset, reg(top++));
     else
-      printf("  mov %s, offset %s\n", reg(top++), var->name);
+      printf("  mov $%s, %%%s\n", var->name, reg(top++));
     return;
   }
   case ND_DEREF:
@@ -129,7 +129,7 @@ static void gen_addr(Node *node)
     return;
   case ND_MEMBER:
     gen_addr(node->lhs);
-    printf("  add %s, %d\n", reg(top - 1), node->member->offset);
+    printf("  add $%d, %%%s\n", node->member->offset, reg(top - 1));
     return;
   default:
     printf("node->kind : %d\n", node->kind);
@@ -148,17 +148,17 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
 {
   if (size_of(node->ty) == 8)
   {
-    printf("  mov rax, %s\n", rd);
+    printf("  mov %%%s, %%rax\n", rd);
     printf("  cqo\n");
-    printf("  idiv %s\n", rs);
-    printf("  mov %s, %s\n", rd, r64);
+    printf("  idiv %%%s\n", rs);
+    printf("  mov %%%s, %%%s\n", r64, rd);
   }
   else
   {
-    printf("  mov eax, %s\n", rd);
+    printf("  mov %%%s, %%eax\n", rd);
     printf("  cdq\n");
-    printf("  idiv %s\n", rs);
-    printf("  mov %s, %s\n", rd, r32);
+    printf("  idiv %%%s\n", rs);
+    printf("  mov %%%s, %%%s\n", r32, rd);
   }
 }
 
@@ -175,15 +175,15 @@ static void builtin_va_start(Node *node)
   // Store the pointer to va_list in rax.
   // Now node->args[0] should be va_list.
   // Note that the pointer to va_list and the pointer to gp_offset are equal.
-  printf("  mov rax, [rbp-%d]\n", node->args[0]->offset);
+  printf("  mov -%d(%%rbp), %%rax\n", node->args[0]->offset);
   // Initialize gp_offset.
   // gp_offset holds the byte offset from reg_save_area to where
   // the next available general purpose argument register is saved.
-  printf("  movq [rax], %d\n", n * 8);
+  printf("  movq $%d, (%%rax)\n", n * 8);
   // Initialize reg_save_area.
   // reg_save_area points to the start of the register save area.
-  printf("  mov [rax+16], rbp\n");
-  printf("  subq [rax+16], 80\n");
+  printf("  mov %%rbp, 16(%%rax)\n");
+  printf("  subq $80 ,16(%%rax)\n");
   top++;
 }
 
@@ -193,7 +193,7 @@ static void gen_expr(Node *node)
   switch (node->kind)
   {
   case ND_NUM:
-    printf("  mov %s, %ld\n", reg(top++), node->val);
+    printf("  mov $%ld, %%%s\n", node->val, reg(top++));
     return;
   case ND_VAR:
   case ND_MEMBER:
@@ -233,7 +233,7 @@ static void gen_expr(Node *node)
   {
     int seq = labelseq++;
     gen_expr(node->cond);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  je  .L.else.%d\n", seq);
     gen_expr(node->then);
     top--;
@@ -245,27 +245,27 @@ static void gen_expr(Node *node)
   }
   case ND_NOT:
     gen_expr(node->lhs);
-    printf("  cmp %s, 0\n", reg(top - 1));
-    printf("  sete %sb\n", reg(top - 1));
-    printf("  movzx %s, %sb\n", reg(top - 1), reg(top - 1));
+    printf("  cmp $0, %%%s\n", reg(top - 1));
+    printf("  sete %%%sb\n", reg(top - 1));
+    printf("  movzx %%%sb, %%%s\n", reg(top - 1), reg(top - 1));
     return;
   case ND_BITNOT:
     gen_expr(node->lhs);
-    printf("  not %s\n", reg(top - 1));
+    printf("  not %%%s\n", reg(top - 1));
     return;
   case ND_LOGAND:
   {
     int seq = labelseq++;
     gen_expr(node->lhs);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  je  .L.false.%d\n", seq);
     gen_expr(node->rhs);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  je  .L.false.%d\n", seq);
-    printf("  mov %s, 1\n", reg(top));
+    printf("  mov $1, %%%s\n", reg(top));
     printf("  jmp .L.end.%d\n", seq);
     printf(".L.false.%d:\n", seq);
-    printf("  mov %s, 0\n", reg(top++));
+    printf("  mov $0, %%%s\n", reg(top++));
     printf("  .L.end.%d:\n", seq);
     return;
   }
@@ -273,15 +273,15 @@ static void gen_expr(Node *node)
   {
     int seq = labelseq++;
     gen_expr(node->lhs);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  jne .L.true.%d\n", seq);
     gen_expr(node->rhs);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  jne .L.true.%d\n", seq);
-    printf("  mov %s, 0\n", reg(top));
+    printf("  mov $0, %%%s\n", reg(top));
     printf("  jmp .L.end.%d\n", seq);
     printf(".L.true.%d:\n", seq);
-    printf("  mov %s, 1\n", reg(top++));
+    printf("  mov $1, %%%s\n", reg(top++));
     printf("  .L.end.%d:\n", seq);
     return;
   }
@@ -297,8 +297,8 @@ static void gen_expr(Node *node)
     //
     // We should push r10 and r11 becouse they are caller saved registers.
     // RAX is set to 0 for varidic function.
-    printf("  push r10\n");
-    printf("  push r11\n");
+    printf("  push %%r10\n");
+    printf("  push %%r11\n");
 
     // Load arguments from the stack.
     for (int i = 0; i < node->nargs; i++)
@@ -306,27 +306,27 @@ static void gen_expr(Node *node)
       Var *arg = node->args[i];
       int sz = size_of(arg->ty);
       if (sz == 1)
-        printf("  movsx %s, byte ptr [rbp-%d]\n", argreg32[i], arg->offset);
+        printf("  movsxb -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
       else if (sz == 2)
-        printf("  movsx %s, word ptr [rbp-%d]\n", argreg32[i], arg->offset);
+        printf("  movsxw -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
       else if (sz == 4)
-        printf("  mov %s, dword ptr [rbp-%d]\n", argreg32[i], arg->offset);
+        printf("  movl -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
       else
-        printf("  mov %s, [rbp-%d]\n", argreg64[i], arg->offset);
+        printf("  movq -%d(%%rbp), %%%s\n", arg->offset,  argreg64[i]);
     }
 
-    printf("  mov rax, 0\n");
+    printf("  mov $0, %%rax\n");
     printf("  call %s\n", node->funcname);
 
     // The System V x86-64 ABI has a special rule regarding a boolean return
     // value that onlyu the lower 8 bits are valid for it and the upper
     // 56 bits may contain garbage. Here, we clear the upper 56 bits.
     if (node->ty->kind == TY_BOOL)
-      printf("  movzx rax, al\n");
+      printf("  movzx %%al, %%rax\n");
 
-    printf("  pop r11\n");
-    printf("  pop r10\n");
-    printf("  mov %s, rax\n", reg(top++));
+    printf("  pop %%r11\n");
+    printf("  pop %%r10\n");
+    printf("  mov %%rax, %%%s\n", reg(top++));
     return;
   }
   }
@@ -341,29 +341,29 @@ static void gen_expr(Node *node)
   switch (node->kind)
   {
   case ND_ADD:
-    printf("  add %s, %s\n", rd, rs);
+    printf("  add %%%s, %%%s\n", rs, rd);
     break;
   case ND_PTR_ADD:
-    printf("  imul %s, %d\n", rs, node->ty->base->size);
-    printf("  add %s, %s\n", rd, rs);
+    printf("  imul $%d, %%%s\n", node->ty->base->size, rs);
+    printf("  add %%%s, %%%s\n", rs, rd);
     break;
   case ND_SUB:
-    printf("  sub %s, %s\n", rd, rs);
+    printf("  sub %%%s, %%%s\n", rs, rd);
     break;
   case ND_PTR_SUB:
-    printf("  imul %s, %d\n", rs, node->ty->base->size);
-    printf("  sub %s, %s\n", rd, rs);
+    printf("  imul $%d, %%%s\n", node->ty->base->size, rs);
+    printf("  sub %%%s, %%%s\n", rs, rd);
     break;
   case ND_PTR_DIFF:
-    printf("  sub %s, %s\n", rd, rs);
-    printf("  mov rax, %s\n", rd);
+    printf("  sub %%%s, %%%s\n", rs, rd);
+    printf("  mov %%%s, %%rax\n", rd);
     printf("  cqo\n");
-    printf("  mov %s, %d\n", rs, node->lhs->ty->base->size);
-    printf("  idiv %s\n", rs);
-    printf("  mov %s, rax\n", rd);
+    printf("  mov $%d, %%%s\n", node->lhs->ty->base->size, rs);
+    printf("  idiv %%%s\n", rs);
+    printf("  mov %%rax, %%%s\n", rd);
     break;
   case ND_MUL:
-    printf("  imul %s, %s\n", rd, rs);
+    printf("  imul %%%s, %%%s\n", rs, rd);
     break;
   case ND_DIV:
     divmod(node, rd, rs, "rax", "eax");
@@ -372,41 +372,41 @@ static void gen_expr(Node *node)
     divmod(node, rd, rs, "rdx", "edx");
     return;
   case ND_BITAND:
-    printf("  and %s, %s\n", rd, rs);
+    printf("  and %%%s, %%%s\n", rs, rd);
     return;
   case ND_BITOR:
-    printf("  or %s, %s\n", rd, rs);
+    printf("  or %%%s, %%%s\n", rs, rd);
     return;
   case ND_BITXOR:
-    printf("  xor %s, %s\n", rd, rs);
+    printf("  xor %%%s, %%%s\n", rs, rd);
     return;
   case ND_EQ:
-    printf("  cmp %s, %s\n", rd, rs);
-    printf("  sete al\n");
-    printf("  movzb %s, al\n", rd);
+    printf("  cmp %%%s, %%%s\n", rs, rd);
+    printf("  sete %%al\n");
+    printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_NE:
-    printf("  cmp %s, %s\n", rd, rs);
-    printf("  setne al\n");
-    printf("  movzb %s, al\n", rd);
+    printf("  cmp %%%s, %%%s\n", rs, rd);
+    printf("  setne %%al\n");
+    printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_LT:
-    printf("  cmp %s, %s\n", rd, rs);
-    printf("  setl al\n");
-    printf("  movzb %s, al\n", rd);
+    printf("  cmp %%%s, %%%s\n", rs, rd);
+    printf("  setl %%al\n");
+    printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_LE:
-    printf("  cmp %s, %s\n", rd, rs);
-    printf("  setle al\n");
-    printf("  movzb %s, al\n", rd);
+    printf("  cmp %%%s, %%%s\n", rs, rd);
+    printf("  setle %%al\n");
+    printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_SHL:
-    printf("  mov rcx, %s\n", reg(top));
-    printf("  shl %s, cl\n", rd);
+    printf("  mov %%%s, %%rcx\n", reg(top));
+    printf("  shl %%cl, %%%s\n", rd);
     return;
   case ND_SHR:
-    printf("  mov rcx, %s\n", reg(top));
-    printf("  sar %s, cl\n", rd);
+    printf("  mov %%%s, %%rcx\n", reg(top));
+    printf("  sar %%cl, %%%s\n", rd);
     return;
   default:
     error_tok(node->tok, "invalid statement");
@@ -425,7 +425,7 @@ static void gen_stmt(Node *node)
     if (node->els)
     {
       gen_expr(node->cond);
-      printf("  cmp %s, 0\n", reg(--top));
+      printf("  cmp $0, %%%s\n", reg(--top));
       printf("  je .L.else.%d\n", seq);
       gen_stmt(node->then);
       printf("  jmp .L.end.%d\n", seq);
@@ -436,7 +436,7 @@ static void gen_stmt(Node *node)
     else
     {
       gen_expr(node->cond);
-      printf("  cmp %s, 0\n", reg(--top));
+      printf("  cmp $0, %%%s\n", reg(--top));
       printf("  je .L.end.%d\n", seq);
       gen_stmt(node->then);
       printf(".L.end.%d:\n", seq);
@@ -452,7 +452,7 @@ static void gen_stmt(Node *node)
 
     printf(".L.begin.%d:\n", seq);
     gen_expr(node->cond);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  je .L.break.%d\n", seq);
     gen_stmt(node->then);
     printf(".L.continue.%d:\n", seq);
@@ -474,7 +474,7 @@ static void gen_stmt(Node *node)
     gen_stmt(node->then);
     printf(".L.continue.%d:\n", seq);
     gen_expr(node->cond);
-    printf("  cmp %s, 0\n", reg(--top));
+    printf("  cmp $0, %%%s\n", reg(--top));
     printf("  jne .L.begin.%d\n", seq);
     printf(".L.break.%d:\n", seq);
 
@@ -495,7 +495,7 @@ static void gen_stmt(Node *node)
     if (node->cond)
     {
       gen_expr(node->cond);
-      printf("  cmp %s, 0\n", reg(--top));
+      printf("  cmp $0, %%%s\n", reg(--top));
       printf("  je .L.break.%d\n", seq);
     }
     gen_stmt(node->then);
@@ -521,7 +521,7 @@ static void gen_stmt(Node *node)
     for (Node *n = node->case_next; n; n = n->case_next)
     {
       n->case_label = labelseq++;
-      printf("  cmp %s, %ld\n", reg(top - 1), n->val);
+      printf("  cmp $%ld, %%%s\n", n->val, reg(top - 1));
       printf("  je .L.case.%d\n", n->case_label);
     }
     top--;
@@ -571,7 +571,7 @@ static void gen_stmt(Node *node)
     if (node->lhs)
     {
       gen_expr(node->lhs);
-      printf("  mov rax, %s\n", reg(--top));
+      printf("  mov %%%s, %%rax\n", reg(--top));
     }
     printf("  jmp .L.return.%s\n", current_fn->name);
     return;
@@ -654,24 +654,24 @@ static void emit_text(Program *prog)
     printf("%s:\n", fn->name);
 
     // Prologue. r12-15 are callee-saved registers.
-    printf("  push rbp\n");
-    printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", fn->stack_size);
-    printf("  mov [rbp-8], r12\n");
-    printf("  mov [rbp-16], r13\n");
-    printf("  mov [rbp-24], r14\n");
-    printf("  mov [rbp-32], r15\n");
+    printf("  push %%rbp\n");
+    printf("  mov %%rsp, %%rbp \n");
+    printf("  sub $%d, %%rsp\n", fn->stack_size);
+    printf("  mov %%r12, -8(%%rbp)\n");
+    printf("  mov %%r13, -16(%%rbp)\n");
+    printf("  mov %%r14, -24(%%rbp)\n");
+    printf("  mov %%r15, -32(%%rbp)\n");
 
     // Save arg registers to the register save area
     // if the function is the variadic
     if (fn->is_variadic)
     {
-      printf("  mov [rbp-80], rdi\n");
-      printf("  mov [rbp-72], rsi\n");
-      printf("  mov [rbp-64], rdx\n");
-      printf("  mov [rbp-56], rcx\n");
-      printf("  mov [rbp-48], r8\n");
-      printf("  mov [rbp-40], r9\n");
+      printf("  mov %%rdi, -80(%%rbp)\n");
+      printf("  mov %%rsi, -72(%%rbp)\n");
+      printf("  mov %%rdx, -64(%%rbp)\n");
+      printf("  mov %%rcx, -56(%%rbp)\n");
+      printf("  mov %%r8, -48(%%rbp)\n");
+      printf("  mov %%r9, -40(%%rbp)\n");
     }
 
     // Save arguments to the stack
@@ -683,7 +683,7 @@ static void emit_text(Program *prog)
     {
       Var *var = param->var;
       char *r = get_argreg(size_of(var->ty), --i);
-      printf("  mov [rbp-%d], %s\n", param->var->offset, r);
+      printf("  mov %%%s, -%d(%%rbp)\n", r, param->var->offset);
     }
 
     // Generate statements
@@ -698,12 +698,12 @@ static void emit_text(Program *prog)
     // Note that we don't have to restore r10, r11
     // because they are caller-saved registers.
     printf(".L.return.%s:\n", fn->name);
-    printf("  mov r12, [rbp-8]\n");
-    printf("  mov r13, [rbp-16]\n");
-    printf("  mov r14, [rbp-24]\n");
-    printf("  mov r15, [rbp-32]\n");
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
+    printf("  mov -8(%%rbp), %%r12\n");
+    printf("  mov -16(%%rbp), %%r13\n");
+    printf("  mov -24(%%rbp), %%r14\n");
+    printf("  mov -32(%%rbp), %%r15\n");
+    printf("  mov %%rbp, %%rsp\n");
+    printf("  pop %%rbp\n");
     printf("  ret\n");
   }
 }
@@ -711,7 +711,6 @@ static void emit_text(Program *prog)
 void codegen(Program *prog)
 {
   // Output the assembly code.
-  printf(".intel_syntax noprefix\n");
 
   char **paths = get_input_files();
   for (int i = 0; paths[i]; i++)
