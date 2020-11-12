@@ -976,7 +976,8 @@ int main()
   assert(16, ({ sizeof(signed int[4]); }), "({ sizeof(signed int[4]); })");
   assert(24, ({ sizeof(signed int[2][3]); }), "({ sizeof(signed int[2][3]); })");
   assert(8, ({ sizeof(struct { signed int a; signed int b; }); }), "({ sizeof(struct { signed int a; signed int b; }); })");
-
+  assert(8, sizeof(signed long long), "sizeof(signed long long)");
+  assert(8, sizeof(signed long long int), "sizeof(signed long long int)");
 
   
 
