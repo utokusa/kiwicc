@@ -539,6 +539,7 @@ static bool is_typename(Token *tok)
           "static",
           "extern",
           "_Alignas",
+          "signed",
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
@@ -586,6 +587,7 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     INT = 1 << 8,
     LONG = 1 << 10,
     OTHER = 1 << 12,
+    SIGNED = 1 << 13,
   };
 
   Type *ty = int_type;
@@ -661,6 +663,8 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
       counter += INT;
     else if (equal(tok, "long"))
       counter += LONG;
+    else if (equal(tok, "signed"))
+      counter += SIGNED;
     else
       error_tok(tok, "internal error");
 
@@ -673,19 +677,28 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
       ty = bool_type;
       break;
     case CHAR:
+    case SIGNED + CHAR:
       ty = char_type;
       break;
     case SHORT:
     case SHORT + INT:
+    case SIGNED + SHORT:
+    case SIGNED + SHORT + INT:
       ty = short_type;
       break;
     case INT:
+    case SIGNED + INT:
+    case SIGNED:
       ty = int_type;
       break;
     case LONG:
     case LONG + INT:
     case LONG + LONG:
     case LONG + LONG + INT:
+    case SIGNED + LONG:
+    case SIGNED + LONG + INT:
+    case SIGNED + LONG + LONG:
+    case SIGNED + LONG + LONG + INT:
       ty = long_type;
       break;
     default:

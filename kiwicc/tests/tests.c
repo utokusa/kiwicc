@@ -959,6 +959,24 @@ int main()
   //    ^ M4 exppand   ^ M5 expand       ^ M4 = 3
   assert(13, M4, "M4");
 
+  assert(4, ({ sizeof(signed); }), "({ sizeof(signed); })");
+  assert(1, ({ sizeof(signed char); }), "({ sizeof(signed char); })");
+  assert(2, ({ sizeof(signed short); }), "({ sizeof(signed short); })");
+  assert(2, ({ sizeof(signed short int); }), "({ sizeof(signed short int); })");
+  assert(2, ({ sizeof(signed int short); }), "({ sizeof(signed int short); })");
+  assert(4, ({ sizeof(signed int); }), "({ sizeof(signed int); })");
+  assert(8, ({ sizeof(signed long); }), "({ sizeof(signed long); })");
+  assert(8, ({ sizeof(signed long int); }), "({ sizeof(signed long int); })");
+  assert(8, ({ sizeof(signed int long); }), "({ sizeof(signed int long); })");
+  assert(8, ({ sizeof(signed char *); }), "({ sizeof(csigned har *); })");
+  assert(8, ({ sizeof(signed int *); }), "({ sizeof(signed int *); })");
+  assert(8, ({ sizeof(signed long *); }), "({ sizeof(signed long *); })");
+  assert(8, ({ sizeof(signed int **); }), "({ sizeof(signed int **); })");
+  assert(8, ({ sizeof(signed int(*)[4]); }), "({ sizeof(signed int(*)[4]); })");
+  assert(16, ({ sizeof(signed int[4]); }), "({ sizeof(signed int[4]); })");
+  assert(24, ({ sizeof(signed int[2][3]); }), "({ sizeof(signed int[2][3]); })");
+  assert(8, ({ sizeof(struct { signed int a; signed int b; }); }), "({ sizeof(struct { signed int a; signed int b; }); })");
+
 
   
 
