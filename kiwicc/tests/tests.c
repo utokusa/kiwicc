@@ -1075,7 +1075,40 @@ int main()
   assert(8, sizeof(0x7fffffffffffffff), "sizeof(0x7fffffffffffffff)"); // long
   assert(8, sizeof(0x8000000000000000), "sizeof(0x8000000000000000)"); // unsigned long
 
+  assert(4, sizeof(0), "sizeof(0)");
+  assert(4, sizeof(0U), "sizeof(0U)");
+  assert(8, sizeof(0L), "sizeof(0L)");
+  assert(4, sizeof(0u), "sizeof(0u)");
+  assert(8, sizeof(0l), "sizeof(0l)");
+  assert(8, sizeof(0UL), "sizeof(0UL)");
+  assert(8, sizeof(0uL), "sizeof(0uL)");
+  assert(8, sizeof(0Ul), "sizeof(0Ul)");
+  assert(8, sizeof(0ul), "sizeof(0ul)");
+  assert(8, sizeof(0LLU), "sizeof(0LLU)");
+  assert(8, sizeof(0LLu), "sizeof(LLu)");
+  assert(8, sizeof(0ULL), "sizeof(ULL)");
+  assert(8, sizeof(0Ull), "sizeof(0Ull)");
+  assert(8, sizeof(0uLL), "sizeof(0uLL)");
+  assert(8, sizeof(0ull), "sizeof(0ull)");
 
+  assert(4, sizeof(10), "sizeof(10)");
+  assert(4, sizeof(10U), "sizeof(10U)");
+  assert(8, sizeof(10L), "sizeof(10L)");
+  assert(4, sizeof(10u), "sizeof(10u)");
+  assert(8, sizeof(10l), "sizeof(10l)");
+  assert(8, sizeof(10UL), "sizeof(10UL)");
+  assert(8, sizeof(10uL), "sizeof(10uL)");
+  assert(8, sizeof(10Ul), "sizeof(10Ul)");
+  assert(8, sizeof(10ul), "sizeof(10ul)");
+  assert(8, sizeof(10LLU), "sizeof(10LLU)");
+  assert(8, sizeof(10LLu), "sizeof(LLu)");
+  assert(8, sizeof(10ULL), "sizeof(ULL)");
+  assert(8, sizeof(10Ull), "sizeof(10Ull)");
+  assert(8, sizeof(10uLL), "sizeof(10uLL)");
+  assert(8, sizeof(10ull), "sizeof(10ull)");
+
+  assert(-1, (int)(4294967295U), "(int)(4294967296U)"); // (1 << 32) - 1
+  assert(-1, (long)(18446744073709551615UL), "(long)(18446744073709551615UL)"); //  (1 << 64) - 1    
 
 
 

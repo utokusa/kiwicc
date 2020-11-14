@@ -389,6 +389,40 @@ static Token *read_int_literal(Token *cur, char *start)
   }
 
   long val = strtoul(p, &p, base);
+
+  // Read U, L or LL suffixes.
+  bool l = false;
+  bool u = false;
+
+  if (startswith(p, "LLU") || startswith(p, "LLu") ||
+      startswith(p, "llU") || startswith(p, "llu") ||
+      startswith(p, "ULL") || startswith(p, "Ull") ||
+      startswith(p, "uLL") || startswith(p, "ull"))
+  {
+    p += 3;
+    l = u = true;    
+  }
+  else if (!strncasecmp(p, "lu", 2) || !strncasecmp(p, "ul", 2))
+  {
+    p += 2;
+    l = u = true;
+  }
+  else if (startswith(p, "LL") || startswith(p, "ll"))
+  {
+    p += 2;
+    l = true;
+  }
+  else if (*p == 'L' || *p == 'l')
+  {
+    p++;
+    l = true;
+  }
+  else if (*p == 'U' || *p == 'u')
+  {
+    p++;
+    u = true;
+  }
+
   if (is_alnum(*p))
     error_at(p, "invalid digit");
 
@@ -396,11 +430,24 @@ static Token *read_int_literal(Token *cur, char *start)
   Type *ty;
   if (base == 10)
   {
-    ty = (val >> 31) ? long_type : int_type;
+    if (l && u)
+      ty = ulong_type;
+    else if (l)
+      ty = long_type;
+    else if (u)
+      ty = (val >> 32) ? ulong_type : uint_type;
+    else
+      ty = (val >> 31) ? long_type : int_type;
   }
   else
   {
-    if (val >> 63)
+    if (l && u)
+      ty = ulong_type;
+    else if (l)
+      ty = (val >> 63) ? ulong_type : long_type;
+    else if (u)
+      ty = (val >> 32) ? ulong_type : uint_type;
+    else if (val >> 63)
       ty = ulong_type;
     else if (val >> 32)
       ty = long_type;
