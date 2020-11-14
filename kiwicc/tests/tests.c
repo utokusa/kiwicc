@@ -1063,6 +1063,21 @@ int main()
   assert(-1, ({ typedef short T; T x = 0xffff; (int)x; }), "({unsigned T; T x = 0xffff; (int)x; })");
   assert(0xffff, ({ typedef unsigned short T; T x = 0xffff; (int)x; }), "({unsigned short T; T x = 0xffff; (int)x; })");
 
+  assert(4, sizeof(2147483647), "sizeof(2147483647)"); //1 << 31 - 1 = 2147483647, int
+  assert(8, sizeof(2147483648), "sizeof(2147483647)"); //1 << 31     = 2147483648, long
+  assert(8, sizeof(4611686018427387904), "sizeof(4611686018427387904)"); //1 << 63 - 1 = 4611686018427387904, long
+  // assert(16, sizeof(9223372036854775808), "sizeof(9223372036854775808)"); //1 << 63 = 9223372036854775808 __int128_t
+
+  assert(4, sizeof(0xfffffffe), "sizeof(0xffffffff)"); // unsigned int
+  assert(4, sizeof(0x7fffffff), "sizeof(0x7fffffff)"); // int
+  assert(8, sizeof(0x100000000), "sizeof(0x100000000)"); // long
+  assert(8, sizeof(0x3fffffffffffffff), "sizeof(0x3fffffffffffffff)"); // long
+  assert(8, sizeof(0x7fffffffffffffff), "sizeof(0x7fffffffffffffff)"); // long
+  assert(8, sizeof(0x8000000000000000), "sizeof(0x8000000000000000)"); // unsigned long
+
+
+
+
 
   printf("OK\n");
   return 0;

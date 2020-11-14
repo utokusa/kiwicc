@@ -2328,5 +2328,7 @@ static Node *primary(Token **rest, Token *tok)
     error_tok(tok, "expected expression");
 
   *rest = tok->next;
-  return new_node_num(get_number(tok), tok);
+  Node *node = new_node_num(get_number(tok), tok);
+  node->ty = tok->ty;
+  return node;
 }

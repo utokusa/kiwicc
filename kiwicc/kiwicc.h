@@ -40,6 +40,8 @@ struct Token
   char *contents; // String literal contents including terminating '\0'
   int cont_len;   // String literal length
 
+  Type *ty;       // Used if TK_NUM
+
   char *filename;   // input filename
   char *input;      // Entire input string
   int file_no;      // File number for .loc directive

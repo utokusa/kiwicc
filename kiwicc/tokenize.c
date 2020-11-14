@@ -174,8 +174,8 @@ static char *starts_with_reserved(char *p)
       "short", "long", "void", "_Bool", "typedef",
       "static", "extern", "break", "continue", "goto",
       "switch", "case", "default", "_Alignof", "_Alignas",
-      "signed", "unsigned" 
-  };
+      "signed", "unsigned"
+      };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)
   {
@@ -346,6 +346,7 @@ static Token *read_char_literal(Token *cur, char *start)
 
   Token *tok = new_token(TK_NUM, cur, start, p - start);
   tok->val = c;
+  tok->ty = int_type;
   return tok;
 }
 
@@ -391,8 +392,27 @@ static Token *read_int_literal(Token *cur, char *start)
   if (is_alnum(*p))
     error_at(p, "invalid digit");
 
+  // Add type
+  Type *ty;
+  if (base == 10)
+  {
+    ty = (val >> 31) ? long_type : int_type;
+  }
+  else
+  {
+    if (val >> 63)
+      ty = ulong_type;
+    else if (val >> 32)
+      ty = long_type;
+    else if (val >> 31)
+      ty = uint_type;
+    else
+      ty = int_type;
+  }
+
   Token *tok = new_token(TK_NUM, cur, start, p - start);
   tok->val = val;
+  tok->ty = ty;
   return tok;
 }
 
@@ -556,7 +576,8 @@ static char *read_file(char *path)
   return buf;
 }
 
-char **get_input_files() {
+char **get_input_files()
+{
   return input_files;
 }
 
@@ -565,7 +586,7 @@ Token *tokenize_file(char *path)
   char *p = read_file(path);
   if (!p)
     return NULL;
-  
+
   // Save the filename for assembler .file directive.
   static int file_no;
   input_files = realloc(input_files, sizeof(char *) * (file_no + 2));
