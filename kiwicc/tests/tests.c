@@ -1137,6 +1137,13 @@ int main()
   assert(1, sizeof(char) << 63 >> 63, "sizeof(char) << 31 >> 31");
   assert(1, _Alignof(char) << 63 >> 63, "_Alignof(char) << 63 >> 63");
 
+  assert(9, ({ char x[(char)0xffffffff + 10]; sizeof(x); }), "({ char x[(char)0xffffffff + 10]; sizeof(x); })");
+  assert(255, ({ char x[(unsigned char)0xffffffff]; sizeof(x); }), "({ char x[(unsigned char)0xffffffff]; sizeof(x); })");
+  assert(0xffff, ({ char x[(unsigned short)0xffffffff]; sizeof(x); }), "({ char x[(unsigned short)0xffffffff]; sizeof(x); })");
+  assert(1, ({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); }), "({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); })");
+  assert(1, ({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); }), "({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); })");
+  
+
 
   printf("OK\n");
   return 0;
