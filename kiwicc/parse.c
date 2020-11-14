@@ -541,6 +541,7 @@ static bool is_typename(Token *tok)
           "_Alignas",
           "signed",
           "unsigned",
+          "const",
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
@@ -575,8 +576,6 @@ static Function *funcdef(Token **rest, Token *tok)
   return fn;
 }
 
-// typespec = "void" | "_Bool" | "char" | "short" | "int" | "long"
-//          | struct-decl | union-decl | typedef-name
 static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
 {
   enum
@@ -594,6 +593,7 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
 
   Type *ty = int_type;
   int counter = 0;
+  bool is_const = false;
 
   while (is_typename(tok))
   {
@@ -612,6 +612,13 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
       if (attr->is_typedef + attr->is_static + attr->is_extern > 1)
         error_tok(tok, "typedef and static may not be used together");
       tok = tok->next;
+      continue;
+    }
+
+    if (equal(tok, "const"))
+    {
+      tok = tok->next;
+      is_const = true;
       continue;
     }
 
@@ -727,6 +734,12 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     }
 
     tok = tok->next;
+  }
+
+  if (is_const)
+  {
+    ty = copy_type(ty);
+    ty->is_const = true;
   }
 
   *rest = tok;
@@ -891,14 +904,27 @@ static Type *type_suffix(Token **rest, Token *tok, Type *ty)
   return ty;
 }
 
-// declarator = "*"* ("(" declarator ")" | ident) type-suffix
-static Type *declarator(Token **rest, Token *tok, Type *ty)
+// pointers = ("*" "const"*)*
+static Type *pointers(Token **rest, Token *tok, Type *ty)
 {
   while (equal(tok, "*"))
   {
     tok = tok->next;
     ty = pointer_to(ty);
+    while (equal(tok, "const"))
+    {
+      tok = tok->next;
+      ty->is_const = true;
+    }
   }
+  *rest = tok;
+  return ty;
+}
+
+// declarator = pointers ("(" declarator ")" | ident) type-suffix
+static Type *declarator(Token **rest, Token *tok, Type *ty)
+{
+  ty = pointers(&tok, tok, ty);
 
   if (equal(tok, "("))
   {
@@ -1218,7 +1244,9 @@ static Node *create_lvar_init(Initializer *init, Type *ty, InitDesg *desg, Token
 
   Node *lhs = init_desg_expr(desg, tok);
   Node *rhs = init ? init->expr : new_node_num(0, tok);
-  return new_binary(ND_ASSIGN, lhs, rhs, tok);
+  Node *expr = new_binary(ND_ASSIGN, lhs, rhs, tok);
+  expr->is_init = true;
+  return expr;
 }
 
 // A variable definition with an initializer is a shorthand notation for
@@ -2247,6 +2275,7 @@ static Node *funcall(Token **rest, Token *tok)
     nargs++;
 
     Node *expr = new_binary(ND_ASSIGN, new_node_var(var, tok), arg, tok);
+    expr->is_init = true;
     node = new_binary(ND_COMMA, node, expr, tok);
   }
 

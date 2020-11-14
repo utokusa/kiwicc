@@ -211,6 +211,17 @@ int ret_none()
   3;
   return;
 }
+
+int const_arg_func(const int x) 
+{
+  return x;
+}
+
+const int const_rest_func(int x) 
+{
+  return x;
+}
+
 _Bool true_fn();
 _Bool false_fn();
 
@@ -1108,8 +1119,19 @@ int main()
   assert(8, sizeof(10ull), "sizeof(10ull)");
 
   assert(-1, (int)(4294967295U), "(int)(4294967296U)"); // (1 << 32) - 1
-  assert(-1, (long)(18446744073709551615UL), "(long)(18446744073709551615UL)"); //  (1 << 64) - 1    
+  assert(-1, (long)(18446744073709551615UL), "(long)(18446744073709551615UL)"); //  (1 << 64) - 1
 
+  { const int x; }
+  { const x; }
+  { int const x; }
+  { const int const const x; }
+  assert(5, ({ const int  x = 5; x; }), "({ const int x = 5; x; })");
+  assert(5, ({ const int x = 5; int * const y = &x; *y; }), "({ const int x = 5; int * const y = &x; *y; })");
+  assert(5, ({ const int x = 5; const int * const y = &x; *y; }), "({ const int x = 5; const int * const y = &x; *y; })");
+  assert(5, ({ const int x = 5; const int * const const y = &x; *y; }), "({ const int x = 5; const int * const const y = &x; *y; })");
+
+  assert(5, const_arg_func(5), "const_arg_func(5)");
+  assert(5, const_rest_func(5), "const_rest_func(5)");
 
 
   printf("OK\n");

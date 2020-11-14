@@ -158,6 +158,9 @@ struct Node
   Node *init;
   Node *inc;
 
+  // Assignment
+  bool is_init;
+
   // Block or statement expression
   Node *body;
 
@@ -228,6 +231,7 @@ struct Type
   int size;           // sizeof() value
   int align;          // alignment
   bool is_unsigned;   // unsigned or signed
+  bool is_const;
   bool is_incomplete; // incomplete type
   Type *base;         // base type
 

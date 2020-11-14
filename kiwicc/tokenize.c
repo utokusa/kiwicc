@@ -174,7 +174,7 @@ static char *starts_with_reserved(char *p)
       "short", "long", "void", "_Bool", "typedef",
       "static", "extern", "break", "continue", "goto",
       "switch", "case", "default", "_Alignof", "_Alignas",
-      "signed", "unsigned"
+      "signed", "unsigned", "const"
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)

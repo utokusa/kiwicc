@@ -140,8 +140,6 @@ static void gen_addr(Node *node)
 
 static void gen_lval(Node *node)
 {
-  if (node->ty->kind == TY_ARR)
-    error_tok(node->tok, "not an lvalue");
   gen_addr(node);
 }
 
@@ -218,6 +216,10 @@ static void gen_expr(Node *node)
     load(node->ty);
     return;
   case ND_ASSIGN:
+    if (node->ty->kind == TY_ARR)
+      error_tok(node->tok, "not an lvalue");
+    if (node->lhs->ty->is_const && !node->is_init)
+      error_tok(node->tok, "cannnot assign to a const variable");
     gen_expr(node->rhs);
     gen_lval(node->lhs);
     store(node->ty);
