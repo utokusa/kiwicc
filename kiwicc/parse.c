@@ -146,6 +146,14 @@ static Node *new_node_num(long val, Token *tok)
   return node;
 }
 
+static Node *new_node_ulong(long val, Token *tok)
+{
+  Node *node = new_node(ND_NUM, tok);
+  node->val = val;
+  node->ty = ulong_type;
+  return node;
+}
+
 static Node *new_node_var(Var *var, Token *tok)
 {
   Node *node = new_node(ND_VAR, tok);
@@ -1975,20 +1983,20 @@ static Node *unary(Token **rest, Token *tok)
   {
     Type *ty = typename(&tok, tok->next->next);
     *rest = skip(tok, ")");
-    return new_node_num(size_of(ty), tok);
+    return new_node_ulong(size_of(ty), tok);
   }
   if (equal(tok, "sizeof"))
   {
     Node *node = cast(rest, tok->next);
     add_type(node);
-    return new_node_num(size_of(node->ty), tok);
+    return new_node_ulong(size_of(node->ty), tok);
   }
   if (equal(tok, "_Alignof"))
   {
     tok = skip(tok->next, "(");
     Type *ty = typename(&tok, tok);
     *rest = skip(tok, ")");
-    return new_node_num(ty->align, tok);
+    return new_node_ulong(ty->align, tok);
   }
   if (equal(tok, "+"))
     return cast(rest, tok->next);

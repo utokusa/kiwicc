@@ -342,10 +342,10 @@ int main()
 
   assert(4, ({ int x = 0; sizeof(x); }), "({ int x = 0; sizeof(x); })");
   assert(4, ({ sizeof(1); }), "({ sizeof(1); })");
-  assert(4, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
+  assert(8, ({ sizeof(sizeof(1)); }), "({ sizeof(sizeof(1)); })");
   assert(8, ({ int x = 0; sizeof(&x); }), "({ int x = 0; sizeof(&x); })");
   assert(8, ({ int x = 0; sizeof(&x + 2); }), "({ int x = 0; sizeof(&x + 2); })");
-  assert(4, ({ int x = 0; sizeof(sizeof(&x)); }), "({ int x = 0; sizeof(sizeof(&x)); })");
+  assert(8, ({ int x = 0; sizeof(sizeof(&x)); }), "({ int x = 0; sizeof(sizeof(&x)); })");
   assert(11, ({ int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); *(a+2); }), "({ int a[3]; *a=10; *(a+1)=1; *(a+2)=*a+*(a+1); *(a+2); })");
   assert(11, ({ int a[3]; int *b=a+2; *b=11; *(a+2); }), "({ int a[3]; int *b=a+2; *b=11; *(a+2); })");
   assert(32, ({ int a[8]; sizeof(a); }), "({ int a[8]; sizeof(a); })");
@@ -1132,6 +1132,10 @@ int main()
 
   assert(5, const_arg_func(5), "const_arg_func(5)");
   assert(5, const_rest_func(5), "const_rest_func(5)");
+
+  assert(8, sizeof(_Alignof(char)), "sizeof(_Alignof(char))");
+  assert(1, sizeof(char) << 63 >> 63, "sizeof(char) << 31 >> 31");
+  assert(1, _Alignof(char) << 63 >> 63, "_Alignof(char) << 63 >> 63");
 
 
   printf("OK\n");
