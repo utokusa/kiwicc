@@ -225,6 +225,7 @@ struct Type
   TypeKind kind;      // type kind
   int size;           // sizeof() value
   int align;          // alignment
+  bool is_unsigned;   // unsigned or signed
   bool is_incomplete; // incomplete type
   Type *base;         // base type
 
@@ -265,6 +266,11 @@ extern Type *char_type;
 extern Type *short_type;
 extern Type *int_type;
 extern Type *long_type;
+extern Type *uchar_type;
+extern Type *ushort_type;
+extern Type *uint_type;
+extern Type *ulong_type;
+
 extern char *file_dir;
 
 /*********************************************

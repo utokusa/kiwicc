@@ -540,6 +540,7 @@ static bool is_typename(Token *tok)
           "extern",
           "_Alignas",
           "signed",
+          "unsigned",
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
@@ -580,14 +581,15 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
 {
   enum
   {
-    VOID = 1 << 0,
-    BOOL = 1 << 2,
-    CHAR = 1 << 4,
-    SHORT = 1 << 6,
-    INT = 1 << 8,
-    LONG = 1 << 10,
-    OTHER = 1 << 12,
-    SIGNED = 1 << 13,
+    VOID     = 1 << 0,
+    BOOL     = 1 << 2,
+    CHAR     = 1 << 4,
+    SHORT    = 1 << 6,
+    INT      = 1 << 8,
+    LONG     = 1 << 10,
+    OTHER    = 1 << 12,
+    SIGNED   = 1 << 13,
+    UNSIGNED = 1 << 14,
   };
 
   Type *ty = int_type;
@@ -664,7 +666,9 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     else if (equal(tok, "long"))
       counter += LONG;
     else if (equal(tok, "signed"))
-      counter += SIGNED;
+      counter |= SIGNED;
+    else if (equal(tok, "unsigned"))
+      counter |= UNSIGNED;
     else
       error_tok(tok, "internal error");
 
@@ -680,16 +684,27 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     case SIGNED + CHAR:
       ty = char_type;
       break;
+    case UNSIGNED + CHAR:
+      ty = uchar_type;
+      break;
     case SHORT:
     case SHORT + INT:
     case SIGNED + SHORT:
     case SIGNED + SHORT + INT:
       ty = short_type;
       break;
+    case UNSIGNED + SHORT:
+    case UNSIGNED + SHORT + INT:
+      ty = ushort_type;
+      break;
     case INT:
     case SIGNED + INT:
     case SIGNED:
       ty = int_type;
+      break;
+    case UNSIGNED + INT:
+    case UNSIGNED:
+      ty = uint_type;
       break;
     case LONG:
     case LONG + INT:
@@ -700,6 +715,12 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     case SIGNED + LONG + LONG:
     case SIGNED + LONG + LONG + INT:
       ty = long_type;
+      break;
+    case UNSIGNED + LONG:
+    case UNSIGNED + LONG + INT:
+    case UNSIGNED + LONG + LONG:
+    case UNSIGNED + LONG + LONG + INT:
+      ty = ulong_type;
       break;
     default:
       error_tok(tok, "invalid type");

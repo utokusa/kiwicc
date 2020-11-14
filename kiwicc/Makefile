@@ -30,6 +30,12 @@ test-stage3: kiwicc-stage3
 
 test-all: test test-stage2 test-stage3
 
+test-gcc:
+	gcc tests/tests.c > tmp.s
+	gcc -xc -c -o tmp2.o tests/extern.c
+	gcc -static -fno-common -o tmp tmp.s tmp2.o
+	./tmp
+
 tmp-kiwicc: kiwicc
 	./kiwicc tests/tmp_test.c > tmp.s
 	gcc -static -o tmp tmp.s

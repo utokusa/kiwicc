@@ -10,6 +10,10 @@ Type *char_type = &(Type){TY_CHAR, 1, 1};
 Type *short_type = &(Type){TY_SHORT, 2, 2};
 Type *int_type = &(Type){TY_INT, 4, 4};
 Type *long_type = &(Type){TY_LONG, 8, 8};
+Type *uchar_type = &(Type){TY_CHAR, 1, 1, true};
+Type *ushort_type = &(Type){TY_SHORT, 2, 2, true};
+Type *uint_type = &(Type){TY_INT, 4, 4, true};
+Type *ulong_type = &(Type){TY_LONG, 8, 8, true};
 
 static Type *new_type(TypeKind kind, int size, int align)
 {
@@ -72,9 +76,18 @@ static Type *get_common_type(Type *ty1, Type *ty2)
 {
   if (ty1->base)
     return pointer_to(ty1->base);
-  if (size_of(ty1) == 8 || size_of(ty2) == 8)
-    return long_type;
-  return int_type;
+  
+  if (ty1->size < 4)
+    ty1 = int_type;
+  if (ty2->size < 4)
+    ty2 = int_type;
+  
+  if (ty1->size != ty2->size)
+    return (ty1->size < ty2->size) ? ty2 : ty1;
+  
+  if (ty2->is_unsigned)
+    return ty2;
+  return ty1;
 }
 
 // Usual arithmettic conversion

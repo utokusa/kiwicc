@@ -40,14 +40,13 @@ static void load(Type *ty)
 
   char *rs = reg(top - 1);
   char *rd = xreg(ty, top - 1);
+  char *movop = ty->is_unsigned ? "movz" : "movs";
   int sz = size_of(ty);
 
   if (sz == 1)
-    printf("  movsxb (%%%s), %%%s\n", rs, rd);
+    printf("  %sxb (%%%s), %%%s\n", movop, rs, rd);
   else if (sz == 2)
-    printf("  movsxw (%%%s), %%%s\n", rs, rd);
-  else if (sz == 4)
-    printf("  movl (%%%s), %%%s\n", rs, rd);
+    printf("  %sxw (%%%s), %%%s\n", movop, rs, rd);
   else
     printf("  mov (%%%s), %%%s\n", rs, rd);
 }
@@ -92,13 +91,15 @@ static void cast(Type *from, Type *to)
     return;
   }
 
+  char *movop = to->is_unsigned ? "movzx" : "movsx";
+
   if (size_of(to) == 1)
-    printf("  movsx %%%sb, %%%s\n", r, r);
-  if (size_of(to) == 2)
-    printf("  movsx %%%sw, %%%s\n", r, r);
-  if (size_of(to) == 4)
+    printf("  %s %%%sb, %%%s\n", movop, r, r);
+  else if (size_of(to) == 2)
+    printf("  %s %%%sw, %%%s\n", movop, r, r);
+  else if (size_of(to) == 4)
     printf("  mov %%%sd, %%%sd\n", r, r);
-  if (is_integer(from) && size_of(from) < 8)
+  else if (is_integer(from) && size_of(from) < 8 && !from->is_unsigned)
     printf("  movsx %%%sd, %%%s\n", r, r);
 }
 
@@ -149,15 +150,27 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
   if (size_of(node->ty) == 8)
   {
     printf("  mov %%%s, %%rax\n", rd);
-    printf("  cqo\n");
-    printf("  idiv %%%s\n", rs);
+    if (node->ty->is_unsigned) {
+      printf("  mov $0, %%rdx\n");
+      printf("  div %%%s\n", rs);
+    }
+    else {
+      printf("  cqo\n");
+      printf("  idiv %%%s\n", rs);
+    }
     printf("  mov %%%s, %%%s\n", r64, rd);
   }
   else
   {
     printf("  mov %%%s, %%eax\n", rd);
-    printf("  cdq\n");
-    printf("  idiv %%%s\n", rs);
+    if (node->ty->is_unsigned) {
+      printf("  mov $0, %%edx\n");
+      printf("  div %%%s\n", rs);
+    }
+    else {
+      printf("  cdq\n");
+      printf("  idiv %%%s\n", rs);
+    }
     printf("  mov %%%s, %%%s\n", r32, rd);
   }
 }
@@ -304,11 +317,12 @@ static void gen_expr(Node *node)
     for (int i = 0; i < node->nargs; i++)
     {
       Var *arg = node->args[i];
+      char *movop = arg->ty->is_unsigned ? "movz" : "movs";
       int sz = size_of(arg->ty);
       if (sz == 1)
-        printf("  movsxb -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
+        printf("  %sxb -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[i]);
       else if (sz == 2)
-        printf("  movsxw -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
+        printf("  %sxw -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[i]);
       else if (sz == 4)
         printf("  movl -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
       else
@@ -392,12 +406,18 @@ static void gen_expr(Node *node)
     break;
   case ND_LT:
     printf("  cmp %%%s, %%%s\n", rs, rd);
-    printf("  setl %%al\n");
+    if (node->lhs->ty->is_unsigned)
+      printf("  setb %%al\n");
+    else
+      printf("  setl %%al\n");
     printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_LE:
     printf("  cmp %%%s, %%%s\n", rs, rd);
-    printf("  setle %%al\n");
+    if (node->lhs->ty->is_unsigned)
+      printf("  setbe %%al\n");
+    else 
+      printf("  setle %%al\n");
     printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_SHL:
@@ -406,7 +426,10 @@ static void gen_expr(Node *node)
     return;
   case ND_SHR:
     printf("  mov %%%s, %%rcx\n", reg(top));
-    printf("  sar %%cl, %%%s\n", rd);
+    if (node->lhs->ty->is_unsigned)
+      printf("  shr %%cl, %%%s\n", rd);
+    else
+      printf("  sar %%cl, %%%s\n", rd);
     return;
   default:
     error_tok(node->tok, "invalid statement");
