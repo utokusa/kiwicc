@@ -550,6 +550,9 @@ static bool is_typename(Token *tok)
           "signed",
           "unsigned",
           "const",
+          "volatile",
+          "register",
+          "_Noreturn"
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
@@ -627,6 +630,12 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     {
       tok = tok->next;
       is_const = true;
+      continue;
+    }
+
+    if (equal(tok, "volatile") || equal(tok, "register") || equal(tok, "_Noreturn"))
+    {
+      tok = tok->next;
       continue;
     }
 
@@ -912,17 +921,18 @@ static Type *type_suffix(Token **rest, Token *tok, Type *ty)
   return ty;
 }
 
-// pointers = ("*" "const"*)*
+// pointers = ("*" ("const" | "volatile" | "restrict")*)*
 static Type *pointers(Token **rest, Token *tok, Type *ty)
 {
   while (equal(tok, "*"))
   {
     tok = tok->next;
     ty = pointer_to(ty);
-    while (equal(tok, "const"))
+    while (equal(tok, "const") || equal(tok, "volatile") || equal(tok, "restrict"))
     {
+      if (equal(tok, "const"))
+        ty->is_const = true;
       tok = tok->next;
-      ty->is_const = true;
     }
   }
   *rest = tok;

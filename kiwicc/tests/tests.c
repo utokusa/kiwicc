@@ -225,6 +225,11 @@ const int const_rest_func(int x)
 _Bool true_fn();
 _Bool false_fn();
 
+_Noreturn noreturn_fn()
+{
+  exit(0);
+}
+
 typedef struct
 {
   int gp_offset;
@@ -1142,6 +1147,16 @@ int main()
   assert(0xffff, ({ char x[(unsigned short)0xffffffff]; sizeof(x); }), "({ char x[(unsigned short)0xffffffff]; sizeof(x); })");
   assert(1, ({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); }), "({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); })");
   assert(1, ({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); }), "({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); })");
+
+  { volatile x; }
+  { int volatile x; }
+  { volatile int x; }
+  { volatile int volatile volatile x; }
+  { volatile int * volatile volatile x; }
+  { int ** restrict const volatile *x; }
+  { register int x = 1; }
+
+
   
 
 
