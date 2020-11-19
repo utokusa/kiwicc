@@ -381,9 +381,12 @@ Program *parse(Token *tok)
     Token *start = tok;
     VarAttr attr = {};
     Type *basety = typespec(&tok, tok, &attr);
+
     // Typename-only declarations
     if (equal(tok, ";"))
     {
+      if (attr.is_typedef)
+        error_tok(tok, "typedef name omitted");
       tok = tok->next;
       continue;
     }
@@ -577,7 +580,11 @@ static Function *funcdef(Token **rest, Token *tok)
 
   enter_scope();
   for (Type *t = ty->params; t; t = t->next)
+  {
+    if (!t->name)
+      error_tok(t->name_pos, "parameter name omitted");
     new_lvar(get_ident(t->name), t);
+  }
   fn->params = locals;
 
   tok = skip(tok, "{");
@@ -952,11 +959,18 @@ static Type *declarator(Token **rest, Token *tok, Type *ty)
     *placeholder = *type_suffix(rest, tok, ty);
     return new_ty;
   }
+  
+  Token *name = NULL;
+  Token *name_pos = tok;
+  if (tok->kind == TK_IDENT)
+  {
+    name = tok;
+    tok = tok->next;
+  }
 
-  if (tok->kind != TK_IDENT)
-    error_tok(tok, "expected a variable name");
-  ty = type_suffix(rest, tok->next, ty);
-  ty->name = tok;
+  ty = type_suffix(rest, tok, ty);
+  ty->name = name;
+  ty->name_pos = name_pos;
   return ty;
 }
 

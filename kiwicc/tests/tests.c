@@ -12,7 +12,7 @@
 int printf();
 int exit();
 int strcmp(char *p, char *q);
-int memcmp(char *p, char *q, long n);
+int memcmp(char *, char *, long);
 
 int ret_777();
 
@@ -1155,6 +1155,8 @@ int main()
   { volatile int * volatile volatile x; }
   { int ** restrict const volatile *x; }
   { register int x = 1; }
+
+  { typedef int ;}
 
 
   
