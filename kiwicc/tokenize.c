@@ -424,9 +424,6 @@ static Token *read_int_literal(Token *cur, char *start)
     u = true;
   }
 
-  if (is_alnum(*p))
-    error_at(p, "invalid digit");
-
   // Add type
   Type *ty;
   if (base == 10)
@@ -464,6 +461,44 @@ static Token *read_int_literal(Token *cur, char *start)
   tok->val = val;
   tok->ty = ty;
   return tok;
+}
+
+static Token *read_flnum_literal(Token *cur, char *start)
+{
+  char *end;
+  double val = strtod(start, &end);
+
+  Type *ty;
+  if (*end == 'f' || *end == 'F')
+  {
+    ty = float_type;
+    end++;
+  }
+  else if (*end == 'l' || *end == 'L')
+  {
+    ty = double_type;
+    end++;
+  }
+  else
+  {
+    ty = double_type;
+  }
+
+  Token *tok = new_token(TK_NUM, cur, start, end - start);
+  tok->fval =  val;
+  tok->ty = ty;
+  return tok;
+}
+
+static Token *read_number(Token *cur, char *start)
+{
+  // Try to parse as an integer constants.
+  Token *tok = read_int_literal(cur, start);
+  if (!strchr(".eEfF", start[tok->len]))
+    return tok;
+  
+  // If it's not an integer, it must be a floating poiint constant.
+  return read_flnum_literal(cur, start);
 }
 
 // Convert input 'user_input' to token
@@ -514,6 +549,30 @@ static Token *tokenize(char *filename, int file_no, char *p)
       continue;
     }
 
+    // Numeric literal
+    if (isdigit(*p) || (p[0] == '.' && isdigit(p[1])))
+    {
+      cur = read_number(cur, p);
+      p += cur->len;
+      continue;
+    }
+
+    // Character literal
+    if (*p == '\'')
+    {
+      cur = read_char_literal(cur, p);
+      p += cur->len;
+      continue;
+    }
+
+    // String literal
+    if (*p == '"')
+    {
+      cur = read_string_literal(cur, p);
+      p += cur->len;
+      continue;
+    }
+
     // Keywords or multi-letter symbols
     char *kw = starts_with_reserved(p);
     if (kw)
@@ -537,35 +596,11 @@ static Token *tokenize(char *filename, int file_no, char *p)
       continue;
     }
 
-    // Character literal
-    if (*p == '\'')
-    {
-      cur = read_char_literal(cur, p);
-      p += cur->len;
-      continue;
-    }
-
     // Variables
     if (is_alpha(*p))
     {
       cur = new_token(TK_IDENT, cur, p, DUMMY_LEN);
       cur->len = var_len(p);
-      p += cur->len;
-      continue;
-    }
-
-    // Numeric literal
-    if (isdigit(*p))
-    {
-      cur = read_int_literal(cur, p);
-      p += cur->len;
-      continue;
-    }
-
-    // String literal
-    if (*p == '"')
-    {
-      cur = read_string_literal(cur, p);
       p += cur->len;
       continue;
     }

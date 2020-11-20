@@ -1159,8 +1159,20 @@ int main()
 
   { typedef int ;}
 
-
-  
+  0.0;
+  1.0;
+  3e+8;
+  0x10.1p13;
+  .1E4;
+  .1E4f;
+  1.4f;
+  assert(4, sizeof(1.2f), "sizeof(1.2f)");
+  assert(4, sizeof(1.2F), "sizeof(1.2F)");
+  assert(8, sizeof(1.2), "sizeof(1.2)");
+  assert(8, sizeof(1.2l), "sizeof(1.2l)");
+  assert(8, sizeof(1.2L), "sizeof(1.2L)");
+  assert(8, sizeof(.0), "sizeof(.0)");
+  assert(8, sizeof(0.), "sizeof(0.)");
 
 
   printf("OK\n");

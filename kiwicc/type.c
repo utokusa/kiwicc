@@ -10,6 +10,8 @@ Type *char_type = &(Type){TY_CHAR, 1, 1};
 Type *short_type = &(Type){TY_SHORT, 2, 2};
 Type *int_type = &(Type){TY_INT, 4, 4};
 Type *long_type = &(Type){TY_LONG, 8, 8};
+Type *float_type = &(Type){TY_FLOAT, 4, 4};
+Type *double_type = &(Type){TY_DOUBLE, 8, 8};
 Type *uchar_type = &(Type){TY_CHAR, 1, 1, true};
 Type *ushort_type = &(Type){TY_SHORT, 2, 2, true};
 Type *uint_type = &(Type){TY_INT, 4, 4, true};
@@ -31,9 +33,15 @@ bool is_integer(Type *ty)
          k == TY_INT || k == TY_LONG || k == TY_ENUM;
 }
 
+bool is_flonum(Type *ty)
+{
+  TypeKind k = ty->kind;
+  return k == TY_FLOAT || k == TY_DOUBLE;
+}
+
 static bool is_scalar(Type *ty)
 {
-  return is_integer(ty) || ty->base;
+  return is_integer(ty) || is_flonum(ty) || ty->base;
 }
 
 Type *copy_type(Type *ty)

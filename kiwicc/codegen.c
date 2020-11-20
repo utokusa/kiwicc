@@ -33,6 +33,14 @@ static char *xreg(Type *ty, int idx)
   return r[idx];
 }
 
+static char *freg(int idx)
+{
+  static char *r[] = {"xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13"};
+  if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
+    error("register out of range: %d", idx);
+  return r[idx];
+}
+
 static void load(Type *ty)
 {
   if (ty->kind == TY_ARR || ty->kind == TY_STRUCT)
@@ -204,7 +212,18 @@ static void gen_expr(Node *node)
   switch (node->kind)
   {
   case ND_NUM:
-    printf("  mov $%lu, %%%s\n", node->val, reg(top++));
+    if (node->ty->kind == TY_FLOAT)
+    {
+      printf("  mov $%u, %%eax\n", *(unsigned *)(&(node->fval)));
+      printf("  movd %%eax, %%%s\n", freg(top++));
+    }
+    else if (node->ty->kind == TY_DOUBLE)
+    {
+      printf("  mov $%lu, %%rax\n", *(unsigned long *)(&(node->fval)));
+      printf("  movq %%rax, %%%s\n", freg(top++));
+    }
+    else
+      printf("  mov $%lu, %%%s\n", node->val, reg(top++));
     return;
   case ND_VAR:
   case ND_MEMBER:

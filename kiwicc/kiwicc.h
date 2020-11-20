@@ -34,6 +34,7 @@ struct Token
   TokenKind kind; // Token kind
   Token *next;    // Next token
   long val;       // If kind is TK_NUM, its value
+  double fval;    // If kind is TK_NUM, its value
   char *loc;      // Token location
   int len;        // Length of the token
 
@@ -187,6 +188,7 @@ struct Node
 
   // Numeric
   long val;
+  double fval;
 };
 
 // Function
@@ -219,6 +221,8 @@ typedef enum
   TY_SHORT,
   TY_INT,
   TY_LONG,
+  TY_FLOAT,
+  TY_DOUBLE,
   TY_ENUM,
   TY_PTR,
   TY_FUNC,
@@ -274,6 +278,8 @@ extern Type *char_type;
 extern Type *short_type;
 extern Type *int_type;
 extern Type *long_type;
+extern Type *float_type;
+extern Type *double_type;
 extern Type *uchar_type;
 extern Type *ushort_type;
 extern Type *uint_type;
@@ -326,6 +332,8 @@ void codegen(Program *prog);
 // ********** type.c *************
 
 bool is_integer(Type *ty);
+
+bool is_flonum(Type *ty);
 
 Type *copy_type(Type *ty);
 

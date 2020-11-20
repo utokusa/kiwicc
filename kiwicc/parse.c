@@ -2405,7 +2405,14 @@ static Node *primary(Token **rest, Token *tok)
     error_tok(tok, "expected expression");
 
   *rest = tok->next;
-  Node *node = new_node_num(get_number(tok), tok);
+  Node *node;
+  if (is_flonum(tok->ty))
+  {
+    node = new_node(ND_NUM, tok);
+    node->fval = tok->fval;
+  }
+  else
+    node = new_node_num(get_number(tok), tok);
   node->ty = tok->ty;
   return node;
 }
