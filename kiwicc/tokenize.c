@@ -437,6 +437,8 @@ static Token *read_int_literal(Token *cur, char *start)
       ty = long_type;
     else if (u)
       ty = (val >> 32) ? ulong_type : uint_type;
+    else if (val >> 63)
+      ty = ulong_type;
     else
       ty = (val >> 31) ? long_type : int_type;
   }

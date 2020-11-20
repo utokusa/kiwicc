@@ -204,11 +204,7 @@ static void gen_expr(Node *node)
   switch (node->kind)
   {
   case ND_NUM:
-    if (node->ty->kind == TY_LONG)
-    {
-      printf("# gen_expr() TY_LONG node\n");
-    }
-    printf("  mov $%ld, %%%s\n", node->val, reg(top++));
+    printf("  mov $%lu, %%%s\n", node->val, reg(top++));
     return;
   case ND_VAR:
   case ND_MEMBER:
