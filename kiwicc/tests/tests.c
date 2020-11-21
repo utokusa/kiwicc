@@ -1246,6 +1246,36 @@ int main()
   assert(1, (float)1==(int)1.1, "(float)1==(int)1.1");
   assert(1, (double)1==(int)1.1, "(double)1==(unsigned long)1.1");
 
+  assert(4, sizeof(1f+2), "sizeof(1f+2)");
+  assert(8, sizeof(1.+2), "sizeof(1.+2)");
+  assert(4, sizeof(1f-2), "sizeof(1f-2)");
+  assert(8, sizeof(1.-2), "sizeof(1.-2)");
+  assert(4, sizeof(1f*2), "sizeof(1f*2)");
+  assert(8, sizeof(1.*2), "sizeof(1.*2)");
+  assert(4, sizeof(1f/2), "sizeof(1f/2)");
+  assert(8, sizeof(1./2), "sizeof(1./2)");
+
+  assert(5, 2.3f+2.8f, "2.3f+2.8f");
+  assert(-2, 2.3f-4.7f, "2.3-4.7f");
+  assert(6, 2.3f*2.7f, "2.3f*2.7f");
+  assert(10, 27.3f/2.7f, "27.3f/2.7f");
+
+  assert(5, 2.3f+2.8, "2.3f+2.8");
+  assert(-2, 2.3f-4.7, "2.3f-4.7");
+  assert(6, 2.3f*2.7, "2.3f*2.7");
+  assert(10, 27.3f/2.7, "27.3f/2.7");
+  
+  assert(5, 2.3+2.8f, "2.3+2.8f");
+  assert(-2, 2.3-4.7f, "2.3-4.7f");
+  assert(6, 2.3*2.7f, "2.3*2.7f");
+  assert(10, 27.3/2.7f, "27.3/2.7f");
+
+  assert(5, 2.3+2.8, "2.3+2.8");
+  assert(-2, 2.3-4.7, "2.3-4.7");
+  assert(6, 2.3*2.7, "2.3*2.7");
+  assert(10, 27.3/2.7, "27.3/2.7");
+  
+
   printf("OK\n");
   return 0;
 }

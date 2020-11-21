@@ -39,9 +39,14 @@ bool is_flonum(Type *ty)
   return k == TY_FLOAT || k == TY_DOUBLE;
 }
 
+bool is_numeric(Type *ty)
+{
+  return is_integer(ty) || is_flonum(ty);
+}
+
 static bool is_scalar(Type *ty)
 {
-  return is_integer(ty) || is_flonum(ty) || ty->base;
+  return is_numeric(ty) || ty->base;
 }
 
 Type *copy_type(Type *ty)

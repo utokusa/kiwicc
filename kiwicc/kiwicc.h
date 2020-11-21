@@ -146,7 +146,7 @@ struct Node
 {
   NodeKind kind;
   Token *tok; // Representative token
-  Type *ty;   // TYpe, e.g. int or pointer to int
+  Type *ty;   // Type, e.g. int or pointer to int
 
   Node *lhs;
   Node *rhs;
@@ -334,6 +334,8 @@ void codegen(Program *prog);
 bool is_integer(Type *ty);
 
 bool is_flonum(Type *ty);
+
+bool is_numeric(Type *ty);
 
 Type *copy_type(Type *ty);
 

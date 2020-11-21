@@ -455,14 +455,24 @@ static void gen_expr(Node *node)
   switch (node->kind)
   {
   case ND_ADD:
-    printf("  add %%%s, %%%s\n", rs, rd);
+    if (node->ty->kind == TY_FLOAT)
+      printf("  addss %%%s, %%%s\n", fs, fd);
+    else if (node->ty->kind == TY_DOUBLE)
+      printf("  addsd %%%s, %%%s\n", fs, fd);
+    else
+      printf("  add %%%s, %%%s\n", rs, rd);
     break;
   case ND_PTR_ADD:
     printf("  imul $%d, %%%s\n", node->ty->base->size, rs);
     printf("  add %%%s, %%%s\n", rs, rd);
     break;
   case ND_SUB:
-    printf("  sub %%%s, %%%s\n", rs, rd);
+    if (node->ty->kind == TY_FLOAT)
+      printf("  subss %%%s, %%%s\n", fs, fd);
+    else if (node->ty->kind == TY_DOUBLE)
+      printf("  subsd %%%s, %%%s\n", fs, fd);
+    else
+      printf("  sub %%%s, %%%s\n", rs, rd);
     break;
   case ND_PTR_SUB:
     printf("  imul $%d, %%%s\n", node->ty->base->size, rs);
@@ -477,10 +487,20 @@ static void gen_expr(Node *node)
     printf("  mov %%rax, %%%s\n", rd);
     break;
   case ND_MUL:
-    printf("  imul %%%s, %%%s\n", rs, rd);
+    if (node->ty->kind == TY_FLOAT)
+      printf("  mulss %%%s, %%%s\n", fs, fd);
+    else if (node->ty->kind == TY_DOUBLE)
+      printf("  mulsd %%%s, %%%s\n", fs, fd);
+    else
+      printf("  imul %%%s, %%%s\n", rs, rd);
     break;
   case ND_DIV:
-    divmod(node, rd, rs, "rax", "eax");
+    if (node->ty->kind == TY_FLOAT)
+      printf("  divss %%%s, %%%s\n", fs, fd);
+    else if (node->ty->kind == TY_DOUBLE)
+      printf("  divsd %%%s, %%%s\n", fs, fd);
+    else
+      divmod(node, rd, rs, "rax", "eax");
     break;
   case ND_MOD:
     divmod(node, rd, rs, "rdx", "edx");
