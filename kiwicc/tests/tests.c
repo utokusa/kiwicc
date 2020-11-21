@@ -1196,6 +1196,8 @@ int main()
   assert(3, (int)3.3, "(int)3.3");
   assert(3, (int)3.3f, "(int)3.3f");
   assert(3, (int)3.3L, "(int)3.3L");
+  assert(2, (int)((double)2.3f), "(int)((double)2.3f)");
+  assert(2, (int)((float)2.3), "(int)((float)2.3)");
 
   assert(3, ({ float x = 3.3; (int)x; }), "({ float x = 3.3; (int)x; })");
   assert(3, ({ float x = 3.3f; (int)x; }), "({ float x = 3.3f; (int)x; })");

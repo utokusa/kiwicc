@@ -146,6 +146,7 @@ static void cast(Type *from, Type *to)
       printf("  cvtss2sd %%%s, %%%s\n", fr, fr);
     else /* integer */
       printf("  cvttss2si %%%s, %%%s\n", fr, r);
+    return;
   }
 
   if (from->kind == TY_DOUBLE)
@@ -157,6 +158,7 @@ static void cast(Type *from, Type *to)
       printf("  cvtsd2ss %%%s, %%%s\n", fr, fr);
     else /* integer */
       printf("  cvttsd2si %%%s, %%%s\n", fr, r);
+    return;
   }
 
   if (to->kind == TY_FLOAT)
