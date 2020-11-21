@@ -214,7 +214,8 @@ static void gen_expr(Node *node)
   case ND_NUM:
     if (node->ty->kind == TY_FLOAT)
     {
-      printf("  mov $%u, %%eax\n", *(unsigned *)(&(node->fval)));
+      float fval_float = node->fval;
+      printf("  mov $%u, %%eax\n", *(unsigned *)(&fval_float));
       printf("  movd %%eax, %%%s\n", freg(top++));
     }
     else if (node->ty->kind == TY_DOUBLE)
