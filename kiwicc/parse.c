@@ -2330,6 +2330,8 @@ static Node *funcall(Token **rest, Token *tok)
       arg = new_cast(arg, param_ty);
       param_ty = param_ty->next;
     }
+    else if (arg->ty->kind == TY_FLOAT)
+      arg = new_cast(arg, double_type);
 
     Var *var = arg->ty->base ? new_lvar("", pointer_to(arg->ty->base))
                              : new_lvar("", arg->ty);
