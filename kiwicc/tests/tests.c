@@ -1274,7 +1274,13 @@ int main()
   assert(-2, 2.3-4.7, "2.3-4.7");
   assert(6, 2.3*2.7, "2.3*2.7");
   assert(10, 27.3/2.7, "27.3/2.7");
-  
+
+  assert(3, ({ float x=3.1; (int)x; }), "({ float x=3.1; (int)x; })");
+  assert(3, ({ double x=3.1; (int)x; }), "({ double x=3.1; (int)x; })");
+  assert(5, ({ float x=3.1; double y=2.3; (int)(x+y); }), "({ float x=3.1; double y=2.3; (int)(x+y); })");
+  assert(-1, ({ float x=3.1; double y=4.3; (int)(x-y); }), "({ float x=3.1; double y=4.3; (int)(x-y); })");
+  assert(7, ({ float x=3.1; double y=2.3; (int)(x*y); }), "({ float x=3.1; double y=2.3; (int)(x*y); })");
+  assert(3, ({ float x=9.1; double y=2.3; (int)(x/y); }), "({ float x=9.1; double y=2.3; (int)(x/y); })");
 
   printf("OK\n");
   return 0;
