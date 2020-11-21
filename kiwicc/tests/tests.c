@@ -230,6 +230,16 @@ _Noreturn noreturn_fn()
   exit(0);
 }
 
+float add_float3(float x, float y, float z)
+{
+  return x + y + z;
+}
+
+double add_double3(double x, double y, double z)
+{
+  return x + y + z;
+}
+
 typedef struct
 {
   int gp_offset;
@@ -1315,6 +1325,8 @@ int main()
 
   assert(6, add_float(2.65463, 3.65), "add_float(2.65463, 3.65)");
   assert(6, add_double(2.65463, 3.65), "add_double(2.65463, 3.65)");
+  assert(5, add_float3(1.1,2.3,2.2), "add_float3(1.1,2.3,2.2)");
+  assert(5, add_double3(1.1,2.3,2.2), "add_double3(1.1,2.3,2.2)");
 
 
   printf("OK\n");
