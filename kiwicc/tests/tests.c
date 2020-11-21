@@ -1173,6 +1173,39 @@ int main()
   assert(8, sizeof(1.2L), "sizeof(1.2L)");
   assert(8, sizeof(.0), "sizeof(.0)");
   assert(8, sizeof(0.), "sizeof(0.)");
+  assert(8, sizeof((double)1), "sizeof((double)1)");
+  assert(4, sizeof((float)1), "sizeof((float)1)");
+  assert(8, sizeof((double)1U), "sizeof((double)1U)");
+  assert(4, sizeof((float)1U), "sizeof((float)1U)");
+  assert(8, sizeof((double)1L), "sizeof((double)1L)");
+  assert(4, sizeof((float)1L), "sizeof((float)1L)");
+  assert(8, sizeof((double)34.4F), "sizeof((double)34.4F)");
+  assert(4, sizeof((float)34.4), "sizeof((float)34.4)");
+  assert(8, sizeof((long double)34.4F), "sizeof((long double)34.4F)");
+
+  assert(0, (_Bool)0.0f, "(_Bool)0.0f");
+  assert(1, (_Bool)0.1f, "(_Bool)0.1f");
+  assert(0, (_Bool)0.0, "(_Bool)0.0");
+  assert(1, (_Bool)0.1, "(_Bool)0.1");
+  assert(3, (char)3.3, "(char)3.3");
+  assert(3, (char)3.3f, "(char)3.3f");
+  assert(3, (short)3.3, "(short)3.3");
+  assert(3, (short)3.3f, "(short)3.3f");
+  assert(3, (unsigned short)3.3, "(unsigned short)3.3");
+  assert(3, (unsigned short)3.3f, "(unsigned short)3.3f");
+  assert(3, (int)3.3, "(int)3.3");
+  assert(3, (int)3.3f, "(int)3.3f");
+  assert(3, (int)3.3L, "(int)3.3L");
+
+  assert(3, ({ float x = 3.3; (int)x; }), "({ float x = 3.3; (int)x; })");
+  assert(3, ({ float x = 3.3f; (int)x; }), "({ float x = 3.3f; (int)x; })");
+  assert(3, ({ double x = 3.3f; (int)x; }), "({ double x = 3.3f; (int)x; })");
+  assert(3, ({ double x = 3.3f; (int)x; }), "({ double x = 3.3f; (int)x; })");
+  assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
+  assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
+
+
+
 
 
   printf("OK\n");

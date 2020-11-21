@@ -43,8 +43,20 @@ static char *freg(int idx)
 
 static void load(Type *ty)
 {
+  printf("# load\n");
   if (ty->kind == TY_ARR || ty->kind == TY_STRUCT)
     return;
+  
+  if (ty->kind == TY_FLOAT)
+  {
+    printf("  movss (%%%s), %%%s\n", reg(top - 1), freg(top - 1));
+    return;
+  }
+  if (ty->kind == TY_DOUBLE)
+  {
+    printf("  movsd (%%%s), %%%s\n", reg(top - 1), freg(top - 1));
+    return;
+  }
 
   char *rs = reg(top - 1);
   char *rd = xreg(ty, top - 1);
@@ -61,6 +73,7 @@ static void load(Type *ty)
 
 static void store(Type *ty)
 {
+  printf("# store\n");
   char *rd = reg(top - 1);
   char *rs = reg(top - 2);
   int sz = size_of(ty);
@@ -73,6 +86,10 @@ static void store(Type *ty)
       printf("  mov %%al, %d(%%%s)\n", i, rd);
     }
   }
+  else if (ty->kind == TY_FLOAT)
+    printf("  movss %%%s, (%%%s)\n", freg(top - 2), rd);
+  else if (ty->kind == TY_DOUBLE)
+    printf("  movsd %%%s, (%%%s)\n", freg(top - 2), rd);
   else if (sz == 1)
     printf("  mov %%%sb, (%%%s)\n", rs, rd);
   else if (sz == 2)
@@ -84,18 +101,73 @@ static void store(Type *ty)
   top--;
 }
 
+static void cmp_zero(Type * ty)
+{
+  if (ty->kind == TY_FLOAT)
+  {
+    // Set all of the single-precision floating-point values in xmm0 to zero.
+    printf("  xorps %%xmm0, %%xmm0\n");
+    printf("  ucomiss %%xmm0, %%%s\n", freg(--top));
+  }
+  else if (ty->kind == TY_DOUBLE)
+  {
+    // Set all of the single-precision floating-point values in xmm0 to zero.
+    printf("  xorpd %%xmm0, %%xmm0\n");
+    printf("  ucomisd %%xmm0, %%%s\n", freg(--top));
+  }
+  else
+    printf("  cmp $0, %%%s\n", reg(--top));
+
+}
+
 static void cast(Type *from, Type *to)
 {
   if (to->kind == TY_VOID)
     return;
 
   char *r = reg(top - 1);
+  char *fr = freg(top - 1);
 
   if (to->kind == TY_BOOL)
   {
-    printf("  cmp $0, %%%s\n", r);
-    printf("  setne %%%sb\n", r);
-    printf("  movzx %%%sb, %%%s\n", r, r);
+    cmp_zero(from);
+    printf("  setne %%%sb\n", reg(top));
+    printf("  movzx %%%sb, %%%s\n", reg(top), reg(top));
+    top++;
+    return;
+  }
+
+  if (from->kind == TY_FLOAT)
+  {
+    if (to->kind == TY_FLOAT)
+      return;
+    
+    if (to->kind == TY_DOUBLE)
+      printf("  cvtss2sd %%%s, %%%s\n", fr, fr);
+    else /* integer */
+      printf("  cvttss2si %%%s, %%%s\n", fr, r);
+  }
+
+  if (from->kind == TY_DOUBLE)
+  {
+    if (to->kind == TY_DOUBLE)
+      return;
+    
+    if (to->kind == TY_FLOAT)
+      printf("  cvtsd2ss %%%s, %%%s\n", fr, fr);
+    else /* integer */
+      printf("  cvttsd2si %%%s, %%%s\n", fr, r);
+  }
+
+  if (to->kind == TY_FLOAT)
+  {
+    printf("  cvtsi2ss %%%s, %%%s\n", r, fr);
+    return;
+  }
+
+  if (to->kind == TY_DOUBLE)
+  {
+    printf("  cvtsi2sd %%%s, %%%s\n", r, fr);
     return;
   }
 
@@ -228,6 +300,7 @@ static void gen_expr(Node *node)
     return;
   case ND_VAR:
   case ND_MEMBER:
+    printf("# ND_MEMBER\n");
     gen_addr(node);
     load(node->ty);
     return;
@@ -244,6 +317,7 @@ static void gen_expr(Node *node)
     gen_addr(node->lhs);
     return;
   case ND_DEREF:
+    printf("# ND_DEREF\n");
     gen_expr(node->lhs);
     load(node->ty);
     return;

@@ -555,7 +555,9 @@ static bool is_typename(Token *tok)
           "const",
           "volatile",
           "register",
-          "_Noreturn"
+          "_Noreturn",
+          "float",
+          "double"
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
@@ -607,6 +609,8 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     OTHER    = 1 << 12,
     SIGNED   = 1 << 13,
     UNSIGNED = 1 << 14,
+    FLOAT    = 1 << 15,
+    DOUBLE   = 1 << 16,
   };
 
   Type *ty = int_type;
@@ -700,6 +704,10 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
       counter |= SIGNED;
     else if (equal(tok, "unsigned"))
       counter |= UNSIGNED;
+    else if (equal(tok, "float"))
+      counter += FLOAT;
+    else if (equal(tok, "double"))
+      counter += DOUBLE;
     else
       error_tok(tok, "internal error");
 
@@ -752,6 +760,13 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     case UNSIGNED + LONG + LONG:
     case UNSIGNED + LONG + LONG + INT:
       ty = ulong_type;
+      break;
+    case FLOAT:
+      ty = float_type;
+      break;
+    case DOUBLE:
+    case LONG + DOUBLE:
+      ty = double_type;
       break;
     default:
       error_tok(tok, "invalid type");
