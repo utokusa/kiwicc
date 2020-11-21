@@ -35,3 +35,13 @@ int add_all3(int x, int y, int z, ...)
     x += y;
   }
 }
+
+float add_float(float x, float y)
+{
+  return x + y;
+}
+
+double add_double(double x, double y)
+{
+  return x + y;
+}

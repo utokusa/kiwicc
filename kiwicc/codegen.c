@@ -13,6 +13,7 @@ static char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *fargreg[] = {"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"};
 
 static char *reg(int idx)
 {
@@ -407,28 +408,47 @@ static void gen_expr(Node *node)
 
     // So far we only support up to 6 arguments.
     //
-    // We should push r10 and r11 becouse they are caller saved registers.
-    // RAX is set to 0 for varidic function.
-    printf("  push %%r10\n");
-    printf("  push %%r11\n");
+    // We should push r10, r11 and xmm8 ~ xmm13  becouse they are caller saved registers.
+    printf("  sub $64, %%rsp\n");
+    printf("  mov %%r10, (%%rsp)\n");
+    printf("  mov %%r11, 8(%%rsp)\n");
+    printf("  movsd %%xmm8, 16(%%rsp)\n");
+    printf("  movsd %%xmm9, 24(%%rsp)\n");
+    printf("  movsd %%xmm10, 32(%%rsp)\n");
+    printf("  movsd %%xmm11, 40(%%rsp)\n");
+    printf("  movsd %%xmm12, 48(%%rsp)\n");
+    printf("  movsd %%xmm13, 56(%%rsp)\n");
+
 
     // Load arguments from the stack.
+    int argp = 0, fargp = 0;
     for (int i = 0; i < node->nargs; i++)
     {
       Var *arg = node->args[i];
+
+      if (is_flonum(arg->ty))
+      {
+        if (arg->ty->kind == TY_FLOAT)
+          printf("  movss -%d(%%rbp), %%%s\n", arg->offset, fargreg[fargp++]);
+        else
+          printf("  movsd -%d(%%rbp), %%%s\n", arg->offset, fargreg[fargp++]);
+        continue;
+      }
+
       char *movop = arg->ty->is_unsigned ? "movz" : "movs";
       int sz = size_of(arg->ty);
       if (sz == 1)
-        printf("  %sxb -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[i]);
+        printf("  %sxb -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[argp++]);
       else if (sz == 2)
-        printf("  %sxw -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[i]);
+        printf("  %sxw -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[argp++]);
       else if (sz == 4)
-        printf("  movl -%d(%%rbp), %%%s\n", arg->offset, argreg32[i]);
+        printf("  movl -%d(%%rbp), %%%s\n", arg->offset, argreg32[argp++]);
       else
-        printf("  movq -%d(%%rbp), %%%s\n", arg->offset,  argreg64[i]);
+        printf("  movq -%d(%%rbp), %%%s\n", arg->offset,  argreg64[argp++]);
     }
+    // Set the number of vector registers used to rax
+    printf("  mov $%d, %%rax\n", fargp);
 
-    printf("  mov $0, %%rax\n");
     printf("  call %s\n", node->funcname);
 
     // The System V x86-64 ABI has a special rule regarding a boolean return
@@ -437,9 +457,25 @@ static void gen_expr(Node *node)
     if (node->ty->kind == TY_BOOL)
       printf("  movzx %%al, %%rax\n");
 
-    printf("  pop %%r11\n");
-    printf("  pop %%r10\n");
-    printf("  mov %%rax, %%%s\n", reg(top++));
+
+    // Restore caaller-saved registers
+    printf("  mov (%%rsp), %%r10\n");
+    printf("  mov 8(%%rsp), %%r11\n");
+    printf("  movsd 16(%%rsp), %%xmm8\n");
+    printf("  movsd 24(%%rsp), %%xmm9\n");
+    printf("  movsd 32(%%rsp), %%xmm10\n");
+    printf("  movsd 40(%%rsp), %%xmm11\n");
+    printf("  movsd 48(%%rsp), %%xmm12\n");
+    printf("  movsd 56(%%rsp), %%xmm13\n");
+    printf("  add $64, %%rsp\n");
+
+    if (node->ty->kind == TY_FLOAT)
+      printf("  movss %%xmm0, %%%s\n", freg(top++));
+    else if (node->ty->kind == TY_DOUBLE)
+      printf("  movsd %%xmm0, %%%s\n", freg(top++));
+    else
+      printf("  mov %%rax, %%%s\n", reg(top++));
+    
     return;
   }
   }

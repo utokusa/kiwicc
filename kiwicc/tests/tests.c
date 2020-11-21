@@ -240,6 +240,9 @@ typedef struct
 
 int add_all1(int x, ...);
 int add_all3(int x, int y, int z, ...);
+float add_float(float x, float y);
+double add_double(double x, double y);
+
 int sprintf(char *buf, char *fmt, ...);
 int vsprintf(char *buf, char *fmt, ...);
 
@@ -1310,7 +1313,8 @@ int main()
   assert(1, 34.f || 0.f, "34.f || 0.f");
   assert(0, 0 || 0.f, "0 || 0.f");
 
-
+  assert(6, add_float(2.65463, 3.65), "add_float(2.65463, 3.65)");
+  assert(6, add_double(2.65463, 3.65), "add_double(2.65463, 3.65)");
 
 
   printf("OK\n");
