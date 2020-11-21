@@ -1204,9 +1204,45 @@ int main()
   assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
   assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
 
+  assert(1, 2e3f==2e3f, "2e3f==2e3f");
+  assert(0, 2e3f==2e4f, "2e3f==2e4f");
+  assert(1, 2.0f==2f, "2.0f==2ƒ");
+  assert(1, 1.1f < 1.2f, "1.1f < 1.2ƒ");
+  assert(0, 1.1f < 1.0f, "1,1f < 1.0f");
+  assert(1, 1.3F <= 1.3F, "1.3F <= 1.3F");
+  assert(1, 1.1F <= 1.2F, "1.1F < 1.2F");
+  assert(0, 1.1F > 1.2F, "1.1F > 1.2F");
+  assert(1, 1.1F > 1.0F, "1,1F > 1.0F");
+  assert(1, 1.3F >= 1.3F, "1.3F >= 1.3F");
+  assert(0, 1.1F >= 1.2F, "1.1F > 1.2F");
 
+  assert(1, 2e3==2e3, "2e3==2e3");
+  assert(0, 2e3==2e4, "2e3==2e4");
+  assert(1, 2.0==2, "2.0==2");
+  assert(1, 1.1 < 1.2, "1.1 < 1.2");
+  assert(0, 1.1 < 1.0, "1,1 < 1.0");
+  assert(1, 1.3 <= 1.3, "1.3 <= 1.3");
+  assert(1, 1.1 <= 1.2, "1.1 < 1.2");
+  assert(0, 1.1 > 1.2, "1.1 > 1.2");
+  assert(1, 1.1 > 1.0, "1,1 > 1.0");
+  assert(1, 1.3 >= 1.3, "1.3 >= 1.3");
+  assert(0, 1.1 >= 1.2, "1.1 > 1.2");
 
+  assert(1, 2e3l==2e3l, "2e3l==2e3l");
+  assert(0, 2e3l==2e4l, "2e3l==2e4l");
+  assert(1, 2.0l==2l, "2.0l==2l");
+  assert(1, 1.1l < 1.2l, "1.1l < 1.2l");
+  assert(0, 1.1l < 1.0l, "1,1l < 1.0l");
+  assert(1, 1.3L <= 1.3L, "1.3L <= 1.3L");
+  assert(1, 1.1L <= 1.2L, "1.1L < 1.2L");
+  assert(0, 1.1L > 1.2L, "1.1L > 1.2L");
+  assert(1, 1.1L > 1.0L, "1,1L > 1.0L");
+  assert(1, 1.3L >= 1.3L, "1.3L >= 1.3L");
+  assert(0, 1.1L >= 1.2L, "1.1L > 1.2L");
 
+  assert(1, 1.1f < 1.2l, "1.1f < 1.2l");
+  assert(1, (float)1==(int)1.1, "(float)1==(int)1.1");
+  assert(1, (double)1==(int)1.1, "(double)1==(unsigned long)1.1");
 
   printf("OK\n");
   return 0;

@@ -446,6 +446,8 @@ static void gen_expr(Node *node)
 
   char *rd = xreg(node->lhs->ty, top - 2);
   char *rs = xreg(node->lhs->ty, top - 1);
+  char *fd = freg(top - 2);
+  char *fs = freg(top - 1);
   top--;
 
   switch (node->kind)
@@ -491,29 +493,65 @@ static void gen_expr(Node *node)
     printf("  xor %%%s, %%%s\n", rs, rd);
     return;
   case ND_EQ:
-    printf("  cmp %%%s, %%%s\n", rs, rd);
+    if (node->lhs->ty->kind == TY_FLOAT)
+      printf("  ucomiss %%%s, %%%s\n", fs, fd);
+    else if (node->lhs->ty->kind == TY_DOUBLE)
+      printf("  ucomisd %%%s, %%%s\n", fs, fd);
+    else
+      printf("  cmp %%%s, %%%s\n", rs, rd);
     printf("  sete %%al\n");
     printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_NE:
-    printf("  cmp %%%s, %%%s\n", rs, rd);
+    if (node->lhs->ty->kind == TY_FLOAT)
+      printf("  ucomiss %%%s, %%%s\n", fs, fd);
+    else if (node->lhs->ty->kind == TY_DOUBLE)
+      printf("  ucomisd %%%s, %%%s\n", fs, fd);
+    else
+      printf("  cmp %%%s, %%%s\n", rs, rd);
     printf("  setne %%al\n");
     printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_LT:
-    printf("  cmp %%%s, %%%s\n", rs, rd);
-    if (node->lhs->ty->is_unsigned)
+    if (node->lhs->ty->kind == TY_FLOAT)
+    {
+      printf("  ucomiss %%%s, %%%s\n", fs, fd);
       printf("  setb %%al\n");
+    }
+    else if (node->lhs->ty->kind == TY_DOUBLE)
+    {
+      printf("  ucomisd %%%s, %%%s\n", fs, fd);
+      printf("  setb %%al\n");
+    }
     else
-      printf("  setl %%al\n");
+    {
+      printf("  cmp %%%s, %%%s\n", rs, rd);
+      if (node->lhs->ty->is_unsigned)
+        printf("  setb %%al\n");
+      else
+        printf("  setl %%al\n");
+    }
     printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_LE:
-    printf("  cmp %%%s, %%%s\n", rs, rd);
-    if (node->lhs->ty->is_unsigned)
+    if (node->lhs->ty->kind == TY_FLOAT)
+    {
+      printf("  ucomiss %%%s, %%%s\n", fs, fd);
       printf("  setbe %%al\n");
-    else 
-      printf("  setle %%al\n");
+    }
+    else if (node->lhs->ty->kind == TY_DOUBLE)
+    {
+      printf("  ucomisd %%%s, %%%s\n", fs, fd);
+      printf("  setbe %%al\n");
+    }
+    else
+    {
+      printf("  cmp %%%s, %%%s\n", rs, rd);
+      if (node->lhs->ty->is_unsigned)
+        printf("  setbe %%al\n");
+      else
+        printf("  setle %%al\n");
+    }
     printf("  movzb %%al, %%%s\n", rd);
     break;
   case ND_SHL:

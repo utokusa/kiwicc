@@ -85,6 +85,11 @@ static Type *get_common_type(Type *ty1, Type *ty2)
   if (ty1->base)
     return pointer_to(ty1->base);
   
+  if (ty1->kind == TY_DOUBLE || ty2->kind == TY_DOUBLE)
+    return double_type;
+  if (ty1->kind == TY_FLOAT || ty2->kind == TY_FLOAT)
+    return float_type;
+  
   if (ty1->size < 4)
     ty1 = int_type;
   if (ty2->size < 4)
