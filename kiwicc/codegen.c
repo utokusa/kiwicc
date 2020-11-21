@@ -421,7 +421,14 @@ static void gen_expr(Node *node)
 
 
     // Load arguments from the stack.
-    int argp = 0, fargp = 0;
+
+    // Index of argreg and fargreg.
+    // Named according to "System V Application Binary Interface".
+    // https://www.uclibc.org/docs/psABI-x86_64.pdf
+    // g stands for general purpose registers.
+    // f stands for floating point registers
+    int gp = 0, fp = 0;
+
     for (int i = 0; i < node->nargs; i++)
     {
       Var *arg = node->args[i];
@@ -429,25 +436,25 @@ static void gen_expr(Node *node)
       if (is_flonum(arg->ty))
       {
         if (arg->ty->kind == TY_FLOAT)
-          printf("  movss -%d(%%rbp), %%%s\n", arg->offset, fargreg[fargp++]);
+          printf("  movss -%d(%%rbp), %%%s\n", arg->offset, fargreg[fp++]);
         else
-          printf("  movsd -%d(%%rbp), %%%s\n", arg->offset, fargreg[fargp++]);
+          printf("  movsd -%d(%%rbp), %%%s\n", arg->offset, fargreg[fp++]);
         continue;
       }
 
       char *movop = arg->ty->is_unsigned ? "movz" : "movs";
       int sz = size_of(arg->ty);
       if (sz == 1)
-        printf("  %sxb -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[argp++]);
+        printf("  %sxb -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[gp++]);
       else if (sz == 2)
-        printf("  %sxw -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[argp++]);
+        printf("  %sxw -%d(%%rbp), %%%s\n", movop, arg->offset, argreg32[gp++]);
       else if (sz == 4)
-        printf("  movl -%d(%%rbp), %%%s\n", arg->offset, argreg32[argp++]);
+        printf("  movl -%d(%%rbp), %%%s\n", arg->offset, argreg32[gp++]);
       else
-        printf("  movq -%d(%%rbp), %%%s\n", arg->offset,  argreg64[argp++]);
+        printf("  movq -%d(%%rbp), %%%s\n", arg->offset,  argreg64[gp++]);
     }
     // Set the number of vector registers used to rax
-    printf("  mov $%d, %%rax\n", fargp);
+    printf("  mov $%d, %%rax\n", fp);
 
     printf("  call %s\n", node->funcname);
 
@@ -894,23 +901,26 @@ static void emit_text(Program *prog)
     }
 
     // Save arguments to the stack
-    int argp = 0, fargp = 0;
+
+    // g stands for general purpose registers.
+    // f stands for floating point registers
+    int gp = 0, fp = 0;
     for (VarList *param = fn->params; param; param = param->next)
       if (is_flonum(param->var->ty))
-        fargp++;
+        fp++;
       else
-        argp++;
+        gp++;
 
     for (VarList *param = fn->params; param; param = param->next)
     {
       Var *var = param->var;
       if (var->ty->kind == TY_FLOAT)
-        printf("  movss %%%s, -%d(%%rbp)\n", fargreg[--fargp], var->offset);
+        printf("  movss %%%s, -%d(%%rbp)\n", fargreg[--fp], var->offset);
       else if (var->ty->kind == TY_DOUBLE)
-        printf("  movsd %%%s, -%d(%%rbp)\n", fargreg[--fargp], var->offset);
+        printf("  movsd %%%s, -%d(%%rbp)\n", fargreg[--fp], var->offset);
       else
       {
-        char *r = get_argreg(size_of(var->ty), --argp);
+        char *r = get_argreg(size_of(var->ty), --gp);
         printf("  mov %%%s, -%d(%%rbp)\n", r, var->offset);
       }
     }
