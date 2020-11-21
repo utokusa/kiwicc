@@ -1282,6 +1282,37 @@ int main()
   assert(7, ({ float x=3.1; double y=2.3; (int)(x*y); }), "({ float x=3.1; double y=2.3; (int)(x*y); })");
   assert(3, ({ float x=9.1; double y=2.3; (int)(x/y); }), "({ float x=9.1; double y=2.3; (int)(x/y); })");
 
+  assert(15, ({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; }), "({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; })");
+  assert(15, ({ int x=0, i=0; while(i<5.23) x+=i++; x; }), "({ int x=0, i=0; while(i<5.23) x+=i++; x; })");
+  assert(14, ({ float x=1.; if(x) x=14; else x=3; (int)x; }), "({ float x=1.; if(x) x=14; else x=3; (int)x; })");
+  assert(3, ({ float x=0.; if(x) x=14; else x=3; (int)x; }), "({ float x=0.; if(x) x=14; else x=3; (int)x; })");
+  assert(14, ({ double x=1.; if(x) x=14; else x=3; (int)x; }), "({ double x=1.; if(x) x=14; else x=3; (int)x; })");
+  assert(3, ({ double x=0.; if(x) x=14; else x=3; (int)x; }), "({ double x=0.; if(x) x=14; else x=3; (int)x; })");
+  assert(1, 1.f?1:0, "1.f?1:0");
+  assert(0, 0.f?1:0, "1.f?1:0");
+  assert(1, 1.?1:0, "1.?1:0");
+  assert(0, 0.?1:0, "1.?1:0");
+  assert(1, 1.l?1:0, "1.l?1:0");
+  assert(0, 0.l?1:0, "1.l?1:0");
+
+  assert(0, !54.3f, "54.3f");
+  assert(1, !0.f, "!0.f");
+  assert(0, !54.3, "54.3");
+  assert(1, !0., "!0.");
+  assert(1, 34. && 3.f, "34. && 3.f");
+  assert(0, 34. && 0.f, "34. && 0.f");
+  assert(0, 34.f && 0., "34.f && 0.");
+  assert(0, 34.f && 0.f, "34.f && 0.f");
+  assert(0, 0 && 0.f, "0 && 0.f");
+  assert(1, 34. || 3.f, "34. || 3.f");
+  assert(1, 34. || 0.f, "34. || 0.f");
+  assert(1, 34.f || 0., "34.f || 0.");
+  assert(1, 34.f || 0.f, "34.f || 0.f");
+  assert(0, 0 || 0.f, "0 || 0.f");
+
+
+
+
   printf("OK\n");
   return 0;
 }
