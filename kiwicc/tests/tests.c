@@ -1329,6 +1329,7 @@ int main()
   assert(5, add_double3(1.1,2.3,2.2), "add_double3(1.1,2.3,2.2)");
 
   assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
+  assert(0, ({ char buf[100]; fmt(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; fmt(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
 
 
   printf("OK\n");

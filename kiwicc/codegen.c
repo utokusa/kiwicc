@@ -257,14 +257,32 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
 }
 
 // Initialize va_list.
+/*
+https://www.uclibc.org/docs/psABI-x86_64.pdf
+typedef struct {
+  unsigned int gp_offset;
+  unsigned int fp_offset;
+  void *overflow_arg_area;
+  void *reg_save_area;
+} va_list[1];
+*/
+
 // Currently we only support up to 6 arguments
 // so only initialize gp_offset and reg_save_area
 static void builtin_va_start(Node *node)
 {
-  // For gp_offset.
-  int n = 0;
+  // g stands for general purpose registers.
+  // f stands for floating point registers
+  int gp = 0, fp = 0;
+
   for (VarList *vl = current_fn->params; vl; vl = vl->next)
-    n++;
+  {
+    Var *var = vl->var;
+    if (is_flonum(var->ty))
+      fp++;
+    else
+      gp++;
+  }
 
   // Store the pointer to va_list in rax.
   // Now node->args[0] should be va_list.
@@ -273,11 +291,16 @@ static void builtin_va_start(Node *node)
   // Initialize gp_offset.
   // gp_offset holds the byte offset from reg_save_area to where
   // the next available general purpose argument register is saved.
-  printf("  movq $%d, (%%rax)\n", n * 8);
+  printf("  movl $%d, (%%rax)\n", gp * 8);
+  // Initialize fp_offset.
+  // fp_offset holds the offset in bytes from reg_save_area to the
+  // place where the next available floating point argument register is saved.
+  printf("  movl $%d, 4(%%rax)\n", 48 + fp * 8);
+
   // Initialize reg_save_area.
   // reg_save_area points to the start of the register save area.
   printf("  mov %%rbp, 16(%%rax)\n");
-  printf("  subq $80 ,16(%%rax)\n");
+  printf("  subq $128 ,16(%%rax)\n");
   top++;
 }
 
@@ -892,12 +915,19 @@ static void emit_text(Program *prog)
     // if the function is the variadic
     if (fn->is_variadic)
     {
-      printf("  mov %%rdi, -80(%%rbp)\n");
-      printf("  mov %%rsi, -72(%%rbp)\n");
-      printf("  mov %%rdx, -64(%%rbp)\n");
-      printf("  mov %%rcx, -56(%%rbp)\n");
-      printf("  mov %%r8, -48(%%rbp)\n");
-      printf("  mov %%r9, -40(%%rbp)\n");
+      printf("  mov %%rdi, -128(%%rbp)\n");
+      printf("  mov %%rsi, -120(%%rbp)\n");
+      printf("  mov %%rdx, -112(%%rbp)\n");
+      printf("  mov %%rcx, -104(%%rbp)\n");
+      printf("  mov %%r8, -96(%%rbp)\n");
+      printf("  mov %%r9, -88(%%rbp)\n");
+
+      printf("  movsd %%xmm0, -80(%%rbp)\n");
+      printf("  movsd %%xmm1, -72(%%rbp)\n");
+      printf("  movsd %%xmm2, -64(%%rbp)\n");
+      printf("  movsd %%xmm3, -56(%%rbp)\n");
+      printf("  movsd %%xmm4, -48(%%rbp)\n");
+      printf("  movsd %%xmm5, -40(%%rbp)\n");
     }
 
     // Save arguments to the stack
