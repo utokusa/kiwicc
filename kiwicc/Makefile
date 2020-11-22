@@ -19,18 +19,16 @@ test: kiwicc
 	gcc -static -fno-common -o tmp tmp.s tmp2.o
 	./tmp
 
-# --- Not Available till flonum is fullly implemented. ---
+test-stage2: kiwicc-stage2
+	./kiwicc-stage2 tests/tests.c > tmp.s
+	gcc -xc -c -o tmp2.o tests/extern.c
+	gcc -static -fno-common -o tmp tmp.s tmp2.o
+	./tmp
 
-# test-stage2: kiwicc-stage2
-# 	./kiwicc-stage2 tests/tests.c > tmp.s
-# 	gcc -xc -c -o tmp2.o tests/extern.c
-# 	gcc -static -fno-common -o tmp tmp.s tmp2.o
-# 	./tmp
+test-stage3: kiwicc-stage3
+	diff kiwicc-stage2 kiwicc-stage3
 
-# test-stage3: kiwicc-stage3
-# 	diff kiwicc-stage2 kiwicc-stage3
-
-# test-all: test test-stage2 test-stage3
+test-all: test test-stage2 test-stage3
 
 test-gcc:
 	gcc tests/tests.c > tmp.s

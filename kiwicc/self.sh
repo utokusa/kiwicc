@@ -48,6 +48,8 @@ int isxdigit(int c);
 char *strstr(char *haystack, char *needle);
 long strtoul(char *nptr, char **endptr, int base);
 void exit(int code);
+double strtod(char *nptr, char **endptr);
+char strchr(char *s, int c);
 EOF
 
   grep -v '^#' kiwicc.h >> $TMP/$1
