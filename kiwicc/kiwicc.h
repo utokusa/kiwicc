@@ -287,6 +287,8 @@ extern Type *ulong_type;
 
 extern char *file_dir;
 
+extern bool opt_fpic;
+
 /*********************************************
 * ...function declarations...
 *********************************************/

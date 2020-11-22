@@ -71,4 +71,4 @@ kiwicc codegen.c
 kiwicc tokenize.c
 kiwicc type.c
 
-(cd $TMP; gcc -static -o ../$OUTPUT *.o)
+(cd $TMP; gcc -o ../$OUTPUT *.o)

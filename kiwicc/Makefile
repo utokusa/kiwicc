@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -g -O0 -no-pie -static
+CFLAGS=-std=c11 -g -O0 -fno-common
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS: .c=.0)
 
@@ -16,7 +16,13 @@ kiwicc-stage3: kiwicc-stage2
 test: kiwicc
 	./kiwicc tests/tests.c > tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
-	gcc -static -fno-common -o tmp tmp.s tmp2.o
+	gcc -o tmp tmp.s tmp2.o
+	./tmp
+
+test-nopic: kiwicc
+	./kiwicc tests/tests.c -fno-pic > tmp.s
+	gcc -xc -c -o tmp2.o tests/extern.c
+	gcc -static -o tmp tmp.s tmp2.o
 	./tmp
 
 test-stage2: kiwicc-stage2
@@ -28,17 +34,17 @@ test-stage2: kiwicc-stage2
 test-stage3: kiwicc-stage3
 	diff kiwicc-stage2 kiwicc-stage3
 
-test-all: test test-stage2 test-stage3
+test-all: test test-nopic test-stage2 test-stage3
 
 test-gcc:
 	gcc tests/tests.c > tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
-	gcc -static -fno-common -o tmp tmp.s tmp2.o
+	gcc -o tmp tmp.s tmp2.o
 	./tmp
 
 tmp-kiwicc: kiwicc
 	./kiwicc tests/tmp_test.c > tmp.s
-	gcc -static -o tmp tmp.s
+	gcc -o tmp tmp.s
 	echo './tmp ; echo $$?' | sh -
 
 tmp-as:
@@ -46,7 +52,7 @@ tmp-as:
 	echo './tmp ; echo $$?' | sh -
 
 tmp-gcc:
-	gcc -static -o tmp tests/tmp_test.c
+	gcc -o tmp tests/tmp_test.c
 	echo './tmp ; echo $$?' | sh -
 
 clean:

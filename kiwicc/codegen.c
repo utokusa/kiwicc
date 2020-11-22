@@ -196,11 +196,28 @@ static void gen_addr(Node *node)
   {
   case ND_VAR:
   {
+    printf("# gen_addr() / ND_VAR\n");
     Var *var = node->var;
     if (var->is_local)
-      printf("  lea -%d(%%rbp), %%%s\n", node->var->offset, reg(top++));
-    else
+    {
+      printf("  lea -%d(%%rbp), %%%s\n", var->offset, reg(top++));
+      return;
+    }
+    
+    if (!opt_fpic)
+    {
       printf("  mov $%s, %%%s\n", var->name, reg(top++));
+    }
+    else if (var->is_static)
+    {
+      // Set %RIP+addend to a register.
+      printf("  lea %s(%%rip), %%%s\n", var->name, reg(top++));
+    }
+    else
+    {
+      // Load a 64-bit address value from memory and set it to a register.
+      printf("  mov %s@GOTPCREL(%%rip), %%%s\n", var->name, reg(top++));
+    }
     return;
   }
   case ND_DEREF:
@@ -479,7 +496,10 @@ static void gen_expr(Node *node)
     // Set the number of vector registers used to rax
     printf("  mov $%d, %%rax\n", fp);
 
-    printf("  call %s\n", node->funcname);
+    if (opt_fpic)
+      printf("  call %s@PLT\n", node->funcname);
+    else
+      printf("  call %s\n", node->funcname);
 
     // The System V x86-64 ABI has a special rule regarding a boolean return
     // value that onlyu the lower 8 bits are valid for it and the upper
