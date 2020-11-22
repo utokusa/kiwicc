@@ -45,7 +45,7 @@ static char *freg(int idx)
 static void load(Type *ty)
 {
   println("# load");
-  if (ty->kind == TY_ARR || ty->kind == TY_STRUCT)
+  if (ty->kind == TY_ARR || ty->kind == TY_STRUCT || ty->kind == TY_FUNC)
     return;
   
   if (ty->kind == TY_FLOAT)
@@ -440,7 +440,8 @@ static void gen_expr(Node *node)
   }
   case ND_FUNCALL:
   {
-    if (!strcmp(node->funcname, "__builtin_va_start"))
+    if (node->lhs->kind == ND_VAR &&
+        !strcmp(node->lhs->var->name, "__builtin_va_start"))
     {
       builtin_va_start(node);
       return;
@@ -459,6 +460,7 @@ static void gen_expr(Node *node)
     println("  movsd %%xmm12, 48(%%rsp)");
     println("  movsd %%xmm13, 56(%%rsp)");
 
+    gen_expr(node->lhs);
 
     // Load arguments from the stack.
 
@@ -495,11 +497,7 @@ static void gen_expr(Node *node)
     }
     // Set the number of vector registers used to rax
     println("  mov $%d, %%rax", fp);
-
-    if (opt_fpic)
-      println("  call %s@PLT", node->funcname);
-    else
-      println("  call %s", node->funcname);
+    println("  call *%%%s", reg(--top));
 
     // The System V x86-64 ABI has a special rule regarding a boolean return
     // value that onlyu the lower 8 bits are valid for it and the upper

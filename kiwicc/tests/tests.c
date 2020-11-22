@@ -244,6 +244,11 @@ double add_double3(double x, double y, double z)
   return x + y + z;
 }
 
+int (*fnptr(void))(int)
+{
+  return ret3;
+}
+
 typedef struct
 {
   int gp_offset;
@@ -1337,6 +1342,12 @@ int main()
   assert(1, g34 - 1.5141 < 0.001, "g34 - 1.5141 < 0.001");
   assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");
   assert(1, g36 - 5.0 < 0.001, "g36 - 5.0 < 0.001");
+
+  assert(11, (add)(2,9), "(add)(2,9)");
+  assert(11, (&add)(2,9), "(add)(2,9)");
+  assert(5, ({ int (*fn)(int, int) = add; fn(2,3); }), "({ int (*fn)(int, int) = add; fn(2,3); })");
+  assert(3, fnptr()(), "fnptr()()");
+
 
   printf("OK\n");
   return 0;
