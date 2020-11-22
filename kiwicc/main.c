@@ -3,7 +3,7 @@
 char *file_dir;
 static FILE *output_file;
 static char *input_path;
-static char *output_path;
+static char *output_path = "-";
 
 bool opt_fpic = true;
 

@@ -1003,7 +1003,7 @@ void codegen(Program *prog)
 
   char **paths = get_input_files();
   for (int i = 0; paths[i]; i++)
-    println("  .file %d \"%s\"", i + 1, paths[i]);
+    println(".file %d \"%s\"", i + 1, paths[i]);
 
   emit_bss(prog);
   emit_data(prog);
