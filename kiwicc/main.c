@@ -1,30 +1,90 @@
 #include "kiwicc.h"
 
 char *file_dir;
+static FILE *output_file;
+static char *input_path;
+static char *output_path;
+
 bool opt_fpic = true;
+
+void println(char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(output_file, fmt, ap);
+  fprintf(output_file, "\n");
+}
+
+static void usage(int status)
+{
+  fprintf(stderr, "kiwicc [ -o <path> ] [ -fpic | -fno-pic] <file>\n");
+  exit(status);
+}
+
+static void parse_args(int argc, char **argv)
+{
+  for (int i = 1; i < argc; i++)
+  {
+    if (!strcmp(argv[i], "--help"))
+      usage(0);
+    
+    if (!strcmp(argv[i], "-o"))
+    {
+      if (!argv[++i])
+        usage(1);
+      output_path = argv[i];
+      continue;
+    }
+
+    if (!strncmp(argv[i], "-o", 2))
+    {
+      output_path = argv[i] + 2;
+      continue;
+    }
+
+    if (!strcmp(argv[i], "-fpic")|| !strcmp(argv[i], "-fPIC"))
+    {
+      opt_fpic = true;
+      continue;
+    }
+
+    if (!strcmp(argv[i], "-fno-pic") || !strcmp(argv[i], "-fno-PIC"))
+    {
+      opt_fpic = false;
+      continue;
+    }
+
+    if (argv[i][0] == '-' && argv[i][1] != '\0')
+      error("unknown argument: %s", argv[i]);
+
+    input_path = argv[i];
+  }
+
+  if (!input_path)
+    error("no input files");
+}
 
 int main(int argc, char **argv)
 {
-  if (argc < 2 || argc > 3)
+  parse_args(argc, argv);
+
+  // Open the output file.
+  if (strcmp(output_path, "-") == 0)
   {
-    fprintf(stderr, "Invalid number of argments.");
-    return 1;
+    output_file = stdout;
+  }
+  else
+  {
+    output_file = fopen(output_path, "w");
+    if (!output_file)
+      error("cannot open output file: %s: %s", output_path, strerror(errno));
   }
 
   // Get file directory
-  file_dir = get_dir(argv[1]);
-
-  // Get options
-  if (argc == 3)
-  {
-    if (!strcmp(argv[2], "-fpic") || !strcmp(argv[2], "-fPIC"))
-      opt_fpic = true;
-    if (!strcmp(argv[2], "-fno-pic") || !strcmp(argv[2], "-fno-PIC"))
-      opt_fpic = false;
-  }
+  file_dir = get_dir(input_path);
 
   // Tokenize
-  Token *token = tokenize_file(argv[1]);
+  Token *token = tokenize_file(input_path);
   if (!token)
     error("cannot open %s: %s", argv[1], strerror(errno));
 

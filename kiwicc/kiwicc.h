@@ -356,3 +356,7 @@ Type *struct_type();
 int size_of(Type *ty);
 
 void add_type(Node *node);
+
+// ********** main.c *************
+
+void println(char *fmt, ...);

@@ -14,19 +14,19 @@ kiwicc-stage3: kiwicc-stage2
 	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
 
 test: kiwicc
-	./kiwicc tests/tests.c > tmp.s
+	./kiwicc tests/tests.c -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -o tmp tmp.s tmp2.o
 	./tmp
 
 test-nopic: kiwicc
-	./kiwicc tests/tests.c -fno-pic > tmp.s
+	./kiwicc tests/tests.c -fno-pic -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -o tmp tmp.s tmp2.o
 	./tmp
 
 test-stage2: kiwicc-stage2
-	./kiwicc-stage2 tests/tests.c > tmp.s
+	./kiwicc-stage2 tests/tests.c -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -fno-common -o tmp tmp.s tmp2.o
 	./tmp
@@ -37,13 +37,13 @@ test-stage3: kiwicc-stage3
 test-all: test test-nopic test-stage2 test-stage3
 
 test-gcc:
-	gcc tests/tests.c > tmp.s
+	gcc tests/tests.c -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -o tmp tmp.s tmp2.o
 	./tmp
 
 tmp-kiwicc: kiwicc
-	./kiwicc tests/tmp_test.c > tmp.s
+	./kiwicc tests/tmp_test.c -o tmp.s
 	gcc -o tmp tmp.s
 	echo './tmp ; echo $$?' | sh -
 
