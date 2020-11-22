@@ -105,6 +105,7 @@ static Node *lvar_initializer(Token **rest, Token *tok, Var *var);
 static void *gvar_initializer(Token **rest, Token *tok, Var *var);
 static Node *compound_stmt(Token **Rest, Token *tok);
 static Node *stmt(Token **rest, Token *tok);
+static double eval_double(Node *node);
 static Node *expr(Token **rest, Token *tok);
 static long eval(Node *node);
 static long eval_addr(Node *node, Var **var);
@@ -511,6 +512,17 @@ write_gvar_data(Relocation *cur, Initializer *init, Type *ty, char *buf, int off
     rel->addend = val;
     cur->next = rel;
     return cur->next;
+  }
+
+  if (ty->kind == TY_FLOAT)
+  {
+    *(float *)(buf + offset) = eval_double(init->expr);
+    return cur;
+  }
+  if (ty->kind == TY_DOUBLE)
+  {
+    *(double *)(buf + offset) = eval_double(init->expr);
+    return cur;
   }
 
   write_buf(buf + offset, eval(init->expr), ty->size);
@@ -1537,10 +1549,47 @@ static Node *expr(Token **rest, Token *tok)
   return node;
 }
 
+static double eval_double(Node *node)
+{
+  add_type(node);
+
+  if (is_integer(node->ty))
+  {
+    return eval(node);
+  }
+
+  switch (node->kind)
+  {
+  case ND_ADD:
+    return eval_double(node->lhs) + eval_double(node->rhs);
+  case ND_SUB:
+    return eval_double(node->lhs) - eval_double(node->rhs);
+  case ND_MUL:
+    return eval_double(node->lhs) * eval_double(node->rhs);
+  case ND_DIV:
+    return eval_double(node->lhs) / eval_double(node->rhs);
+  case ND_COND:
+    return eval_double(node->cond) ? eval_double(node->then) : eval_double(node->els);
+  case ND_COMMA:
+    return eval_double(node->rhs);
+  case ND_CAST:
+    if (is_flonum(node->lhs->ty))
+      return eval_double(node->lhs);
+    return eval(node->lhs);
+  case ND_NUM:
+    return node->fval;
+  }
+
+  error_tok(node->tok, "not a constant expression");
+}
+
 // Evaluate a given node as a constant expression.
 static long eval(Node *node)
 {
   add_type(node);
+
+  if (is_flonum(node->ty))
+    return eval_double(node);
 
   switch (node->kind)
   {

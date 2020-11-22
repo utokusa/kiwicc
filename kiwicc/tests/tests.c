@@ -72,6 +72,10 @@ char *g32 = {"foobar"};
 #define MY_INT int
 #define RET3 ret3()
 
+float g34 = 1.5141;
+double g35 = 0.0 ? 5 : (0, 1 + 3.5 * 2.2 / 2  - 1.0 );
+double g36 = 1.0 + 3. ? ((double)3 + (float)2 ) : 345;
+
 typedef struct Tree
 {
   int val;
@@ -1330,7 +1334,9 @@ int main()
 
   assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
   assert(0, ({ char buf[100]; fmt(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; fmt(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
-
+  assert(1, g34 - 1.5141 < 0.001, "g34 - 1.5141 < 0.001");
+  assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");
+  assert(1, g36 - 5.0 < 0.001, "g36 - 5.0 < 0.001");
 
   printf("OK\n");
   return 0;
