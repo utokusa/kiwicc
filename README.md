@@ -6,6 +6,6 @@ https://www.sigbus.info/compilerbook
 
 ## Setup
 ```bash
-docker build -t kiwicc_dev docker
+docker build -t kiwicc_dev .
 ```
 

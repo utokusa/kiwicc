@@ -6,5 +6,4 @@ kiwicc/kiwicc
 .DS_Store
 .vscode
 core
-work/
 kiwicc-stage*
