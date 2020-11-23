@@ -248,6 +248,19 @@ static Token *add_hideset(Token *tok, Hideset *hs) {
   return head.next;
 }
 
+static Hideset *hideset_intersection(Hideset *hs1, Hideset *hs2)
+{
+  Hideset head = {};
+  Hideset *cur = &head;
+
+  for (; hs1; hs1 = hs1->next)
+  {
+    if (hideset_contains(hs2, hs1->name, strlen(hs1->name)))
+      cur = cur->next = new_hideset(hs1->name);
+  }
+  return head.next;
+}
+
 static MacroArg *read_macro_arg_one(Token **rest, Token *tok)
 {
   Token head = {};
@@ -305,7 +318,8 @@ static MacroArg *read_macro_args(Token **rest, Token *tok, MacroParam *params)
   if (pp)
     error_tok(start, "too many arguments");
 
-  *rest = skip(tok, ")");
+  skip(tok, ")");
+  *rest = tok;
   return head.next;
 }
 
@@ -385,14 +399,21 @@ static bool expand_macro(Token **new_tok, Token *tok)
     // If a funclike macro token is not followed by an argument list,
     // treat it as a normal identifier.
 
-    Token *ident = tok;
+    Token *macro_name = tok;
     MacroArg *args = read_macro_args(&tok, tok, m->params);
+    Token *rparen = tok;
     // e.g.
     // MACRO(<args>)<rest of the code>
     // ^ ident
-    //              ^ tok
-    replace(ident, subst(m->body, args), tok);
-    *new_tok = ident;
+    //             ^ rparen
+
+    Hideset *hs = hideset_intersection(macro_name->hideset, rparen->hideset);
+    hs = hideset_union(hs, new_hideset(m->name));
+
+    Token *body = subst(m->body, args);
+    body = add_hideset(body, hs);
+    replace(macro_name, body, rparen->next);
+    *new_tok = macro_name;
     return true;
   }
   *new_tok = tok;

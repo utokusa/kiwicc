@@ -249,6 +249,8 @@ int (*fnptr(void))(int)
   return ret3;
 }
 
+int M10(int x) {return x*x; }
+
 typedef struct
 {
   int gp_offset;
@@ -1495,6 +1497,10 @@ int main()
 #define M9(x,y) x y
   assert(9, M9(,3+6), "M9(,3+6)");
   assert(9, M9(3+6, ), "M9(3+6, )");
+
+#define M10(x) M11(x) * x
+#define M11(x) M10(x) + 3
+  assert(10, M10(2), "M10(2)");
 
   
   printf("OK\n");
