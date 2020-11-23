@@ -1455,8 +1455,26 @@ int main()
   m = 3;
 #endif
   assert(3, m, "m");
-  }
 
+#ifdef M7
+  m = 4;
+#endif
+  assert(4, m, "m");
+
+#ifdef THIS_MACRO_DOES_NOT_EXIST
+  m = 0;
+#else
+  m = 5;
+#endif
+  assert(5, m, "m");
+
+#ifndef THIS_MACRO_DOES_NOT_EXIST
+  m = 6;
+#else
+  m = 0;
+#endif
+  assert(6, m, "m");
+  }
 
   
   printf("OK\n");
