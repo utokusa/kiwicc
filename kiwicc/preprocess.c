@@ -25,7 +25,9 @@ typedef struct CondIncl CondIncl;
 struct CondIncl
 {
   CondIncl *next;
+  enum { IN_THEN, IN_ELSE } ctx;
   Token *tok;
+  bool included;
 };
 
 Macro *macros = NULL;
@@ -206,7 +208,25 @@ static Token *new_eof(Token *tok)
   return t;
 }
 
-// Skip until next `#endif`.
+static Token *skip_cond_incl2(Token *tok)
+{
+  while (tok->kind != TK_EOF)
+  {
+    if (equal(tok, "#") && equal(tok->next, "if"))
+    {
+      tok = skip_cond_incl2(tok->next->next);
+      continue;
+    }
+
+    if (equal(tok, "#") && equal(tok->next, "endif"))
+      return tok->next->next;
+    
+    tok = tok->next;
+  }
+  return tok;
+}
+
+// Skip until next `#else` or `#endif`.
 // Nested `#if` and `#endif` are skipped.
 static Token *skip_cond_incl(Token *tok)
 {
@@ -214,11 +234,11 @@ static Token *skip_cond_incl(Token *tok)
   {
     if (equal(tok, "#") && equal(tok->next, "if"))
     {
-      tok = skip_cond_incl(tok->next->next);
-      tok = tok->next;
+      tok = skip_cond_incl2(tok->next->next);
       continue;
     }
-    if (equal(tok, "#") && equal(tok->next, "endif"))
+    if (equal(tok, "#") && 
+        (equal(tok->next, "else") || equal(tok->next, "endif")))
       break;
     tok = tok->next;
   }
@@ -252,11 +272,13 @@ static long eval_const_expr(Token **rest, Token *tok)
 }
 
 // Push `#if` to cond_incl stack
-static CondIncl *push_cond_incl(Token *tok)
+static CondIncl *push_cond_incl(Token *tok, bool included)
 {
   CondIncl *ci = calloc(1, sizeof(CondIncl));
   ci->next = cond_incl;
+  ci->ctx = IN_THEN;
   ci->tok = tok;
+  ci->included = included;
   cond_incl = ci;
   return ci;
 }
@@ -326,8 +348,21 @@ Token *preprocess(Token *tok)
     if (equal(tok, "if"))
     {
       long val = eval_const_expr(&tok, tok->next);
-      push_cond_incl(hash);
+      push_cond_incl(hash, val);
       if (!val)
+        tok = skip_cond_incl(tok);
+      continue;
+    }
+
+    // #else directive
+    if (equal(tok, "else"))
+    {
+      if (!cond_incl || cond_incl->ctx == IN_ELSE)
+        error_tok(hash, "stray #else");
+      cond_incl->ctx = IN_ELSE;
+      tok = skip_line(tok->next);
+
+      if (cond_incl->included)
         tok = skip_cond_incl(tok);
       continue;
     }
