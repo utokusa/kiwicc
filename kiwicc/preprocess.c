@@ -327,7 +327,7 @@ static Token *subst(Token *tok, MacroArg *args)
     if (arg)
     {
       arg = preprocess2(arg);
-      for (Token *t = arg; t->kind != TK_EOF; t = t->next)
+      for (Token *t = arg; t && t->kind != TK_EOF; t = t->next)
         cur = cur->next = copy_token(t);
       tok = tok->next;
       continue;
