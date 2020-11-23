@@ -1385,6 +1385,53 @@ int main()
 #endif
     assert(8, m, "m");
   }
+
+  {
+    int m = 5;
+#if 0
+    m = 0;
+#elif 0
+    m = 0;
+#elif 1
+    m=100;
+#else
+    m = 0;
+#endif
+    assert(100, m, "m");
+
+#if 0
+    m = 0;
+#elif 0
+    m = 0;
+#elif 1
+    m=101;
+#elif 1
+    m = 0;
+#else
+    m = 0;
+#endif
+    assert(101, m, "m");
+
+#if 0
+    m = 0;
+#elif 0
+    m = 0;
+#elif 1
+# if 0
+    m = 0;
+# elif 1
+    m = 102;
+# else
+    m = 0;
+# endif
+#elif 1
+    m = 0;
+#else
+    m = 0;
+#endif
+    assert(102, m, "m");
+
+  }
   
   printf("OK\n");
   return 0;
