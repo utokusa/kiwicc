@@ -16,6 +16,9 @@ char *current_input;
 // A list of all input files.
 static char **input_files;
 
+// True if the current position follows a space character.
+static bool has_space;
+
 // Report error
 // Take the same arguments as printf()
 void error(char *fmt, ...)
@@ -217,7 +220,8 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   tok->filename = current_filename;
   tok->input = current_input;
   tok->at_bol = at_bol;
-  at_bol = false;
+  tok->has_space = has_space;
+  at_bol = has_space = false;
   cur->next = tok;
   return tok;
 }
@@ -513,6 +517,7 @@ static Token *tokenize(char *filename, int file_no, char *p)
   int DUMMY_LEN = 1;
 
   at_bol = true;
+  has_space = false;
 
   while (*p)
   {
@@ -522,6 +527,7 @@ static Token *tokenize(char *filename, int file_no, char *p)
       p += 2;
       while (*p != '\n')
         p++;
+      has_space = true;
       continue;
     }
 
@@ -532,6 +538,7 @@ static Token *tokenize(char *filename, int file_no, char *p)
       if (!q)
         error_at(p, "unclosed block comment");
       p = q + 2;
+      has_space = true;
       continue;
     }
 
@@ -540,6 +547,7 @@ static Token *tokenize(char *filename, int file_no, char *p)
     {
       ++p;
       at_bol = true;
+      has_space = false;
       continue;
     }
 
@@ -547,6 +555,7 @@ static Token *tokenize(char *filename, int file_no, char *p)
     if (isspace(*p))
     {
       ++p;
+      has_space = true;
       continue;
     }
 

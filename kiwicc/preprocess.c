@@ -11,6 +11,7 @@ struct Macro
   char *name;
   Token *body;
   Macro *next;
+  bool is_objlike; // Object-like or function-like
   bool deleted;
 };
 
@@ -72,13 +73,45 @@ static char *concat(char *s1, char *s2)
   return s;
 }
 
+static Token *undef_macro(Token *tok, Macro **macros)
+{
+  if (tok->kind != TK_IDENT)
+    error_tok(tok, "expected an identifier");
+  Macro *m = calloc(1, sizeof(Macro));
+  m->name = strndup(tok->loc, tok->len);
+  m->next = *macros;
+  m->deleted = true;
+  *macros = m;
+
+  while (!tok->at_bol)
+    tok = tok->next;
+
+  return tok;
+}
+
 static Token *push_macro(Token *tok, Macro **macros)
 {
   if (tok->kind != TK_IDENT)
     error_tok(tok, "expected an identifier");
   Macro *m = calloc(1, sizeof(Macro));
   m->name = strndup(tok->loc, tok->len);
-  m->body = tok->next;
+
+  tok = tok->next;
+
+  if (!tok->has_space && equal(tok, "("))
+  {
+    // Function-like macro
+    tok = skip(tok->next, ")");
+    m->is_objlike = false;
+  }
+  else
+  {
+    // Object-like macro
+    m->is_objlike = true;
+  }
+  
+
+  m->body = tok;
   m->next = *macros;
   *macros = m;
 
@@ -180,8 +213,9 @@ static Token *add_hideset(Token *tok, Hideset *hs) {
 }
 
 // If tok is a macro, expand it and return true.
-// If not, just return false. 
-static bool expand_macro(Token **rest, Token *tok)
+// In this case, assign the head of the macro body to *new_tok.
+// If not, just return false and assign tok to *new_tok
+static bool expand_macro(Token **new_tok, Token *tok)
 {
   if (tok->kind == TK_IDENT)
   {
@@ -189,17 +223,42 @@ static bool expand_macro(Token **rest, Token *tok)
       return false;
     
     Macro *m = find_macro(tok, macros);
-    if (m)
+    if (!m)
+    {
+      *new_tok = tok;
+      return false;
+    }
+
+    // Object-like macro
+    if (m->is_objlike)
     {
       Hideset *hs = hideset_union(tok->hideset, new_hideset(m->name));
       Token *body = add_hideset(m->body, hs);
       replace(tok, body);
-      *rest = tok;
+      *new_tok = tok;
       return true;
     }
-  }
 
-  *rest = tok;
+    // Function-like macro
+
+    if (!equal(tok->next, "("))
+      return false;
+    
+    // If a funclike macro token is not followed by an argument list,
+    // treat it as a normal identifier.
+
+    Token *ident = tok;
+    tok = skip(tok->next->next, ")");
+    // e.g.
+    // MACRO()<rest of the code>
+    // ^ ident
+    //        ^ tok
+    replace(ident, m->body);
+    ident->next = tok;
+    *new_tok = ident;
+    return true;
+  }
+  *new_tok = tok;
   return false;
 }
 
@@ -326,9 +385,8 @@ static Token *preprocess2(Token *tok)
     if (equal(tok, "undef"))
     {
       tok = tok->next;
-      tok = cur->next = push_macro(tok, &macros);
-      Macro *top = macros;
-      top->deleted = true;
+      tok = cur->next = undef_macro(tok, &macros);
+      continue;
     }
 
     // #include directive

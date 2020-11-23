@@ -48,6 +48,7 @@ struct Token
   int file_no;      // File number for .loc directive
   int line_no;      // Line number
   bool at_bol;      // True if this token is at beginning of line
+  bool has_space;    // True if this token follows a space cha
   Hideset *hideset; // For macro expansionl
 };
 

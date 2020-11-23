@@ -1476,6 +1476,14 @@ int main()
   assert(6, m, "m");
   }
 
+#define M8() 1
+  int M8 = 5;
+  assert(1, M8(), "M8()");
+  assert(5, M8, "M8");
+#define M8 ()
+  assert(3, ret3 M8, "ret3 M8");
+
+
   
   printf("OK\n");
   return 0;

@@ -80,6 +80,8 @@ static void print_tokens(Token *tok)
   {
     if (line > 1 && tok->at_bol)
       printf("\n");
+    if (tok->has_space && !tok->at_bol)
+      printf(" ");
     printf(" %.*s", tok->len, tok->loc);
     line++;
   }
