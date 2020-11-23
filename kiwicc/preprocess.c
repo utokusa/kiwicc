@@ -4,6 +4,22 @@
 * ...preprocessor...
 *********************************************/
 
+typedef struct MacroParam MacroParam;
+struct MacroParam
+{
+  MacroParam *next;
+  char *name;
+};
+
+typedef struct MacroArg MacroArg;
+struct MacroArg
+{
+  MacroArg *next;
+  char *name;
+  Token *tok;
+  bool is_last; // Used to check the number of args.
+};
+
 // Object-like macro
 typedef struct Macro Macro;
 struct Macro
@@ -12,6 +28,7 @@ struct Macro
   Token *body;
   Macro *next;
   bool is_objlike; // Object-like or function-like
+  MacroParam *params;
   bool deleted;
 };
 
@@ -33,6 +50,8 @@ struct CondIncl
 };
 
 static Token *preprocess2(Token *tok);
+static Token *copy_line(Token **rest, Token *tok);
+static Token *new_eof(Token *tok);
 
 Macro *macros = NULL;
 
@@ -89,6 +108,27 @@ static Token *undef_macro(Token *tok, Macro **macros)
   return tok;
 }
 
+static MacroParam *read_macro_params(Token **rest, Token *tok)
+{
+  MacroParam head = {};
+  MacroParam *cur = &head;
+
+  while (!equal(tok, ")"))
+  {
+    if (cur != &head)
+      tok = skip(tok, ",");
+    
+    if (tok->kind != TK_IDENT)
+      error_tok(tok, "expected an identifier");
+    MacroParam *m = calloc(1, sizeof(MacroParam));
+    m->name = strndup(tok->loc, tok->len);
+    cur = cur->next = m;
+    tok = tok->next;
+  }
+  *rest = tok->next;
+  return head.next;
+}
+
 static Token *push_macro(Token *tok, Macro **macros)
 {
   if (tok->kind != TK_IDENT)
@@ -101,7 +141,8 @@ static Token *push_macro(Token *tok, Macro **macros)
   if (!tok->has_space && equal(tok, "("))
   {
     // Function-like macro
-    tok = skip(tok->next, ")");
+    MacroParam *params = read_macro_params(&tok, tok->next);
+    m->params = params;
     m->is_objlike = false;
   }
   else
@@ -109,14 +150,10 @@ static Token *push_macro(Token *tok, Macro **macros)
     // Object-like macro
     m->is_objlike = true;
   }
-  
 
-  m->body = tok;
+  m->body = copy_line(&tok, tok);
   m->next = *macros;
   *macros = m;
-
-  while (!tok->at_bol)
-    tok = tok->next;
 
   return tok;
 }
@@ -152,10 +189,9 @@ static Token *copy_macro_body(Token *body, Token **last)
 }
 
 // Replace macro
-static void replace(Token *tok, Token *macro_body)
+static void replace(Token *tok, Token *macro_body, Token *next)
 {
   Token *last = NULL;
-  Token *next = tok->next;
   Token *body_head = copy_macro_body(macro_body, &last);
   *tok = *body_head;
   if (body_head == last)
@@ -212,6 +248,101 @@ static Token *add_hideset(Token *tok, Hideset *hs) {
   return head.next;
 }
 
+static MacroArg *read_macro_arg_one(Token **rest, Token *tok)
+{
+  Token head = {};
+  Token *cur = &head;
+
+  while (!equal(tok, ",") && !equal(tok, ")"))
+  {
+    if (tok->kind == TK_EOF)
+      error_tok(tok, "premature end of input");
+    cur = cur->next = copy_token(tok);
+    tok = tok->next;
+  }
+
+  bool is_last = equal(tok, ")");
+
+  cur->next = new_eof(tok);
+
+  MacroArg *arg = calloc(1, sizeof(MacroArg));
+  arg->tok = head.next;
+  arg->is_last = is_last;
+  *rest = tok;
+  return arg;
+}
+
+static MacroArg *read_macro_args(Token **rest, Token *tok, MacroParam *params)
+{
+  // MACRO_NAME(<args...>)
+  // ^
+  // start = tok
+  Token *start = tok;
+  // MACRO_NAME(<args...>)
+  //            ^
+  //            tok (points the first argument)
+  tok = tok->next->next;
+
+  MacroArg head = {};
+  MacroArg *cur = &head;
+
+  MacroParam *pp = params;
+  for (; pp && !cur->is_last ; pp = pp->next)
+  {
+    if (cur != &head)
+      tok = skip(tok, ",");
+    cur = cur->next = read_macro_arg_one(&tok, tok);
+    cur->name = pp->name;
+  }
+
+  if (pp)
+    error_tok(start, "too many arguments");
+
+  *rest = skip(tok, ")");
+  return head.next;
+}
+
+static Token *find_arg(MacroArg *args, Token *tok)
+{
+  for (MacroArg *ap = args; ap; ap = ap->next)
+  {
+    if (tok->len == strlen(ap->name) && !strncmp(tok->loc, ap->name, tok->len))
+      return ap->tok;
+  }
+  return NULL;
+}
+
+// Replace func-like macro parameters with given arguments.
+static Token *subst(Token *tok, MacroArg *args)
+{
+  Token head = {};
+  Token *cur = &head;
+
+  while (tok->kind != TK_EOF)
+  {
+    Token *arg = find_arg(args, tok);
+
+    // Handle a macro token. Macro arguments are completely
+    // macro-expanded before they are substituted into a macro body.
+    if (arg)
+    {
+      arg = preprocess2(arg);
+      for (Token *t = arg; t->kind != TK_EOF; t = t->next)
+        cur = cur->next = copy_token(t);
+      tok = tok->next;
+      continue;
+    }
+
+    // Handle a non-macro token.
+    cur = cur->next = copy_token(tok);
+    tok = tok->next;
+    continue;
+  }
+
+  cur->next = tok;
+  return head.next;
+}
+
 // If tok is a macro, expand it and return true.
 // In this case, assign the head of the macro body to *new_tok.
 // If not, just return false and assign tok to *new_tok
@@ -234,7 +365,7 @@ static bool expand_macro(Token **new_tok, Token *tok)
     {
       Hideset *hs = hideset_union(tok->hideset, new_hideset(m->name));
       Token *body = add_hideset(m->body, hs);
-      replace(tok, body);
+      replace(tok, body, tok->next);
       *new_tok = tok;
       return true;
     }
@@ -248,13 +379,12 @@ static bool expand_macro(Token **new_tok, Token *tok)
     // treat it as a normal identifier.
 
     Token *ident = tok;
-    tok = skip(tok->next->next, ")");
+    MacroArg *args = read_macro_args(&tok, tok, m->params);
     // e.g.
-    // MACRO()<rest of the code>
+    // MACRO(<args>)<rest of the code>
     // ^ ident
-    //        ^ tok
-    replace(ident, m->body);
-    ident->next = tok;
+    //              ^ tok
+    replace(ident, subst(m->body, args), tok);
     *new_tok = ident;
     return true;
   }
@@ -311,7 +441,7 @@ static Token *skip_cond_incl(Token *tok)
 
 // Copy all tokens until the next new line.
 // Copied tokens will terminated with an EOF token.
-static Token *copy_line (Token **rest, Token *tok)
+static Token *copy_line(Token **rest, Token *tok)
 {
   Token head = {};
   Token *cur = &head;

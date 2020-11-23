@@ -1483,6 +1483,14 @@ int main()
 #define M8 ()
   assert(3, ret3 M8, "ret3 M8");
 
+#define M9(x,y) x+y
+  assert(9, M9(3,6), "M9(3, 6)");
+#define M9(x, y) x*y
+  assert(18, M9(3, 6), "M9(3, 6)");
+#define M9(x,y,z) x*y+z
+  assert(20, M9(3, 6, 2), "M9(3, 6, 2)");
+#define M9(x, y) (x)*(y)
+  assert(18, M9(1+2, 2*2+2), "M9(1+2, 2*2+2)");
 
   
   printf("OK\n");
