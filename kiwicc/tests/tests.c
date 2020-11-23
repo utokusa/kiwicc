@@ -1348,7 +1348,21 @@ int main()
   assert(5, ({ int (*fn)(int, int) = add; fn(2,3); }), "({ int (*fn)(int, int) = add; fn(2,3); })");
   assert(3, fnptr()(), "fnptr()()");
 
-
+#if 0 * 1 + 2 - 2
+#include "file/which/does/not/exist"
+  assert(0, 1, "1");
+#endif
+  {
+    int m = 0;
+#if 1
+    m = 5;
+#if 1 * 1
+    m++;
+#endif
+#endif
+    assert(6, m, "m");
+  }
+  
   printf("OK\n");
   return 0;
 }

@@ -111,7 +111,6 @@ static long eval(Node *node);
 static long eval_addr(Node *node, Var **var);
 static long eval_rval(Node *node, Var **var);
 static Node *assign(Token **rest, Token *tok);
-static long const_expr(Token **rest, Token *tok);
 static Node *conditional(Token **rest, Token *tok);
 static Node *logor(Token **rest, Token *tok);
 static Node *logand(Token **rest, Token *tok);
@@ -1725,7 +1724,7 @@ static long eval_rval(Node *node, Var **var)
   error_tok(node->tok, "invalid initializer");
 }
 
-static long const_expr(Token **rest, Token *tok)
+long const_expr(Token **rest, Token *tok)
 {
   Node *node = conditional(rest, tok);
   return eval(node);

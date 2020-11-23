@@ -324,6 +324,8 @@ char *get_dir(char *path);
 // ********** parse.c *************
 Node *new_cast(Node *expr, Type *ty);
 
+long const_expr(Token **rest, Token *tok);
+
 Program *parse(Token *tok);
 
 // ********** codegen.c *************

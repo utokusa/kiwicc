@@ -19,7 +19,18 @@ struct Hideset {
   char *name;
 };
 
+// For conditional inclusion.
+// `#if` can be nested, so we use a stack to manage nested `#if`s
+typedef struct CondIncl CondIncl;
+struct CondIncl
+{
+  CondIncl *next;
+  Token *tok;
+};
+
 Macro *macros = NULL;
+
+static CondIncl *cond_incl;
 
 // Get file directory from full file path.
 // e.g. "foo/bar.txt" --> "foo/"
@@ -187,6 +198,62 @@ static bool expand_macro(Token **rest, Token *tok)
   return false;
 }
 
+static Token *new_eof(Token *tok)
+{
+  Token *t = copy_token(tok);
+  t->kind = TK_EOF;
+  t->len = 0;
+  return t;
+}
+
+// Skip until next `#endif`.
+static Token *skip_cond_incl(Token *tok)
+{
+  while (tok->kind != TK_EOF)
+  {
+    if (equal(tok, "#") && equal(tok->next, "endif"))
+      return tok;
+    tok = tok->next;
+  }
+  return tok;
+}
+
+// Copy all tokens until the next new line.
+// Copied tokens will terminated with an EOF token.
+static Token *copy_line (Token **rest, Token *tok)
+{
+  Token head = {};
+  Token *cur = &head;
+
+  for (; !tok->at_bol; tok = tok->next)
+    cur = cur->next = copy_token(tok);
+  
+  cur->next= new_eof(tok);
+  *rest = tok;
+  return head.next;
+}
+
+// Read and evaluate a constant expression
+static long eval_const_expr(Token **rest, Token *tok)
+{
+  Token *expr = copy_line(rest, tok);
+  Token *rest2;
+  long val = const_expr(&rest2, expr);
+  if (rest2->kind != TK_EOF)
+    error_tok(rest2, "extra token");
+  return val;
+}
+
+// Push `#if` to cond_incl stack
+static CondIncl *push_cond_incl(Token *tok)
+{
+  CondIncl *ci = calloc(1, sizeof(CondIncl));
+  ci->next = cond_incl;
+  ci->tok = tok;
+  cond_incl = ci;
+  return ci;
+}
+
 Token *preprocess(Token *tok)
 {
   Token head = {};
@@ -208,15 +275,17 @@ Token *preprocess(Token *tok)
       continue;
     }
 
+    // hash->loc: "#{some string ...}"
+    Token *hash = tok;
+    tok = tok->next;
+
     // Object-like macro
-    if (equal(tok->next, "define"))
+    if (equal(tok, "define"))
     {
-      tok = tok->next->next;
+      tok = tok->next;
       tok = cur->next = push_macro(tok, &macros);
       continue;
     }
-
-    tok = tok->next;
 
     // #include directive
     if (equal(tok, "include"))
@@ -246,10 +315,32 @@ Token *preprocess(Token *tok)
       continue;
     }
 
+    // #if directive
+    if (equal(tok, "if"))
+    {
+      long val = eval_const_expr(&tok, tok->next);
+      push_cond_incl(hash);
+      if (!val)
+        tok = skip_cond_incl(tok);
+      continue;
+    }
+
+    // #endif directive
+    if (equal(tok, "endif"))
+    {
+      if (!cond_incl)
+        error_tok(hash, "stray #endif");
+      cond_incl = cond_incl->next;
+      tok = skip_line(tok->next);
+      continue;
+    }
+
     // Null directive
     if (!tok->at_bol)
       error_tok(tok->next, "expected a new line");
     continue;
   }
+  if (cond_incl)
+    error_tok(cond_incl->tok, "unterminated conditional directive");
   return head.next;
 }
