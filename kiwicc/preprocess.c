@@ -207,12 +207,19 @@ static Token *new_eof(Token *tok)
 }
 
 // Skip until next `#endif`.
+// Nested `#if` and `#endif` are skipped.
 static Token *skip_cond_incl(Token *tok)
 {
   while (tok->kind != TK_EOF)
   {
+    if (equal(tok, "#") && equal(tok->next, "if"))
+    {
+      tok = skip_cond_incl(tok->next->next);
+      tok = tok->next;
+      continue;
+    }
     if (equal(tok, "#") && equal(tok->next, "endif"))
-      return tok;
+      break;
     tok = tok->next;
   }
   return tok;

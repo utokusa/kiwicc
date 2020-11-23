@@ -1351,6 +1351,11 @@ int main()
 #if 0 * 1 + 2 - 2
 #include "file/which/does/not/exist"
   assert(0, 1, "1");
+#if nested
+#endif
+#if 1
+  assert(0, 1, "1");
+#endif
 #endif
   {
     int m = 0;
