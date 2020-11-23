@@ -1432,6 +1432,12 @@ int main()
     assert(102, m, "m");
 
   }
+
+  int M6 = 6;
+  #define M6 M6 + 3
+  assert(9, M6, "M6");
+  #undef M6
+  assert(6, M6, "M6");
   
   printf("OK\n");
   return 0;

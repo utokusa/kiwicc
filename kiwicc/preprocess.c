@@ -11,6 +11,7 @@ struct Macro
   char *name;
   Token *body;
   Macro *next;
+  bool deleted;
 };
 
 typedef struct Hideset Hideset;
@@ -92,7 +93,7 @@ static Macro *find_macro(Token *tok, Macro *macros)
   while (m)
   {
     if (!strcmp(name, m->name))
-      return m;
+      return m->deleted ? NULL : m;
     m = m->next;
   }
   return NULL;
@@ -314,6 +315,15 @@ Token *preprocess(Token *tok)
       tok = tok->next;
       tok = cur->next = push_macro(tok, &macros);
       continue;
+    }
+
+    // #undef directive
+    if (equal(tok, "undef"))
+    {
+      tok = tok->next;
+      tok = cur->next = push_macro(tok, &macros);
+      Macro *top = macros;
+      top->deleted = true;
     }
 
     // #include directive
