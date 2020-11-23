@@ -31,6 +31,8 @@ struct CondIncl
   bool included;
 };
 
+static Token *preprocess2(Token *tok);
+
 Macro *macros = NULL;
 
 static CondIncl *cond_incl;
@@ -265,6 +267,7 @@ static Token *copy_line (Token **rest, Token *tok)
 static long eval_const_expr(Token **rest, Token *tok)
 {
   Token *expr = copy_line(rest, tok);
+  expr = preprocess2(expr);
   Token *rest2;
   long val = const_expr(&rest2, expr);
   if (rest2->kind != TK_EOF)
@@ -284,7 +287,7 @@ static CondIncl *push_cond_incl(Token *tok, bool included)
   return ci;
 }
 
-Token *preprocess(Token *tok)
+static Token *preprocess2(Token *tok)
 {
   Token head = {};
   Token *cur = &head;
@@ -406,7 +409,13 @@ Token *preprocess(Token *tok)
       error_tok(tok->next, "expected a new line");
     continue;
   }
+  return head.next;
+}
+
+Token *preprocess(Token *tok)
+{
+  tok = preprocess2(tok);
   if (cond_incl)
     error_tok(cond_incl->tok, "unterminated conditional directive");
-  return head.next;
+  return tok;
 }

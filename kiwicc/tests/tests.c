@@ -1425,7 +1425,7 @@ int main()
     m = 0;
 # endif
 #elif 1
-    m = 0;
+    m = 0;1
 #else
     m = 0;
 #endif
@@ -1438,6 +1438,26 @@ int main()
   assert(9, M6, "M6");
   #undef M6
   assert(6, M6, "M6");
+  {
+  #define M7 7
+  int m = 1;
+#if M7 - 7
+  m = 2;
+#endif
+  assert(1, m, "m");
+#if M7
+  m = 2;
+#endif
+  assert(2, m, "m");
+#if M7 - 7
+  m = 2;
+#elif M7
+  m = 3;
+#endif
+  assert(3, m, "m");
+  }
+
+
   
   printf("OK\n");
   return 0;
