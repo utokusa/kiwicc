@@ -1502,6 +1502,18 @@ int main()
 #define M11(x) M10(x) + 3
   assert(10, M10(2), "M10(2)");
 
+#define M12(x) #x
+
+  assert('a', M12(a!b 1""c)[0], "M12(a!b 1\"\"c)[0]");
+  assert('!', M12(a!b 1""c)[1], "M12(a!b 1\"\"c)[1]");
+  assert('b', M12(a!b 1""c)[2], "M12(a!b 1\"\"c)[2]");
+  assert(' ', M12(a!b 1""c)[3], "M12(a!b 1\"\"c)[3]");
+  assert('1', M12(a!b 1""c)[4], "M12(a!b 1\"\"c)[4]");
+  assert('"', M12(a!b 1""c)[5], "M12(a!b 1\"\"c)[5]");
+  assert('"', M12(a!b 1""c)[6], "M12(a!b 1\"\"c)[6]");
+  assert('c', M12(a!b 1""c)[7], "M12(a!b 1\"\"c)[7]");
+  assert(0, M12(a!b 1""c)[8], "M12(a!b 1\"\"c)[8]");
+
   
   printf("OK\n");
   return 0;

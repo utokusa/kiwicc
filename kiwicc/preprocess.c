@@ -333,6 +333,95 @@ static Token *find_arg(MacroArg *args, Token *tok)
   return NULL;
 }
 
+static Token *stringize(Token *arg)
+{
+  // Count lenght of stringized string literal
+
+  /*
+  e.g.
+  #define PRINT(str) printf(#str"\n")
+  PRINT(   Kitty on your lap  );
+
+  Kitty on   your lap  )            ;
+  tok0  tok1 tok2 tok3 end_tok(kind == TK_EOF)
+  ^                  ^
+  start              end
+  */
+
+  // White space before the first preprocessing token and
+  // after the last preprocessing token composing the argument is deleted.
+  // In this example spaces between "(" and "Kitty" are deleted,
+  // and spaces between "lap" and ")" are also deleted.
+
+  char *start = arg->loc;
+  char *end;
+  Token *end_tok;
+  for (Token *t = arg; t && t->kind != TK_EOF; t = t->next)
+  {
+    end = t->loc;
+    end_tok = t;
+  }
+  end_tok = end_tok->next;
+  // Kitty on your lap
+  //               ^ end
+
+  while (!isspace(*end) && (end < end_tok->loc))
+    end++;
+  // Kitty on your lap
+  //                  ^ end
+
+  // For tok->loc.
+  // len is initialized with 2 for first and last `"`
+  int len = 2;
+
+  // For tok->cont_len.
+  int len2 = 0;
+
+  for (char *p = start; p != end; p++)
+  {
+    len++;
+    len2++;
+    if (*p == '\"')
+      len++;
+    if (*p == '\\')
+      len++;
+  }
+
+  // For terminating '\0'
+  len++;
+  len2++;
+
+  // For tok->loc
+  char *buf = malloc(len);
+  // For tok->contents
+  char *buf2 = malloc(len2);
+
+  int i = 0;
+  int j = 0;
+  buf[i++] = '\"';
+  for (char *p = start; p != end; p++, i++, j++)
+  {
+    if (*p == '\"')
+      buf[i++] = '\\'; 
+    if (*p == '\\')
+      buf[i++] = '\\';
+    buf[i] = *p;
+    buf2[j] = *p;
+  }
+  buf[len - 2] = '\"';
+  buf[len - 1] = '\0';
+  buf2[len2 - 1] = '\0';
+
+  Token *tok = copy_token(arg);
+  tok->loc = buf;
+  tok->len = len - 1;
+  tok->kind = TK_STR;
+  tok->contents = buf2;
+  tok->cont_len = len2 + 1; // tok->cont_len count trailing '\0'
+  return tok;
+  
+}
+
 // Replace func-like macro parameters with given arguments.
 static Token *subst(Token *tok, MacroArg *args)
 {
@@ -347,6 +436,14 @@ static Token *subst(Token *tok, MacroArg *args)
     // macro-expanded before they are substituted into a macro body.
     if (arg)
     {
+      // # operator
+      if (equal(cur, "#"))
+      {
+        *cur = *stringize(arg);
+        tok = tok->next;
+        continue;
+      }
+
       arg = preprocess2(arg);
       for (Token *t = arg; t && t->kind != TK_EOF; t = t->next)
         cur = cur->next = copy_token(t);
