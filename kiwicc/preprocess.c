@@ -430,20 +430,25 @@ static Token *subst(Token *tok, MacroArg *args)
 
   while (tok->kind != TK_EOF)
   {
+    // # operator
+    // "#" followed by a parameter is replaced with stringized actual.
+    if (equal(tok, "#"))
+    {
+      Token *arg = find_arg(args, tok->next);
+      if (!arg)
+        error_tok(tok->next, "'#' is not followed by a macro parameter");
+
+      cur = cur->next = stringize(arg);
+      tok = tok->next->next;
+      continue;
+    }
+
     Token *arg = find_arg(args, tok);
 
     // Handle a macro token. Macro arguments are completely
     // macro-expanded before they are substituted into a macro body.
     if (arg)
     {
-      // # operator
-      if (equal(cur, "#"))
-      {
-        *cur = *stringize(arg);
-        tok = tok->next;
-        continue;
-      }
-
       arg = preprocess2(arg);
       for (Token *t = arg; t && t->kind != TK_EOF; t = t->next)
         cur = cur->next = copy_token(t);
