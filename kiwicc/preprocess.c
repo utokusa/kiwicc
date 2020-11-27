@@ -422,6 +422,20 @@ static Token *stringize(Token *arg)
   
 }
 
+static Token *paste(Token *lhs, Token *rhs)
+{
+  // Paste the two tokens.
+  char *buf = calloc(1, lhs->len + rhs->len + 1);
+  sprintf(buf, "%.*s%.*s", lhs->len, lhs->loc, rhs->len, rhs->loc);
+
+  // Tokenize the resulting string.
+  Token *tok = tokenize(lhs->filename, lhs->file_no, buf);
+  if (tok->next->kind != TK_EOF)
+    error_tok(lhs, "pasting forms '%s', an invalid token", buf);
+  tok->at_bol = false;
+  return tok;
+}
+
 // Replace func-like macro parameters with given arguments.
 static Token *subst(Token *tok, MacroArg *args)
 {
@@ -430,7 +444,7 @@ static Token *subst(Token *tok, MacroArg *args)
 
   while (tok->kind != TK_EOF)
   {
-    // # operator
+    // # operator (stringizing operator)
     // "#" followed by a parameter is replaced with stringized actual.
     if (equal(tok, "#"))
     {
@@ -440,6 +454,51 @@ static Token *subst(Token *tok, MacroArg *args)
 
       cur = cur->next = stringize(arg);
       tok = tok->next->next;
+      continue;
+    }
+
+    // ## operator (token-pasting operator)
+    // x##y is replaced with xy.
+    if (equal(tok->next, "##"))
+    {
+      Token *x = tok;
+      Token *y = tok->next->next;
+      Token *ax = find_arg(args, x);
+
+      // x##y becomes y if x is the empty argument list.
+      if (ax && ax->kind == TK_EOF)
+      {
+        tok = y;
+        continue;
+      }
+
+      if (ax)
+      {
+        for (Token *t = ax; t->kind != TK_EOF; t = t->next)
+          cur = cur->next = copy_token(t);
+      }
+      else
+        cur = cur->next = copy_token(x);
+      
+      Token *ay = find_arg(args, y);
+
+      // x##y becomes x if y is the empty argument list.
+      if (ay && ay->kind == TK_EOF)
+      {
+        tok = y->next;
+        continue;
+      }
+
+      if (ay)
+      {
+        *cur = *paste(cur, ay);
+        for (Token *t = ay->next; t->kind != TK_EOF; t = t->next)
+          cur = cur->next = copy_token(t);
+      }
+      else
+        *cur = *paste(cur, y);
+      
+      tok = y->next;
       continue;
     }
 
@@ -513,6 +572,7 @@ static bool expand_macro(Token **new_tok, Token *tok)
     hs = hideset_union(hs, new_hideset(m->name));
 
     Token *body = subst(m->body, args);
+    body->at_bol = macro_name->at_bol;
     body = add_hideset(body, hs);
     replace(macro_name, body, rparen->next);
     *new_tok = macro_name;

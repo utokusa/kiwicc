@@ -1514,6 +1514,22 @@ int main()
   assert('c', M12(a!b 1""c)[7], "M12(a!b 1\"\"c)[7]");
   assert(0, M12(a!b 1""c)[8], "M12(a!b 1\"\"c)[8]");
 
+#define paste(x,y) x##y
+  assert(15, paste(1,5), "paste(1,5)");
+  assert(255, paste(0, xff), "paste(0x, ff)");
+  assert(3, ({ int ab = 3; paste(a,b); }), "({ int ab = 3; paste(a,b); })");
+  assert(5, paste(5, ), "paste(5, )");
+  assert(5, paste(, 5), "paste(, 5)");
+
+#define i 5
+  assert(101, ({ int i3 = 100; paste(1+i, 3); }), "({ int i3 = 100; paste(1+i, 3); })");
+#undef i
+
+#define paste2(x) x##5
+  assert(26, paste2(1+2), "paste2(1+2)");
+
+#define paste3(x) 1##x
+  assert(13, paste3(1+2), "paste2(1+2)");
   
   printf("OK\n");
   return 0;

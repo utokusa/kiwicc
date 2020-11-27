@@ -200,7 +200,7 @@ static char *starts_with_reserved(char *p)
   // Two-letter punctuators
   static char *ops2[] = {"==", "!=", "<=", ">=", "->", "+=", "-=", "*=", "/=",
                          "%=", "++", "--", "&=", "|=", "^=", "&&", "||",
-                         "<<", ">>"};
+                         "<<", ">>", "##"};
   for (int i = 0; i < sizeof(ops2) / sizeof(*ops2); ++i)
   {
     if (startswith(p, ops2[i]))
@@ -507,7 +507,7 @@ static Token *read_number(Token *cur, char *start)
 }
 
 // Convert input 'user_input' to token
-static Token *tokenize(char *filename, int file_no, char *p)
+Token *tokenize(char *filename, int file_no, char *p)
 {
   current_filename = filename;
   current_input = p;

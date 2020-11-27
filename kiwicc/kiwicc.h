@@ -317,6 +317,8 @@ char **get_input_files();
 // convert input 'user_input' to token
 Token *tokenize_file(char *filename);
 
+Token *tokenize(char *filename, int file_no, char *p);
+
 // ********** preprocess.c *************
 Token *preprocess(Token *tok);
 
