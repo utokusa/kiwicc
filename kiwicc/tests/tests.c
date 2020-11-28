@@ -1568,6 +1568,10 @@ int main()
 #endif
   assert(3, m, "m");
   }
+
+  assert(1, size\
+of(char), \
+  "sizeof(char)");
   
   printf("OK\n");
   return 0;
