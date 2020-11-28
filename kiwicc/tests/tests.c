@@ -1561,7 +1561,12 @@ int main()
 #endif
   assert(2, m, "m");
 
-
+#if no_such_symbol == 0
+  m = 3;
+#else
+  m = 4;
+#endif
+  assert(3, m, "m");
   }
   
   printf("OK\n");

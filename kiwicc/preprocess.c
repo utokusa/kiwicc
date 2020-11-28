@@ -699,6 +699,17 @@ static long eval_const_expr(Token **rest, Token *tok)
 {
   Token *expr = read_const_expr(rest, tok);
   expr = preprocess2(expr);
+
+  // Replace remaining non-macro identifieres with 0.
+  for (Token *t = expr; t->kind != TK_EOF; t= t->next)
+  {
+    if (t->kind == TK_IDENT)
+    {
+      Token *next = t->next;
+      *t = *new_num_token(0, t);
+      t->next = next;
+    }
+  }
   Token *rest2;
   long val = const_expr(&rest2, expr);
   if (rest2->kind != TK_EOF)
