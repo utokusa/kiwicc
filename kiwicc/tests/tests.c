@@ -1613,6 +1613,11 @@ of(char), \
   assert(0, strcmp(__func__, "main"), "strcmp(__func__, \"main\")");
   assert(0, strcmp(func_name(), "func_name"), "strcmp(func_name(), \"func_name\")");
 
+  assert(7, sizeof("abc" "def"), "sizeof(\"abc\" \"def\")");
+  assert(9, sizeof("abc" "def" "gh"), "sizeof(\"abc\" \"def\" \"gh\")");
+  assert(0, strcmp("abc" "def", "abcdef"), "strcmp(\"abc\" \"def\", \"abcdef\")");
+  assert(0, strcmp("abc" "def" "gh", "abcdefgh"), "strcmp(\"abc\" \"def\" \"gh\", \"abcdefgh\")");
+
   
   printf("OK\n");
   return 0;
