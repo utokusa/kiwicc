@@ -578,6 +578,14 @@ static bool is_typename(Token *tok)
   return find_typedef(tok);
 }
 
+// Create a node for "__func__" local variable and add that
+// to the current scope
+static void add_func_ident(char *func)
+{
+  Var *var = new_string_literal(func, strlen(func) + 1);
+  push_scope("__func__")->var = var;
+}
+
 // funcdef = typespec declarator compound-stmt
 static Function *funcdef(Token **rest, Token *tok)
 {
@@ -602,6 +610,7 @@ static Function *funcdef(Token **rest, Token *tok)
   fn->params = locals;
 
   tok = skip(tok, "{");
+  add_func_ident(fn->name);
   fn->node = compound_stmt(rest, tok)->body;
   fn->locals = locals;
   leave_scope();

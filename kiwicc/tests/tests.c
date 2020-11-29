@@ -254,6 +254,11 @@ int (*fnptr(void))(int)
 
 int M10(int x) {return x*x; }
 
+char *func_name()
+{
+  return __func__;
+}
+
 typedef struct
 {
   int gp_offset;
@@ -1603,6 +1608,10 @@ of(char), \
 
 #define M15(...) add6(1, 2, __VA_ARGS__, 6)
   assert(21, M15(3, 4, 5), "M15(3, 4, 5)");
+
+  assert(5, sizeof(__func__), "sizeof(__func__)");
+  assert(0, strcmp(__func__, "main"), "strcmp(__func__, \"main\")");
+  assert(0, strcmp(func_name(), "func_name"), "strcmp(func_name(), \"func_name\")");
 
   
   printf("OK\n");
