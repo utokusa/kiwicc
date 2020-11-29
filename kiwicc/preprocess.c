@@ -987,6 +987,10 @@ static Token *preprocess2(Token *tok)
       continue;
     }
 
+    // #error directive
+    if (equal(tok, "error"))
+      error_tok(tok, "");
+
     // Null directive
     if (!tok->at_bol)
       error_tok(tok->next, "expected a new line");
