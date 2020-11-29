@@ -1588,6 +1588,22 @@ of(char), \
   assert(2, main_line, "main_line");
   assert(0, strcmp(include_filename, "include.h"), "strcmp(include_filename, \"include.h\")");
   assert(2, include_line, "include_line");
+
+#define M15(...) 3
+  assert(3, M15(), "M15");
+
+#define M15(...) __VA_ARGS__
+  assert(5, M15(5), "M15(5)");
+
+#define M15(...) add(__VA_ARGS__)
+  assert(8, M15(5, 3), "M15(5, 3)");
+
+#define M15(...) add6(__VA_ARGS__)
+  assert(21, M15(1, 2, 3, 4, 5, 6), "M15(1, 2, 3, 4, 5, 6)");
+
+#define M15(...) add6(1, 2, __VA_ARGS__, 6)
+  assert(21, M15(3, 4, 5), "M15(3, 4, 5)");
+
   
   printf("OK\n");
   return 0;
