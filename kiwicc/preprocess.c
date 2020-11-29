@@ -20,6 +20,8 @@ struct MacroArg
   bool is_last; // Used to check the number of args.
 };
 
+typedef Token *macro_handler_fn(Token *);
+
 // Object-like macro
 typedef struct Macro Macro;
 struct Macro
@@ -30,6 +32,7 @@ struct Macro
   bool is_objlike; // Object-like or function-like
   MacroParam *params;
   bool deleted;
+  macro_handler_fn *handler;
 };
 
 typedef struct Hideset Hideset;
@@ -543,6 +546,14 @@ static bool expand_macro(Token **new_tok, Token *tok)
       return false;
     }
 
+    // Built-in dynamic macro such as __LINE__
+    if (m->handler)
+    {
+      *new_tok = m->handler(tok);
+      (*new_tok)->next = tok->next;
+      return true;
+    }
+
     // Object-like macro
     if (m->is_objlike)
     {
@@ -643,6 +654,38 @@ static Token *copy_line(Token **rest, Token *tok)
   cur->next= new_eof(tok);
   *rest = tok;
   return head.next;
+}
+
+// Double-quote a given string and returns it.
+// foo --> "foo"
+static char *quote_string(char *str)
+{
+  int len = 3; // First '"', '\0' and last '"'.
+  for (int i = 0; str[i]; i++)
+  {
+    if (str[i] == '\\' || str[i] == '"')
+      len++;
+    len++;
+  }
+
+  char *buf = calloc(1, len);
+  char *p = buf;
+  *p++ = '"';
+  for (int i = 0; str[i]; i++)
+  {
+    if (str[i] == '\\' || str[i] == '"')
+      *p++ = '\\';
+    *p++ = str[i];
+  }
+  *p++ = '"';
+  *p++ = '\0';
+  return buf;
+}
+
+static Token *new_str_token(char *str, Token *tmpl)
+{
+  char *buf = quote_string(str);
+  return tokenize(tmpl->filename, tmpl->file_no, buf);
 }
 
 static Token *new_num_token(int val, Token *tmpl)
@@ -1017,6 +1060,25 @@ static void define_macro(char *name, char *buf)
   add_macro(name, true, tok);
 }
 
+static Macro *add_builtin(char *name, macro_handler_fn *fn)
+{
+  Macro *m = add_macro(name, true, NULL);
+  m->handler = fn;
+  return m;
+}
+
+// __FILE__ macro
+static Token *file_macro(Token *tmpl)
+{
+  return new_str_token(tmpl->filename, tmpl);
+}
+
+// __LINE__ macro
+static Token *line_macro(Token *tmpl)
+{
+  return new_num_token(tmpl->line_no, tmpl);
+}
+
 static void init_macros()
 {
   // Define predefined macros
@@ -1063,6 +1125,9 @@ static void init_macros()
   define_macro("__signed__", "signed");
   define_macro("__typeof__", "typeof");
   define_macro("__volatile__", "volatile");
+
+  add_builtin("__FILE__", file_macro);
+  add_builtin("__LINE__", line_macro);
 
 }
 

@@ -1,3 +1,6 @@
+char *main_filename = __FILE__;
+char *main_line = __LINE__;
+
 // This is a line comment.
 
 /*
@@ -1580,6 +1583,11 @@ of(char), \
   assert(4, INCLUDE4_MACRO, "INCLUDE4_MACRO");
 
   assert(1, __STDC__, "__STDC__");
+
+  assert(0, strcmp(main_filename, "tests.c"), "strcmp(main_filename, \"tests.c\")");
+  assert(2, main_line, "main_line");
+  assert(0, strcmp(include_filename, "include.h"), "strcmp(include_filename, \"include.h\")");
+  assert(2, include_line, "include_line");
   
   printf("OK\n");
   return 0;

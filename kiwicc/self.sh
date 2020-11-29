@@ -58,6 +58,7 @@ char strchr(char *s, int c);
 int stat(char *path, struct stat *statbuf);
 char *strncpy(char *dest, char *src, long n);
 char *dirname(char *path);
+char *basename(char *path);
 EOF
 
   grep -v '^#' kiwicc.h >> $TMP/$1

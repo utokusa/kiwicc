@@ -509,7 +509,7 @@ static Token *read_number(Token *cur, char *start)
 // Convert input 'user_input' to token
 Token *tokenize(char *filename, int file_no, char *p)
 {
-  current_filename = filename;
+  current_filename = basename(strdup(filename));
   current_input = p;
   Token head;
   head.next = NULL;
