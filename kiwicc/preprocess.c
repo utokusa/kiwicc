@@ -763,6 +763,40 @@ static bool file_exists(char *path)
   return !stat(path, &st);
 }
 
+// Join path
+// e.g.
+// lhs: "example/path1", rhs: "path2.txt"
+// ---> join_paths(lhs, rhs) ----> "example/path1/path2.txt"
+//
+// lhs: "example/path1/", rhs: "path2.txt"
+// ---> join_paths(lhs, rhs) ----> "example/path1/path2.txt"
+//
+// lhs: "example/path1/", rhs: "/path2.txt"
+// ---> join_paths(lhs, rhs) ----> "example/path1//path2.txt"
+static char *join_paths(char *lhs, char *rhs)
+{
+  char *last;
+  for (char *p = lhs; *p; p++)
+    last = p;
+  if (*last != '/')
+  {
+    lhs = concat(lhs, "/");
+  }
+  return concat(lhs, rhs);
+}
+
+static char *search_include_paths(char *filename, Token *start)
+{
+  // Search a file from the include paths.
+  for (char **p = include_paths; *p; p++)
+  {
+    char *path = join_paths(*p, filename);
+    if (file_exists(path))
+      return path;
+  }
+  error_tok(start, "'%s': file not found", filename);
+}
+
 // Read an #include argument.
 static char *read_include_path(Token **rest, Token *tok)
 {
@@ -773,11 +807,18 @@ static char *read_include_path(Token **rest, Token *tok)
     // and we don't want to interpret any escape sequances in it.
     // So we don't use token->contents.
 
+    Token *start = tok;
     char *filename = strndup(tok->loc + 1, tok->len - 2);
     *rest = skip_line(tok->next);
-    // *rest = tok->next;
-    char *path = concat(file_dir, filename);
-    return path;
+
+    // Search path that current file exists.
+    char *same_dir_path = join_paths(file_dir, filename);
+    if (file_exists(same_dir_path))
+      return same_dir_path;
+    
+    return search_include_paths(filename, start);
+    
+
   }
 
   // Pattern 2: #include <foo.h>
@@ -796,11 +837,7 @@ static char *read_include_path(Token **rest, Token *tok)
     char *filename = join_tokens(start->next, tok);
     *rest = skip_line(tok->next);
 
-    // Search a file from the include path.
-    // TODO: implementthe actual include paths.
-    char *path = concat("./tests/", filename);
-    if (!file_exists(path))
-      error_tok(start, "'%s': file not found", filename);
+    char *path = search_include_paths(filename, start);
     return path;
   }
 

@@ -288,6 +288,7 @@ extern Type *ulong_type;
 
 extern char *file_dir;
 
+extern char **include_paths;
 extern bool opt_fpic;
 
 /*********************************************

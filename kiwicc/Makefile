@@ -14,19 +14,19 @@ kiwicc-stage3: kiwicc-stage2
 	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
 
 test: kiwicc
-	./kiwicc tests/tests.c -o tmp.s
+	./kiwicc tests/tests.c -I./tests -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -o tmp tmp.s tmp2.o
 	./tmp
 
 test-nopic: kiwicc
-	./kiwicc tests/tests.c -fno-pic -o tmp.s
+	./kiwicc tests/tests.c -I./tests  -fno-pic -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -o tmp tmp.s tmp2.o
 	./tmp
 
 test-stage2: kiwicc-stage2
-	./kiwicc-stage2 tests/tests.c -o tmp.s
+	./kiwicc-stage2 tests/tests.c -I./tests  -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -fno-common -o tmp tmp.s tmp2.o
 	./tmp
