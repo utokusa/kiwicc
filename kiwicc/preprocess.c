@@ -811,7 +811,7 @@ static char *read_include_path(Token **rest, Token *tok)
     char *filename = strndup(tok->loc + 1, tok->len - 2);
     *rest = skip_line(tok->next);
 
-    // Search path that current file exists.
+    // Search ./ relative to argv[0].
     char *same_dir_path = join_paths(file_dir, filename);
     if (file_exists(same_dir_path))
       return same_dir_path;

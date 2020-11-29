@@ -2,7 +2,7 @@ CFLAGS=-std=c11 -g -O0 -fno-common
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS: .c=.0)
 
-kiwicc: $(OBJS)
+kiwicc: $(OBJS) kiwicc.h
 	$(CC) $(CFLAGS) -o kiwicc $(OBJS) $(LDFLAGS)
 
 $(OBJS): kiwicc.h

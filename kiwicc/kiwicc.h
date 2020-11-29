@@ -9,6 +9,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/stat.h>
+#include <libgen.h>
 
 /*********************************************
 * ...type definitions...

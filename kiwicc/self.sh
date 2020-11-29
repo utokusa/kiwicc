@@ -45,6 +45,7 @@ int vfprintf(FILE *fp, char *fmt, va_list ap);
 long strlen(char *p);
 int strncmp(char *p, char *q);
 void *memcpy(char *dst, char *src, long n);
+char *strdup(char *p);
 char *strndup(char *p, long n);
 int isspace(int c);
 int isdigit(int c);
@@ -56,6 +57,7 @@ double strtod(char *nptr, char **endptr);
 char strchr(char *s, int c);
 int stat(char *path, struct stat *statbuf);
 char *strncpy(char *dest, char *src, long n);
+char *dirname(char *path);
 EOF
 
   grep -v '^#' kiwicc.h >> $TMP/$1
