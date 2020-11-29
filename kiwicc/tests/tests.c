@@ -1578,6 +1578,8 @@ of(char), \
 #define M14 < include4.h
 #include M14 >
   assert(4, INCLUDE4_MACRO, "INCLUDE4_MACRO");
+
+  assert(1, __STDC__, "__STDC__");
   
   printf("OK\n");
   return 0;
