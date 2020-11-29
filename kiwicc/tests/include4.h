@@ -1,0 +1,1 @@
+#define INCLUDE4_MACRO 4

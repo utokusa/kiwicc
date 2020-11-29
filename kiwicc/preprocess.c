@@ -729,6 +729,93 @@ static CondIncl *push_cond_incl(Token *tok, bool included)
   return ci;
 }
 
+// Concatenates all tokens in `tok` and returns a new string.
+static char *join_tokens(Token *tok, Token *end)
+{
+  // Compute the length of the resulting token.
+  int len = 1;
+  for (Token *t = tok; t != end && t->kind != TK_EOF; t = t->next)
+  {
+    if (t != tok && t->has_space)
+      len++;
+    len += t->len;
+  }
+
+  char *buf = calloc(1, len);
+
+  // Copy token texts.
+  int pos = 0;
+  for (Token *t = tok; t != end && t->kind != TK_EOF; t = t->next)
+  {
+    if (t != tok && t->has_space)
+      buf[pos++] = ' ';
+    strncpy(buf + pos, t->loc, t->len);
+    pos += t->len;
+  }
+  buf[pos] = '\0';
+  return buf;
+}
+
+// Returns true if a given file exists.
+static bool file_exists(char *path)
+{
+  struct stat st;
+  return !stat(path, &st);
+}
+
+// Read an #include argument.
+static char *read_include_path(Token **rest, Token *tok)
+{
+  // Pattern 1: #include "foo.h"
+  if (tok->kind == TK_STR)
+  {
+    // A double-quoted filename for #include is a special kind of token,
+    // and we don't want to interpret any escape sequances in it.
+    // So we don't use token->contents.
+
+    char *filename = strndup(tok->loc + 1, tok->len - 2);
+    *rest = skip_line(tok->next);
+    // *rest = tok->next;
+    char *path = concat(file_dir, filename);
+    return path;
+  }
+
+  // Pattern 2: #include <foo.h>
+  if (equal(tok, "<"))
+  {
+    // Reconstruct a filename from a sequence of tokens between "<" and ">".
+    Token *start = tok;
+
+    // Find closing ">".
+    for (; !equal(tok, ">"); tok = tok->next)
+    {
+      if (tok->kind == TK_EOF)
+        error_tok(tok, "expected '>'");
+    }
+
+    char *filename = join_tokens(start->next, tok);
+    *rest = skip_line(tok->next);
+
+    // Search a file from the include path.
+    // TODO: implementthe actual include paths.
+    char *path = concat("./tests/", filename);
+    if (!file_exists(path))
+      error_tok(start, "'%s': file not found", filename);
+    return path;
+  }
+
+  // Pattern 3 #include FOO
+  // In this case FOO must be macro-expanded to either
+  // a single string token or a sequence of "<" ... ">".
+  if (tok->kind == TK_IDENT)
+  {
+    Token *tok2 = preprocess(copy_line(rest, tok));
+    return read_include_path(&tok2, tok2);
+  }
+
+  error_tok(tok, "expected a filename");
+}
+
 static Token *preprocess2(Token *tok)
 {
   Token head = {};
@@ -773,11 +860,7 @@ static Token *preprocess2(Token *tok)
     // #include directive
     if (equal(tok, "include"))
     {
-      tok = tok->next;
-      if (tok->kind != TK_STR)
-        error_tok(tok, "expected a string literal");
-      char *file_name = tok->contents;
-      char *file_path = concat(file_dir, file_name);
+      char *file_path = read_include_path(&tok, tok->next);
       // Tokenize
       Token *included = tokenize_file(file_path);
       if (!included)
@@ -794,7 +877,7 @@ static Token *preprocess2(Token *tok)
         included = included->next;
 
       cur = included;
-      included->next = tok = skip_line(tok->next);
+      included->next = tok;
       continue;
     }
 

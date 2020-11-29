@@ -23,6 +23,10 @@ typedef struct
   void *reg_save_area;
 } va_list[1];
 
+struct stat {
+  char _[512];
+};
+
 void *malloc(long size);
 void *calloc(long nmemb, long size);
 void *realloc(void *buf, long size);
@@ -50,6 +54,8 @@ long strtoul(char *nptr, char **endptr, int base);
 void exit(int code);
 double strtod(char *nptr, char **endptr);
 char strchr(char *s, int c);
+int stat(char *path, struct stat *statbuf);
+char *strncpy(char *dest, char *src, long n);
 EOF
 
   grep -v '^#' kiwicc.h >> $TMP/$1

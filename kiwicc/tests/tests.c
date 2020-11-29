@@ -1572,6 +1572,12 @@ int main()
   assert(1, size\
 of(char), \
   "sizeof(char)");
+
+#include <include3.h>
+  assert(3, INCLUDE3_MACRO, "INCLUDE3_MACRO");
+#define M14 < include4.h
+#include M14 >
+  assert(4, INCLUDE4_MACRO, "INCLUDE4_MACRO");
   
   printf("OK\n");
   return 0;
