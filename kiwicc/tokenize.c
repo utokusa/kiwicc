@@ -167,9 +167,9 @@ static int var_len(char *p)
   return cnt_len;
 }
 
-// Check if p starts with a reserved keyword
-static char *starts_with_reserved(char *p)
+static bool is_keyword(Token *tok)
 {
+  char *p = strndup(tok->loc, tok->len);
   // Keywords
   static char *kw[] = {
       "return", "if", "else",
@@ -187,9 +187,24 @@ static char *starts_with_reserved(char *p)
   {
     int len = strlen(kw[i]);
     if (startswith(p, kw[i]) && !is_alnum(p[len]))
-      return kw[i];
+      return true;
   }
 
+  return false;
+}
+
+void convert_keywords(Token *tok)
+{
+  for (Token *t = tok; t->kind != TK_EOF; t = t->next)
+  {
+    if (t->kind == TK_IDENT && is_keyword(t))
+      t->kind = TK_RESERVED;
+  }
+}
+
+// Check if p starts with a reserved keyword
+static char *starts_with_multi_letter_symbol(char *p)
+{
   // Three-letter punctuators
   static char *ops3[] = {"<<=", ">>=", "..."};
   for (int i = 0; i < sizeof(ops3) / sizeof(*ops3); ++i)
@@ -587,7 +602,7 @@ Token *tokenize(char *filename, int file_no, char *p)
     }
 
     // Keywords or multi-letter symbols
-    char *kw = starts_with_reserved(p);
+    char *kw = starts_with_multi_letter_symbol(p);
     if (kw)
     {
       int len = strlen(kw);

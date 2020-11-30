@@ -318,6 +318,8 @@ Token *copy_token(Token *tok);
 
 char **get_input_files();
 
+void convert_keywords(Token *tok);
+
 // convert input 'user_input' to token
 Token *tokenize_file(char *filename);
 

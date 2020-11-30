@@ -1184,6 +1184,7 @@ Token *preprocess(Token *tok)
   tok = preprocess2(tok);
   if (cond_incl != current_cond_incl)
     error_tok(cond_incl->tok, "unterminated conditional directive");
+  convert_keywords(tok);
   join_adjacent_string_literals(tok);
   return tok;
 }

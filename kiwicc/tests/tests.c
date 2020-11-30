@@ -1622,6 +1622,16 @@ of(char), \
 #include "include4.h"
 #endif
 
+#if defined _Noreturn
+#endif
+
+#if (!defined _Noreturn && 1)
+#endif
+
+#define _Noreturn 5
+  assert(5, _Noreturn, "_Noreturn");
+#undef _Noreturn
+
   
   printf("OK\n");
   return 0;
