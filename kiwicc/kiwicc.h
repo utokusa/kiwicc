@@ -45,7 +45,8 @@ struct Token
 
   Type *ty;       // Used if TK_NUM
 
-  char *filename;   // input filename
+  char *filename;   // Input filename
+  char *filepath;   // Input filepath. For debugging.
   char *input;      // Entire input string
   int file_no;      // File number for .loc directive
   int line_no;      // Line number

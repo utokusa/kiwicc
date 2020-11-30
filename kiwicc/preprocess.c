@@ -1180,8 +1180,9 @@ static void join_adjacent_string_literals(Token *tok)
 Token *preprocess(Token *tok)
 {
   init_macros();
+  CondIncl *current_cond_incl = cond_incl;
   tok = preprocess2(tok);
-  if (cond_incl)
+  if (cond_incl != current_cond_incl)
     error_tok(cond_incl->tok, "unterminated conditional directive");
   join_adjacent_string_literals(tok);
   return tok;

@@ -1618,6 +1618,10 @@ of(char), \
   assert(0, strcmp("abc" "def", "abcdef"), "strcmp(\"abc\" \"def\", \"abcdef\")");
   assert(0, strcmp("abc" "def" "gh", "abcdefgh"), "strcmp(\"abc\" \"def\" \"gh\", \"abcdefgh\")");
 
+#if 1
+#include "include4.h"
+#endif
+
   
   printf("OK\n");
   return 0;

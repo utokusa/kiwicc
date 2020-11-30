@@ -6,6 +6,7 @@
 
 // Input filename
 static char *current_filename;
+static char *current_filepath;
 
 // True if the current position is at the biggining of a line.
 static bool at_bol;
@@ -218,6 +219,7 @@ static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
   tok->loc = str;
   tok->len = len;
   tok->filename = current_filename;
+  tok->filepath = current_filepath;
   tok->input = current_input;
   tok->at_bol = at_bol;
   tok->has_space = has_space;
@@ -510,6 +512,7 @@ static Token *read_number(Token *cur, char *start)
 Token *tokenize(char *filename, int file_no, char *p)
 {
   current_filename = basename(strdup(filename));
+  current_filepath = filename;
   current_input = p;
   Token head;
   head.next = NULL;
