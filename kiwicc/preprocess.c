@@ -208,6 +208,11 @@ static void replace(Token *tok, Token *macro_body, Token *next)
 {
   Token *last = NULL;
   Token *body_head = copy_macro_body(macro_body, &last);
+  if (!body_head)
+  {
+    *tok = *next;
+    return;
+  }
   *tok = *body_head;
   if (body_head == last)
     tok->next = next;

@@ -1634,6 +1634,9 @@ of(char), \
 
 #include "include5.h"
 
+#define EMPTY_MACR
+  assert(1, 1 EMPTY_MACR EMPTY_MACR, "1 EMPTY_MACR EMPTY_MACR");
+
   
   printf("OK\n");
   return 0;
