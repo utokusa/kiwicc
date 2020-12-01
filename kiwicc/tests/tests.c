@@ -1632,6 +1632,8 @@ of(char), \
   assert(5, _Noreturn, "_Noreturn");
 #undef _Noreturn
 
+#include "include5.h"
+
   
   printf("OK\n");
   return 0;

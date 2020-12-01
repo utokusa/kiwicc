@@ -924,6 +924,7 @@ static Token *preprocess2(Token *tok)
 {
   Token head = {};
   Token *cur = &head;
+  Token *start = tok;
 
   while (tok && tok->kind != TK_EOF)
   {
@@ -1063,7 +1064,7 @@ static Token *preprocess2(Token *tok)
       error_tok(tok->next, "expected a new line");
     continue;
   }
-  return head.next;
+  return head.next ? head.next : new_eof(start);
 }
 
 static Macro *add_macro(char *name, bool is_objlike, Token *body)
