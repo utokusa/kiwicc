@@ -1637,6 +1637,10 @@ of(char), \
 #define EMPTY_MACR
   assert(1, 1 EMPTY_MACR EMPTY_MACR, "1 EMPTY_MACR EMPTY_MACR");
 
+#include "include6.h"
+#undef MACRO_INCLUDE6
+#include "include7.h"
+
   
   printf("OK\n");
   return 0;

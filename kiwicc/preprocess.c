@@ -955,7 +955,7 @@ static Token *preprocess2(Token *tok)
     if (equal(tok, "define"))
     {
       tok = tok->next;
-      tok = cur->next = push_macro(tok, &macros);
+      tok = push_macro(tok, &macros);
       continue;
     }
 
@@ -963,7 +963,7 @@ static Token *preprocess2(Token *tok)
     if (equal(tok, "undef"))
     {
       tok = tok->next;
-      tok = cur->next = undef_macro(tok, &macros);
+      tok = undef_macro(tok, &macros);
       continue;
     }
 
