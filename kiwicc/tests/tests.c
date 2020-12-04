@@ -1641,6 +1641,14 @@ of(char), \
 #undef MACRO_INCLUDE6
 #include "include7.h"
 
+  {
+#include "include8.h"
+#if 1
+  int INCLUDE8(2) m = 1;
+#endif
+  }
+
+
   
   printf("OK\n");
   return 0;

@@ -207,12 +207,14 @@ static Token *copy_macro_body(Token *body, Token **last)
 static void replace(Token *tok, Token *macro_body, Token *next)
 {
   Token *last = NULL;
+  bool at_bol = macro_body->at_bol;
   Token *body_head = copy_macro_body(macro_body, &last);
   if (!body_head)
   {
     *tok = *next;
     return;
   }
+  body_head->at_bol = at_bol;
   *tok = *body_head;
   if (body_head == last)
     tok->next = next;
@@ -613,7 +615,6 @@ static bool expand_macro(Token **new_tok, Token *tok)
     hs = hideset_union(hs, new_hideset(m->name));
 
     Token *body = subst(m->body, args);
-    body->at_bol = macro_name->at_bol;
     body = add_hideset(body, hs);
     replace(macro_name, body, rparen->next);
     *new_tok = macro_name;
@@ -936,7 +937,6 @@ static Token *preprocess2(Token *tok)
     // Macro replacement
     if (expand_macro(&tok, tok))
     {
-      cur->next = tok;
       continue;
     }
     // Preprocessing directive
