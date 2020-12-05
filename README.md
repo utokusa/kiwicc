@@ -9,3 +9,7 @@ https://www.sigbus.info/compilerbook
 docker build -t kiwicc_dev .
 ```
 
+## Run develop environment
+```bash
+sh start_kiwicc_dev.sh
+```
