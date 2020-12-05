@@ -629,6 +629,7 @@ static Token *new_eof(Token *tok)
   Token *t = copy_token(tok);
   t->kind = TK_EOF;
   t->len = 0;
+  t->at_bol = true;
   return t;
 }
 
@@ -1069,7 +1070,8 @@ static Token *preprocess2(Token *tok)
       error_tok(tok->next, "expected a new line");
     continue;
   }
-  return head.next ? head.next : new_eof(start);
+  cur->next = new_eof(start);
+  return head.next;
 }
 
 static Macro *add_macro(char *name, bool is_objlike, Token *body)
