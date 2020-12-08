@@ -1,12 +1,12 @@
 # kiwicc
-kiwicc is a hobby compilor.
+kiwicc is a hobby C compilor for RISC-V.
 
 ## Reference
 https://www.sigbus.info/compilerbook
 
 ## Setup
 ```bash
-docker build -t kiwicc_dev .
+docker build -t riscv_dev .
 ```
 
 ## Run develop environment
