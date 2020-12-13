@@ -1,6 +1,9 @@
+CC=riscv64-unknown-linux-gnu-gcc
 CFLAGS=-std=c11 -g -O0 -fno-common
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS: .c=.0)
+
+# --- NOTE: Currently most of the command is not available ---
 
 kiwicc: $(OBJS) kiwicc.h
 	$(CC) $(CFLAGS) -o kiwicc $(OBJS) $(LDFLAGS)
@@ -20,7 +23,7 @@ test: kiwicc
 	./tmp
 
 test-nopic: kiwicc
-	./kiwicc tests/tests.c -I./tests  -fno-pic -o tmp.s
+	./kiwicc tests/tests.c -I./tests -fno-pic -o tmp.s
 	gcc -xc -c -o tmp2.o tests/extern.c
 	gcc -static -o tmp tmp.s tmp2.o
 	./tmp

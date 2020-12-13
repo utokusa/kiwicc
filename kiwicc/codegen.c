@@ -17,7 +17,7 @@ static char *fargreg[] = {"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6"
 
 static char *reg(int idx)
 {
-  static char *r[] = {"r10", "r11", "r12", "r13", "r14", "r15"};
+  static char *r[] = {"s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11"};
   if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
     error("register out of range: &d", idx);
   return r[idx];
@@ -28,7 +28,7 @@ static char *xreg(Type *ty, int idx)
   if (ty->base || size_of(ty) == 8)
     return reg(idx);
 
-  static char *r[] = {"r10d", "r11d", "r12d", "r13d", "r14d", "r15d"};
+  static char *r[] = {"s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11"};
   if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
     error("register out of range: %d", idx);
   return r[idx];
@@ -181,7 +181,10 @@ static void cast(Type *from, Type *to)
   else if (size_of(to) == 2)
     println("  %s %%%sw, %%%s", movop, r, r);
   else if (size_of(to) == 4)
+  {
+    println("# cast() size_of(to) == 4");
     println("  mov %%%sd, %%%sd", r, r);
+  }
   else if (is_integer(from) && size_of(from) < 8 && !from->is_unsigned)
     println("  movsx %%%sd, %%%s", r, r);
 }
@@ -339,7 +342,8 @@ static void gen_expr(Node *node)
       println("  movq %%rax, %%%s", freg(top++));
     }
     else
-      println("  mov $%lu, %%%s", node->val, reg(top++));
+      println("# gen_expr() ND_NUM");
+      println("  li %s, %lu", reg(top++), node->val);
     return;
   case ND_VAR:
   case ND_MEMBER:
@@ -379,7 +383,7 @@ static void gen_expr(Node *node)
     return;
   case ND_CAST:
     gen_expr(node->lhs);
-    cast(node->lhs->ty, node->ty);
+    // cast(node->lhs->ty, node->ty);
     return;
   case ND_COND:
   {
@@ -838,9 +842,10 @@ static void gen_stmt(Node *node)
       if (is_flonum(node->lhs->ty))
         println("  movsd %%%s, %%xmm0", freg(--top));
       else
-        println("  mov %%%s, %%rax", reg(--top));
+        println("# gen_stmt() !is_flonum(node->lhs->ty)");
+        println("  mv a0, %s", reg(--top));
     }
-    println("  jmp .L.return.%s", current_fn->name);
+    println("  j .L.return.%s", current_fn->name);
     return;
   case ND_EXPR_STMT:
     gen_expr(node->lhs);
@@ -921,13 +926,13 @@ static void emit_text(Program *prog)
     println("%s:", fn->name);
 
     // Prologue. r12-15 are callee-saved registers.
-    println("  push %%rbp");
-    println("  mov %%rsp, %%rbp ");
-    println("  sub $%d, %%rsp", fn->stack_size);
-    println("  mov %%r12, -8(%%rbp)");
-    println("  mov %%r13, -16(%%rbp)");
-    println("  mov %%r14, -24(%%rbp)");
-    println("  mov %%r15, -32(%%rbp)");
+    // println("  push %%rbp");
+    // println("  mov %%rsp, %%rbp ");
+    // println("  sub $%d, %%rsp", fn->stack_size);
+    // println("  mov %%r12, -8(%%rbp)");
+    // println("  mov %%r13, -16(%%rbp)");
+    // println("  mov %%r14, -24(%%rbp)");
+    // println("  mov %%r15, -32(%%rbp)");
 
     // Save arg registers to the register save area
     // if the function is the variadic
@@ -985,12 +990,12 @@ static void emit_text(Program *prog)
     // Note that we don't have to restore r10, r11
     // because they are caller-saved registers.
     println(".L.return.%s:", fn->name);
-    println("  mov -8(%%rbp), %%r12");
-    println("  mov -16(%%rbp), %%r13");
-    println("  mov -24(%%rbp), %%r14");
-    println("  mov -32(%%rbp), %%r15");
-    println("  mov %%rbp, %%rsp");
-    println("  pop %%rbp");
+    // println("  mov -8(%%rbp), %%r12");
+    // println("  mov -16(%%rbp), %%r13");
+    // println("  mov -24(%%rbp), %%r14");
+    // println("  mov -32(%%rbp), %%r15");
+    // println("  mov %%rbp, %%rsp");
+    // println("  pop %%rbp");
     println("  ret");
   }
 }
@@ -1003,7 +1008,7 @@ void codegen(Program *prog)
   for (int i = 0; paths[i]; i++)
     println(".file %d \"%s\"", i + 1, paths[i]);
 
-  emit_bss(prog);
-  emit_data(prog);
+  // emit_bss(prog);
+  // emit_data(prog);
   emit_text(prog);
 }
