@@ -88,7 +88,7 @@ static void parse_args(int argc, char **argv)
       continue;
     }
 
-    if (!strncmp(argv[i], "-I", 1))
+    if (!strncmp(argv[i], "-I", 2))
     {
       add_include_path(argv[i] + 2);
       continue;
