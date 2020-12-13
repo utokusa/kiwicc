@@ -117,7 +117,11 @@ static void cmp_zero(Type * ty)
     println("  ucomisd %%xmm0, %%%s", freg(--top));
   }
   else
-    println("  cmp $0, %%%s", reg(--top));
+  {
+    char *rd = reg(--top);
+    char *rs = rd;
+    println("  seqz %s, %s", rd, rs);
+  }
 
 }
 
@@ -400,6 +404,7 @@ static void gen_expr(Node *node)
     return;
   }
   case ND_NOT:
+    println("# ND_NOT");
     gen_expr(node->lhs);
     cmp_zero(node->lhs->ty);
     println("  sete %%%sb", reg(top));
@@ -549,7 +554,7 @@ static void gen_expr(Node *node)
     else if (node->ty->kind == TY_DOUBLE)
       println("  addsd %%%s, %%%s", fs, fd);
     else
-      println("  add %%%s, %%%s", rs, rd);
+      println("  add %s, %s, %s", rd, rd, rs);
     break;
   case ND_PTR_ADD:
     println("  imul $%d, %%%s", node->ty->base->size, rs);
@@ -561,7 +566,7 @@ static void gen_expr(Node *node)
     else if (node->ty->kind == TY_DOUBLE)
       println("  subsd %%%s, %%%s", fs, fd);
     else
-      println("  sub %%%s, %%%s", rs, rd);
+      println("  sub %s, %s, %s", rd, rd, rs);
     break;
   case ND_PTR_SUB:
     println("  imul $%d, %%%s", node->ty->base->size, rs);
@@ -581,7 +586,7 @@ static void gen_expr(Node *node)
     else if (node->ty->kind == TY_DOUBLE)
       println("  mulsd %%%s, %%%s", fs, fd);
     else
-      println("  imul %%%s, %%%s", rs, rd);
+      println("  mul %s, %s, %s", rd, rd, rs);
     break;
   case ND_DIV:
     if (node->ty->kind == TY_FLOAT)
@@ -589,7 +594,12 @@ static void gen_expr(Node *node)
     else if (node->ty->kind == TY_DOUBLE)
       println("  divsd %%%s, %%%s", fs, fd);
     else
-      divmod(node, rd, rs, "rax", "eax");
+    {
+      if (node->ty->is_unsigned)
+        println("  divu %s, %s, %s", rd, rd, rs);
+      else
+        println("  div %s, %s, %s", rd, rd, rs);
+    }
     break;
   case ND_MOD:
     divmod(node, rd, rs, "rdx", "edx");
@@ -609,9 +619,12 @@ static void gen_expr(Node *node)
     else if (node->lhs->ty->kind == TY_DOUBLE)
       println("  ucomisd %%%s, %%%s", fs, fd);
     else
-      println("  cmp %%%s, %%%s", rs, rd);
-    println("  sete %%al");
-    println("  movzb %%al, %%%s", rd);
+    {
+      println("  sub %s, %s, %s", rd, rd, rs);
+      println("  seqz %s, %s", rd, rd);
+    }
+    // println("  sete %%al");
+    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_NE:
     if (node->lhs->ty->kind == TY_FLOAT)
@@ -619,9 +632,12 @@ static void gen_expr(Node *node)
     else if (node->lhs->ty->kind == TY_DOUBLE)
       println("  ucomisd %%%s, %%%s", fs, fd);
     else
-      println("  cmp %%%s, %%%s", rs, rd);
-    println("  setne %%al");
-    println("  movzb %%al, %%%s", rd);
+    {
+      println("  sub %s, %s, %s", rd, rd, rs);
+      println("  snez %s, %s", rd, rd);
+    }
+    // println("  setne %%al");
+    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_LT:
     if (node->lhs->ty->kind == TY_FLOAT)
@@ -636,13 +652,12 @@ static void gen_expr(Node *node)
     }
     else
     {
-      println("  cmp %%%s, %%%s", rs, rd);
       if (node->lhs->ty->is_unsigned)
-        println("  setb %%al");
+        println("  sltu %s, %s, %s", rd, rd, rs);
       else
-        println("  setl %%al");
+        println("  slt %s, %s, %s", rd, rd, rs);
     }
-    println("  movzb %%al, %%%s", rd);
+    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_LE:
     if (node->lhs->ty->kind == TY_FLOAT)
@@ -657,13 +672,13 @@ static void gen_expr(Node *node)
     }
     else
     {
-      println("  cmp %%%s, %%%s", rs, rd);
       if (node->lhs->ty->is_unsigned)
-        println("  setbe %%al");
+        println("  sltu %s, %s, %s", rd, rs, rd);
       else
-        println("  setle %%al");
+        println("  slt %s, %s, %s", rd, rs, rd);
+      println("  seqz %s, %s", rd, rd);
     }
-    println("  movzb %%al, %%%s", rd);
+    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_SHL:
     println("  mov %%%s, %%rcx", reg(top));
