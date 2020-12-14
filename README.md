@@ -8,6 +8,10 @@ https://riscv.org/technical/specifications/
 
 https://github.com/riscv/riscv-asm-manual/blob/master/riscv-asm.md
 
+https://github.com/riscv/riscv-elf-psabi-doc/blob/master/riscv-elf.md
+
+https://msyksphinz-self.github.io/riscv-isadoc/html/index.html#
+
 ## Setup
 ```bash
 $ docker build -t riscv_dev .

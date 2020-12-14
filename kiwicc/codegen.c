@@ -69,7 +69,7 @@ static void load(Type *ty)
   else if (sz == 2)
     println("  %sxw (%%%s), %%%s", movop, rs, rd);
   else
-    println("  mov (%%%s), %%%s", rs, rd);
+    println("  ld %s, (%s)", rd, rs);
 }
 
 static void store(Type *ty)
@@ -96,9 +96,9 @@ static void store(Type *ty)
   else if (sz == 2)
     println("  mov %%%sw, (%%%s)", rs, rd);
   else if (sz == 4)
-    println("  mov %%%sd, (%%%s)", rs, rd);
+    println("  sw %s, (%s)", rs, rd);
   else
-    println("  mov %%%s, (%%%s)", rs, rd);
+    println("  sd %s, (%s)", rs, rd);
   top--;
 }
 
@@ -207,7 +207,7 @@ static void gen_addr(Node *node)
     Var *var = node->var;
     if (var->is_local)
     {
-      println("  lea -%d(%%rbp), %%%s", var->offset, reg(top++));
+      println("  addi %s, s0, -%d", reg(top++), var->offset);
       return;
     }
     
@@ -941,9 +941,13 @@ static void emit_text(Program *prog)
     println("%s:", fn->name);
 
     // Prologue. r12-15 are callee-saved registers.
-    // println("  push %%rbp");
-    // println("  mov %%rsp, %%rbp ");
-    // println("  sub $%d, %%rsp", fn->stack_size);
+    // For frame pointer
+    println("  addi sp, sp, -8");
+    // Save frame pointer
+    println("  sd s0, (sp)");
+
+    println("  mv s0, sp");
+    println("  addi sp, sp, -%d", fn->stack_size);
     // println("  mov %%r12, -8(%%rbp)");
     // println("  mov %%r13, -16(%%rbp)");
     // println("  mov %%r14, -24(%%rbp)");
@@ -1009,8 +1013,9 @@ static void emit_text(Program *prog)
     // println("  mov -16(%%rbp), %%r13");
     // println("  mov -24(%%rbp), %%r14");
     // println("  mov -32(%%rbp), %%r15");
-    // println("  mov %%rbp, %%rsp");
-    // println("  pop %%rbp");
+    println("  mv sp, s0");
+    println("  ld s0, (sp)");
+    println("  addi sp, sp, 8");
     println("  ret");
   }
 }
