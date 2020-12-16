@@ -68,6 +68,8 @@ static void load(Type *ty)
     println("  %sxb (%%%s), %%%s", movop, rs, rd);
   else if (sz == 2)
     println("  %sxw (%%%s), %%%s", movop, rs, rd);
+  else if (sz == 4)
+    println("  lw %s, (%s)", rd, rs);
   else
     println("  ld %s, (%s)", rd, rs);
 }
@@ -709,9 +711,9 @@ static void gen_stmt(Node *node)
     {
       gen_expr(node->cond);
       cmp_zero(node->cond->ty);
-      println("  je .L.else.%d", seq);
+      println("  bne %s, zero, .L.else.%d", reg(top), seq);
       gen_stmt(node->then);
-      println("  jmp .L.end.%d", seq);
+      println("  jal zero, .L.end.%d", seq);
       println(".L.else.%d:", seq);
       gen_stmt(node->els);
       println(".L.end.%d:", seq);
@@ -720,7 +722,7 @@ static void gen_stmt(Node *node)
     {
       gen_expr(node->cond);
       cmp_zero(node->cond->ty);
-      println("  je .L.end.%d", seq);
+      println("  bne %s, zero, .L.end.%d", reg(top), seq);
       gen_stmt(node->then);
       println(".L.end.%d:", seq);
     }
@@ -735,11 +737,10 @@ static void gen_stmt(Node *node)
 
     println(".L.begin.%d:", seq);
     gen_expr(node->cond);
-    println("  cmp $0, %%%s", reg(--top));
-    println("  je .L.break.%d", seq);
+    println("  beq %s, zero, .L.break.%d", reg(--top), seq);
     gen_stmt(node->then);
     println(".L.continue.%d:", seq);
-    println("  jmp .L.begin.%d", seq);
+    println("  jal zero, .L.begin.%d", seq);
     println(".L.break.%d:", seq);
 
     brkseq = brk;
@@ -772,20 +773,31 @@ static void gen_stmt(Node *node)
     int cont = contseq;
     brkseq = contseq = seq;
 
+    println("# for init start");
     if (node->init)
       gen_stmt(node->init);
+    println("# for init end");
     println(".L.begin.%d:", seq);
     if (node->cond)
     {
+      println("# for cond start");
       gen_expr(node->cond);
-      println("  cmp $0, %%%s", reg(--top));
-      println("  je .L.break.%d", seq);
+      println("# for cond end");
+      // char *rd = reg(--top);
+      // char *rs = rd;
+      // println("  seqz %s, %s", rd, rs);
+      // println("  bne %s, zero, .L.break.%d", rd, seq);
+      println("  beq %s, zero, .L.break.%d", reg(--top), seq);
     }
+    println("# for then start");
     gen_stmt(node->then);
+    println("# for then end");
     println(".L.continue.%d:", seq);
+    println("# for inc start");
     if (node->inc)
       gen_stmt(node->inc);
-    println("  jmp .L.begin.%d", seq);
+    println("# for inc end");
+    println("  jal zero, .L.begin.%d", seq);
     println(".L.break.%d:", seq);
 
     brkseq = brk;
