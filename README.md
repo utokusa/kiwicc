@@ -43,7 +43,7 @@ $ ./test.sh
 ```bash
 # in development environment
 
-# compile with GCC
+# compile with kiwicc
 $ qemu-riscv64 kiwicc foo.c -o tmp.s
 $ riscv64-unknown-linux-gnu-gcc tmp.s -o a.out
 
