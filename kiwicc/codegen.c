@@ -13,6 +13,7 @@ static char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *argreg[] = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 static char *fargreg[] = {"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"};
 
 static char *reg(int idx)
@@ -215,7 +216,7 @@ static void gen_addr(Node *node)
     
     if (!opt_fpic)
     {
-      println("  mov $%s, %%%s", var->name, reg(top++));
+      println("  la %s, %s", reg(top++), var->name);
     }
     else if (var->is_static)
     {
@@ -451,6 +452,7 @@ static void gen_expr(Node *node)
   }
   case ND_FUNCALL:
   {
+    println("# ND_FUNCALL");
     if (node->lhs->kind == ND_VAR &&
         !strcmp(node->lhs->var->name, "__builtin_va_start"))
     {
@@ -460,16 +462,18 @@ static void gen_expr(Node *node)
 
     // So far we only support up to 6 arguments.
     //
-    // We should push r10, r11 and xmm8 ~ xmm13  becouse they are caller saved registers.
-    println("  sub $64, %%rsp");
-    println("  mov %%r10, (%%rsp)");
-    println("  mov %%r11, 8(%%rsp)");
-    println("  movsd %%xmm8, 16(%%rsp)");
-    println("  movsd %%xmm9, 24(%%rsp)");
-    println("  movsd %%xmm10, 32(%%rsp)");
-    println("  movsd %%xmm11, 40(%%rsp)");
-    println("  movsd %%xmm12, 48(%%rsp)");
-    println("  movsd %%xmm13, 56(%%rsp)");
+    // We should push ra, a0 ~ a7 becouse they are caller saved registers.
+    println("  addi sp, sp, -72");
+    println("  sd ra, (sp)");
+    println("  sd a0, 8(sp)");
+    println("  sd a1, 16(sp)");
+    println("  sd a2, 24(sp)");
+    println("  sd a3, 32(sp)");
+    println("  sd a4, 40(sp)");
+    println("  sd a5, 48(sp)");
+    println("  sd a6, 56(sp)");
+    println("  sd a7, 64(sp)");
+
 
     gen_expr(node->lhs);
 
@@ -502,13 +506,14 @@ static void gen_expr(Node *node)
       else if (sz == 2)
         println("  %sxw -%d(%%rbp), %%%s", movop, arg->offset, argreg32[gp++]);
       else if (sz == 4)
-        println("  movl -%d(%%rbp), %%%s", arg->offset, argreg32[gp++]);
+        println("  lw %s, -%d(s0)", argreg[gp++], arg->offset);
       else
-        println("  movq -%d(%%rbp), %%%s", arg->offset,  argreg64[gp++]);
+        println("  ld %s, -%d(s0)", argreg[gp++], arg->offset);
     }
-    // Set the number of vector registers used to rax
-    println("  mov $%d, %%rax", fp);
-    println("  call *%%%s", reg(--top));
+    // // Set the number of vector registers used to rax
+    // println("  mov $%d, %%rax", fp);
+    
+    println("  jr %s", reg(--top));
 
     // The System V x86-64 ABI has a special rule regarding a boolean return
     // value that onlyu the lower 8 bits are valid for it and the upper
@@ -518,22 +523,23 @@ static void gen_expr(Node *node)
 
 
     // Restore caaller-saved registers
-    println("  mov (%%rsp), %%r10");
-    println("  mov 8(%%rsp), %%r11");
-    println("  movsd 16(%%rsp), %%xmm8");
-    println("  movsd 24(%%rsp), %%xmm9");
-    println("  movsd 32(%%rsp), %%xmm10");
-    println("  movsd 40(%%rsp), %%xmm11");
-    println("  movsd 48(%%rsp), %%xmm12");
-    println("  movsd 56(%%rsp), %%xmm13");
-    println("  add $64, %%rsp");
+    println("  ld ra, (sp)");
+    println("  ld a0, 8(sp)");
+    println("  ld a1, 16(sp)");
+    println("  ld a2, 24(sp)");
+    println("  ld a3, 32(sp)");
+    println("  ld a4, 40(sp)");
+    println("  ld a5, 48(sp)");
+    println("  ld a6, 56(sp)");
+    println("  ld a7, 64(sp)");
+    println("  addi sp, sp, 72");
 
     if (node->ty->kind == TY_FLOAT)
       println("  movss %%xmm0, %%%s", freg(top++));
     else if (node->ty->kind == TY_DOUBLE)
       println("  movsd %%xmm0, %%%s", freg(top++));
     else
-      println("  mov %%rax, %%%s", reg(top++));
+      println("  mv %s, a0", reg(top++));
     
     return;
   }
