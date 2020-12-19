@@ -549,8 +549,9 @@ static void gen_expr(Node *node)
       println("  add %s, %s, %s", rd, rd, rs);
     break;
   case ND_PTR_ADD:
-    println("  imul $%d, %%%s", node->ty->base->size, rs);
-    println("  add %%%s, %%%s", rs, rd);
+    println("  li t1, %d", node->ty->base->size);
+    println("  mul %s, %s, t1", rs, rs);
+    println("  add %s, %s, %s", rd, rd, rs);
     break;
   case ND_SUB:
     if (node->ty->kind == TY_FLOAT)
@@ -561,16 +562,14 @@ static void gen_expr(Node *node)
       println("  sub %s, %s, %s", rd, rd, rs);
     break;
   case ND_PTR_SUB:
-    println("  imul $%d, %%%s", node->ty->base->size, rs);
-    println("  sub %%%s, %%%s", rs, rd);
+    println("  li t1, %d", node->ty->base->size);
+    println("  mul %s, %s, t1", rs, rs);
+    println("  sub %s, %s, %s", rd, rd, rs);
     break;
   case ND_PTR_DIFF:
-    println("  sub %%%s, %%%s", rs, rd);
-    println("  mov %%%s, %%rax", rd);
-    println("  cqo");
-    println("  mov $%d, %%%s", node->lhs->ty->base->size, rs);
-    println("  idiv %%%s", rs);
-    println("  mov %%rax, %%%s", rd);
+    println("  sub %s, %s, %s", rd, rd, rs);
+    println("  li t1, %d", node->lhs->ty->base->size);
+    println("  divu %s, %s, t1", rd, rd);
     break;
   case ND_MUL:
     if (node->ty->kind == TY_FLOAT)
