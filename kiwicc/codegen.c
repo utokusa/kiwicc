@@ -1052,7 +1052,7 @@ void codegen(Program *prog)
   for (int i = 0; paths[i]; i++)
     println(".file %d \"%s\"", i + 1, paths[i]);
 
-  // emit_bss(prog);
-  // emit_data(prog);
+  emit_bss(prog);
+  emit_data(prog);
   emit_text(prog);
 }
