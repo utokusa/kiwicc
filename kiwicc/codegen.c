@@ -942,7 +942,7 @@ static void emit_text(Program *prog)
       println(".global %s", fn->name);
     println("%s:", fn->name);
 
-    // Prologue. r12-15 are callee-saved registers.
+    // Prologue. s0 ~ s11 are callee-saved registers.
     // For frame pointer
     println("  addi sp, sp, -8");
     // Save frame pointer
@@ -950,10 +950,18 @@ static void emit_text(Program *prog)
 
     println("  mv s0, sp");
     println("  addi sp, sp, -%d", fn->stack_size);
-    // println("  mov %%r12, -8(%%rbp)");
-    // println("  mov %%r13, -16(%%rbp)");
-    // println("  mov %%r14, -24(%%rbp)");
-    // println("  mov %%r15, -32(%%rbp)");
+    // println("  sd s0, -8(s0)");
+    println("  sd s1, -16(s0)");
+    println("  sd s2, -24(s0)");
+    println("  sd s3, -32(s0)");
+    println("  sd s4, -40(s0)");
+    println("  sd s5, -48(s0)");
+    println("  sd s6, -56(s0)");
+    println("  sd s7, -64(s0)");
+    println("  sd s8, -72(s0)");
+    println("  sd s9, -80(s0)");
+    println("  sd s10, -88(s0)");
+    println("  sd s11, -96(s0)");
 
     // Save arg registers to the register save area
     // if the function is the variadic
@@ -994,8 +1002,15 @@ static void emit_text(Program *prog)
         println("  movsd %%%s, -%d(%%rbp)", fargreg[--fp], var->offset);
       else
       {
-        char *r = get_argreg(size_of(var->ty), --gp);
-        println("  mov %%%s, -%d(%%rbp)", r, var->offset);
+        int sz = size_of(var->ty);
+        if (sz == 1)
+          println("  sw %s, -%d(s0)", argreg[--gp], var->offset);
+        else if (sz == 2)
+          println("  sh %s, -%d(s0)", argreg[--gp], var->offset);
+        else if (sz == 4)
+          println("  sw %s, -%d(s0)", argreg[--gp], var->offset);
+        else
+          println("  sd %s, -%d(s0)", argreg[--gp], var->offset);
       }
     }
 
@@ -1007,14 +1022,22 @@ static void emit_text(Program *prog)
     }
 
     // Epilogue
-    // Restore the values of r12 to r15.
-    // Note that we don't have to restore r10, r11
-    // because they are caller-saved registers.
+    // Restore the values of sp, s0 ~ s11
     println(".L.return.%s:", fn->name);
-    // println("  mov -8(%%rbp), %%r12");
-    // println("  mov -16(%%rbp), %%r13");
-    // println("  mov -24(%%rbp), %%r14");
-    // println("  mov -32(%%rbp), %%r15");
+  
+    // println("  ld s0, -8(s0)");
+    println("  ld s1, -16(s0)");
+    println("  ld s2, -24(s0)");
+    println("  ld s3, -32(s0)");
+    println("  ld s4, -40(s0)");
+    println("  ld s5, -48(s0)");
+    println("  ld s6, -56(s0)");
+    println("  ld s7, -64(s0)");
+    println("  ld s8, -72(s0)");
+    println("  ld s9, -80(s0)");
+    println("  ld s10, -88(s0)");
+    println("  ld s11, -96(s0)");
+  
     println("  mv sp, s0");
     println("  ld s0, (sp)");
     println("  addi sp, sp, 8");
