@@ -66,7 +66,7 @@ static void load(Type *ty)
   int sz = size_of(ty);
 
   if (sz == 1)
-    println("  %sxb (%%%s), %%%s", movop, rs, rd);
+    println("  lb %s, (%s)", rd, rs);
   else if (sz == 2)
     println("  %sxw (%%%s), %%%s", movop, rs, rd);
   else if (sz == 4)
@@ -95,7 +95,7 @@ static void store(Type *ty)
   else if (ty->kind == TY_DOUBLE)
     println("  movsd %%%s, (%%%s)", freg(top - 2), rd);
   else if (sz == 1)
-    println("  mov %%%sb, (%%%s)", rs, rd);
+    println("  sb %s, (%s)", rs, rd);
   else if (sz == 2)
     println("  mov %%%sw, (%%%s)", rs, rd);
   else if (sz == 4)
@@ -494,7 +494,7 @@ static void gen_expr(Node *node)
       char *movop = arg->ty->is_unsigned ? "movz" : "movs";
       int sz = size_of(arg->ty);
       if (sz == 1)
-        println("  %sxb -%d(%%rbp), %%%s", movop, arg->offset, argreg32[gp++]);
+        println("  lb %s, -%d(s0)", argreg[gp++], arg->offset);
       else if (sz == 2)
         println("  %sxw -%d(%%rbp), %%%s", movop, arg->offset, argreg32[gp++]);
       else if (sz == 4)
@@ -1003,7 +1003,7 @@ static void emit_text(Program *prog)
       {
         int sz = size_of(var->ty);
         if (sz == 1)
-          println("  sw %s, -%d(s0)", argreg[--gp], var->offset);
+          println("  sb %s, -%d(s0)", argreg[--gp], var->offset);
         else if (sz == 2)
           println("  sh %s, -%d(s0)", argreg[--gp], var->offset);
         else if (sz == 4)
