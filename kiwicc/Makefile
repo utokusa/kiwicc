@@ -51,7 +51,7 @@ tmp-kiwicc: kiwicc
 	echo './tmp ; echo $$?' | sh -
 
 tmp-as:
-	riscv64-unknown-linux-gnu-gcc -static -o tmp tmp.s
+	riscv64-unknown-linux-gnu-gcc -static -o tmp tmp.s tmp2.o
 	echo 'qemu-riscv64 -L $RISCV/sysroot ./tmp; echo $$?' | sh -
 
 tmp-gcc:

@@ -462,17 +462,9 @@ static void gen_expr(Node *node)
 
     // So far we only support up to 6 arguments.
     //
-    // We should push ra, a0 ~ a7 becouse they are caller saved registers.
-    println("  addi sp, sp, -72");
+    // We should push ra becouse they are caller saved registers.
+    println("  addi sp, sp, -8");
     println("  sd ra, (sp)");
-    println("  sd a0, 8(sp)");
-    println("  sd a1, 16(sp)");
-    println("  sd a2, 24(sp)");
-    println("  sd a3, 32(sp)");
-    println("  sd a4, 40(sp)");
-    println("  sd a5, 48(sp)");
-    println("  sd a6, 56(sp)");
-    println("  sd a7, 64(sp)");
 
 
     gen_expr(node->lhs);
@@ -513,7 +505,7 @@ static void gen_expr(Node *node)
     // // Set the number of vector registers used to rax
     // println("  mov $%d, %%rax", fp);
     
-    println("  jr %s", reg(--top));
+    println("  jalr %s", reg(--top));
 
     // The System V x86-64 ABI has a special rule regarding a boolean return
     // value that onlyu the lower 8 bits are valid for it and the upper
@@ -524,15 +516,7 @@ static void gen_expr(Node *node)
 
     // Restore caaller-saved registers
     println("  ld ra, (sp)");
-    println("  ld a0, 8(sp)");
-    println("  ld a1, 16(sp)");
-    println("  ld a2, 24(sp)");
-    println("  ld a3, 32(sp)");
-    println("  ld a4, 40(sp)");
-    println("  ld a5, 48(sp)");
-    println("  ld a6, 56(sp)");
-    println("  ld a7, 64(sp)");
-    println("  addi sp, sp, 72");
+    println("  addi sp, sp, 8");
 
     if (node->ty->kind == TY_FLOAT)
       println("  movss %%xmm0, %%%s", freg(top++));
