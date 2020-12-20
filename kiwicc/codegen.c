@@ -858,8 +858,10 @@ static void gen_stmt(Node *node)
       if (is_flonum(node->lhs->ty))
         println("  movsd %%%s, %%xmm0", freg(--top));
       else
+      {
         println("# gen_stmt() !is_flonum(node->lhs->ty)");
         println("  mv a0, %s", reg(--top));
+    }
     }
     println("  j .L.return.%s", current_fn->name);
     return;
