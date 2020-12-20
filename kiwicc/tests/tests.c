@@ -488,69 +488,69 @@ int main()
 
   assert(21, add6(1, 2, 3, 4, 5, 6), "add6(1, 2, 3, 4, 5, 6)");
 
-//   assert(1, ({ struct {int a; int b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a; int b;} x; x.a=1; x.b=2; x.a; })");
-//   assert(2, ({ struct {int a; int b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a; int b;} x; x.a=1; x.b=2; x.b; })");
-//   assert(1, ({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].a; }), "({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].a; })");
-//   assert(2, ({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].b; }), "({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].b; })");
-//   assert(1, ({ struct {int a; char b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a; char b;} x; x.a=1; x.b=2; x.a; })");
-//   assert(2, ({ struct {int a; char b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a; char b;} x; x.a=1; x.b=2; x.b; })");
-//   assert(1, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.a; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.a; })");
-//   assert(2, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.b; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.b; })");
-//   assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.c; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.c; })");
-//   assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+5); }), "({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+9); })");
-//   assert(3, ({ struct {int a; struct {char b; char c[5];} y[2];} x; x.y[1].c[3]=3; x.y[1].c[3]; }), "({ struct {int a; struct {char b; char c[5];} y[2];} x; x.y[1].c[3]=3; x.y[1].c[3]; })");
-//   assert(1, ({ struct {int a, b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a, b;} x; x.a=1; x.b=2; x.a; })");
-//   assert(2, ({ struct {int a, b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a, b;} x; x.a=1; x.b=2; x.b; })");
-//   assert(1, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.a; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.a; })");
-//   assert(2, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.b; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.b; })");
-//   assert(3, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.c; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.c; })");
-//   assert(4, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.d; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.d; })");
-//   assert(5, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.e; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.e; })");
-//   assert(3, ({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+4); }), "({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+8); })");
-//   assert(8, ({ struct {int a; int b;} x; sizeof(x); }), "({ struct {int a; int b;} x; sizeof(x); })");
-//   assert(8, ({ struct {int a; char b;} x; sizeof(x); }), "({ struct {int a; char b;} x; sizeof(x); })");
-//   assert(16, ({ struct {int a; int b;} x[2]; sizeof(x); }), "({ struct {int a; int b;} x[2]; sizeof(x); })");
-//   assert(16, ({ struct {int a; char b;} x[2]; sizeof(x); }), "({ struct {int a; char b;} x[2]; sizeof(x); })");
-//   assert(8, ({ struct {int a; struct {char b; char c;} y;} x; sizeof(x); }), "({ struct {int a; struct {char b; char c;} y;} sizeof(x); })");
-//   assert(16, ({ struct {int a; struct {char b; char c[5];} y[2];} x; sizeof(x); }), "({ struct {int a; struct {char b; char c[5];} y[2];} x; sizeof(x); })");
-//   assert(12, ({ struct {int a, b; char c, d, e, f;} x; sizeof(x); }), "({ struct {int a, b; char c, d, e, f;} x; sizeof(x); })");
-//   assert(8, ({ struct {char a; int b;} x; sizeof(x); }), "({ struct {char a; int b;} x; sizeof(x); })");
+  assert(1, ({ struct {int a; int b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a; int b;} x; x.a=1; x.b=2; x.a; })");
+  assert(2, ({ struct {int a; int b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a; int b;} x; x.a=1; x.b=2; x.b; })");
+  assert(1, ({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].a; }), "({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].a; })");
+  assert(2, ({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].b; }), "({ struct {int a; int b;} x[2]; x[1].a=1; x[1].b=2; x[1].b; })");
+  assert(1, ({ struct {int a; char b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a; char b;} x; x.a=1; x.b=2; x.a; })");
+  assert(2, ({ struct {int a; char b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a; char b;} x; x.a=1; x.b=2; x.b; })");
+  assert(1, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.a; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.a; })");
+  assert(2, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.b; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.b; })");
+  assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.c; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.c; })");
+  assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+5); }), "({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+5); })");
+  assert(3, ({ struct {int a; struct {char b; char c[5];} y[2];} x; x.y[1].c[3]=3; x.y[1].c[3]; }), "({ struct {int a; struct {char b; char c[5];} y[2];} x; x.y[1].c[3]=3; x.y[1].c[3]; })");
+  assert(1, ({ struct {int a, b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a, b;} x; x.a=1; x.b=2; x.a; })");
+  assert(2, ({ struct {int a, b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a, b;} x; x.a=1; x.b=2; x.b; })");
+  assert(1, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.a; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.a; })");
+  assert(2, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.b; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.b; })");
+  assert(3, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.c; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.c; })");
+  assert(4, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.d; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.d; })");
+  assert(5, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.e; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.e; })");
+  assert(3, ({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+4); }), "({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+4); })");
+  assert(8, ({ struct {int a; int b;} x; sizeof(x); }), "({ struct {int a; int b;} x; sizeof(x); })");
+  assert(8, ({ struct {int a; char b;} x; sizeof(x); }), "({ struct {int a; char b;} x; sizeof(x); })");
+  assert(16, ({ struct {int a; int b;} x[2]; sizeof(x); }), "({ struct {int a; int b;} x[2]; sizeof(x); })");
+  assert(16, ({ struct {int a; char b;} x[2]; sizeof(x); }), "({ struct {int a; char b;} x[2]; sizeof(x); })");
+  assert(8, ({ struct {int a; struct {char b; char c;} y;} x; sizeof(x); }), "({ struct {int a; struct {char b; char c;} y;} sizeof(x); })");
+  assert(16, ({ struct {int a; struct {char b; char c[5];} y[2];} x; sizeof(x); }), "({ struct {int a; struct {char b; char c[5];} y[2];} x; sizeof(x); })");
+  assert(12, ({ struct {int a, b; char c, d, e, f;} x; sizeof(x); }), "({ struct {int a, b; char c, d, e, f;} x; sizeof(x); })");
+  assert(8, ({ struct {char a; int b;} x; sizeof(x); }), "({ struct {char a; int b;} x; sizeof(x); })");
 
-//   assert(8, ({ int x; int y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; }), "({ int x; int y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; })");
-//   assert(8, ({ int x; char y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; }), "({ int x; char y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; })");
-//   assert(7, ({ int x; int y; char z; char *a=&y; char *b=&z; b-a; }), "({ int x; int y; char z; char *a=&y; char *b=&z; b-a; })");
-//   assert(1, ({ int x; char y; int z; char *a=&y; char *b=&z; b-a; }), "({ int x; char y; int z; char *a=&y; char *b=&z; b-a; })");
+  assert(8, ({ int x; int y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; }), "({ int x; int y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; })");
+  assert(8, ({ int x; char y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; }), "({ int x; char y; int z; char *a=&x; char *b=&y; char *c=&z; c-a; })");
+  assert(7, ({ int x; int y; char z; char *a=&y; char *b=&z; b-a; }), "({ int x; int y; char z; char *a=&y; char *b=&z; b-a; })");
+  assert(1, ({ int x; char y; int z; char *a=&y; char *b=&z; b-a; }), "({ int x; char y; int z; char *a=&y; char *b=&z; b-a; })");
 
-//   assert(8, ({ struct foo {int x, y;} x; struct foo y; sizeof(y); }), "({ struct foo {int x, y;} x; struct foo y; sizeof(y); })");
-//   assert(5, ({ struct foo {int x, y;} x; struct foo y; y.y=5; y.y; }), "({ struct foo {int x, y;} x; struct foo y; y.y=5; y.y; })");
-//   assert(5, ({ int; int x=5; x; }), "({ int; int x=5; x; })");
-//   assert(8, ({ struct foo {int x, y;}; struct foo y; sizeof(y); }), "({ struct foo {int x, y;}; struct foo y; sizeof(y); })");
+  assert(8, ({ struct foo {int x, y;} x; struct foo y; sizeof(y); }), "({ struct foo {int x, y;} x; struct foo y; sizeof(y); })");
+  assert(5, ({ struct foo {int x, y;} x; struct foo y; y.y=5; y.y; }), "({ struct foo {int x, y;} x; struct foo y; y.y=5; y.y; })");
+  assert(5, ({ int; int x=5; x; }), "({ int; int x=5; x; })");
+  assert(8, ({ struct foo {int x, y;}; struct foo y; sizeof(y); }), "({ struct foo {int x, y;}; struct foo y; sizeof(y); })");
 
-//   assert(5, ({ struct foo {int x, y;}; struct foo y; y.y=5; struct foo *z=&y; z->y; }), "({ struct foo {int x, y;}; struct foo y; y.y=5; struct foo *z=&y; z->y; })");
-//   assert(5, ({ struct foo {int x, y;}; struct foo y; struct foo *z=&y; z->y=5; y.y=5; }), "({ struct foo {int x, y;}; struct foo y; struct foo *z=&y; z->y=5; y.y=5; })");
+  assert(5, ({ struct foo {int x, y;}; struct foo y; y.y=5; struct foo *z=&y; z->y; }), "({ struct foo {int x, y;}; struct foo y; y.y=5; struct foo *z=&y; z->y; })");
+  assert(5, ({ struct foo {int x, y;}; struct foo y; struct foo *z=&y; z->y=5; y.y=5; }), "({ struct foo {int x, y;}; struct foo y; struct foo *z=&y; z->y=5; y.y=5; })");
 
-//   assert(8, ({union {int a; char b[6];}x; sizeof(x); }), "({union {int a; char b[6];}x; sizeof(x); })");
-//   assert(3, ({union {int a; char b[4];}x; x.a = 515; x.b[0]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[0]; })");
-//   assert(2, ({union {int a; char b[4];}x; x.a = 515; x.b[1]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[1]; })");
-//   assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[2]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[2]; })");
-//   assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[3]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[3]; })");
+  assert(8, ({union {int a; char b[6];}x; sizeof(x); }), "({union {int a; char b[6];}x; sizeof(x); })");
+  assert(3, ({union {int a; char b[4];}x; x.a = 515; x.b[0]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[0]; })");
+  assert(2, ({union {int a; char b[4];}x; x.a = 515; x.b[1]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[1]; })");
+  assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[2]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[2]; })");
+  assert(0, ({union {int a; char b[4];}x; x.a = 515; x.b[3]; }), "({union {int a; char b[4];}x; x.a = 515; x.b[3]; })");
 
-//   assert(1, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; })");
-//   assert(2, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; })");
-//   assert(3, ({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; }), "({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; })");
+  assert(1, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.a; })");
+  assert(2, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; })");
+  assert(3, ({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; }), "({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; })");
 
-//   assert(2, ({short x; sizeof(x); }), "({short x; sizeof(x); })");
-//   assert(4, ({struct {char a; short b; } x; sizeof(x); }), "({struct {char a; short b; } x; sizeof(x); })");
-//   assert(8, ({long x; sizeof(x); }), "({long x; sizeof(x); })");
-//   assert(16, ({struct {char a; long b; } x; sizeof(x); }), "({struct {char a; long b; } x; sizeof(x); })");
-//   assert(1, sub_short(3, 1, 1), "sub_short(3, 1, 1)");
-//   assert(1, sub_long(3, 1, 1), "sub_long(3, 1, 1)");
+  // assert(2, ({short x; sizeof(x); }), "({short x; sizeof(x); })");
+  // assert(4, ({struct {char a; short b; } x; sizeof(x); }), "({struct {char a; short b; } x; sizeof(x); })");
+  // assert(8, ({long x; sizeof(x); }), "({long x; sizeof(x); })");
+  // assert(16, ({struct {char a; long b; } x; sizeof(x); }), "({struct {char a; long b; } x; sizeof(x); })");
+  // assert(1, sub_short(3, 1, 1), "sub_short(3, 1, 1)");
+  // assert(1, sub_long(3, 1, 1), "sub_long(3, 1, 1)");
 
-//   assert(24, ({int *x[3]; sizeof(x); }), "({int *x[3]; sizeof(x); })");
-//   assert(8, ({int (*x)[3]; sizeof(x); }), "({int (*x)[3]; sizeof(x); })");
-//   assert(3, ({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; }), "({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; })");
-//   assert(4, ({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; }), "({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; })");
-//   assert(777, ret_777(), "ret_777()");
+  // assert(24, ({int *x[3]; sizeof(x); }), "({int *x[3]; sizeof(x); })");
+  // assert(8, ({int (*x)[3]; sizeof(x); }), "({int (*x)[3]; sizeof(x); })");
+  // assert(3, ({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; }), "({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; })");
+  // assert(4, ({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; }), "({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; })");
+  // assert(777, ret_777(), "ret_777()");
 
 //   {
 //     void *x;

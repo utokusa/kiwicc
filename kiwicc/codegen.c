@@ -116,8 +116,8 @@ static void store(Type *ty)
   {
     for (int i = 0; i < sz; i++)
     {
-      println("  mov %d(%%%s), %%al", i, rs);
-      println("  mov %%al, %d(%%%s)", i, rd);
+      println("  lb a0, %d(%s)", i, rs);
+      println("  sb a0, %d(%s)", i, rd);
     }
   }
   else if (ty->kind == TY_FLOAT)
@@ -269,9 +269,14 @@ static void gen_addr(Node *node)
     gen_addr(node->rhs);
     return;
   case ND_MEMBER:
+  {
+    println("# gen_addr() ND_MEMBER start");
     gen_addr(node->lhs);
-    println("  add $%d, %%%s", node->member->offset, reg(top - 1));
+    char *rd = reg(top - 1);
+    gen_addi(rd, rd, node->member->offset);
+    println("# gen_addr() ND_MEMBER end");
     return;
+  }
   default:
     println("node->kind : %d", node->kind);
     error_tok(node->tok, "The lvalue of the assignment is not a variable.");
@@ -384,9 +389,10 @@ static void gen_expr(Node *node)
     return;
   case ND_VAR:
   case ND_MEMBER:
-    println("# ND_MEMBER");
+    println("# gen_expr() ND_MEMBER start");
     gen_addr(node);
     load(node->ty);
+    println("# gen_expr() ND_MEMBER end");
     return;
   case ND_ASSIGN:
     if (node->ty->kind == TY_ARR)
