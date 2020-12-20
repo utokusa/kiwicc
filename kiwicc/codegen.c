@@ -98,7 +98,7 @@ static void load(Type *ty)
   if (sz == 1)
     println("  lb %s, (%s)", rd, rs);
   else if (sz == 2)
-    println("  %sxw (%%%s), %%%s", movop, rs, rd);
+    println("  lh %s, (%s)", rd, rs);
   else if (sz == 4)
     println("  lw %s, (%s)", rd, rs);
   else
@@ -127,7 +127,7 @@ static void store(Type *ty)
   else if (sz == 1)
     println("  sb %s, (%s)", rs, rd);
   else if (sz == 2)
-    println("  mov %%%sw, (%%%s)", rs, rd);
+    println("  sh %s, (%s)", rs, rd);
   else if (sz == 4)
     println("  sw %s, (%s)", rs, rd);
   else
@@ -532,7 +532,7 @@ static void gen_expr(Node *node)
       if (sz == 1)
         gen_offset_instr("lb", argreg[gp++], "s0", -1 * arg->offset);
       else if (sz == 2)
-        println("  %sxw -%d(%%rbp), %%%s", movop, arg->offset, argreg32[gp++]);
+        gen_offset_instr("lh", argreg[gp++], "s0", -1 * arg->offset);
       else if (sz == 4)
         gen_offset_instr("lw", argreg[gp++], "s0", -1 * arg->offset);
       else

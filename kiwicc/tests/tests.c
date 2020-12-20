@@ -169,10 +169,10 @@ int add6(int a, int b, int c, int d, int e, int f)
 {
   return a + b + c + d + e + f;
 }
-// int sub_short(short a, short b, short c)
-// {
-//   return a - b - c;
-// }
+int sub_short(short a, short b, short c)
+{
+  return a - b - c;
+}
 int sub_long(long a, long b, long c)
 {
   return a - b - c;
@@ -539,58 +539,58 @@ int main()
   assert(2, ({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; }), "({ struct t {int a; int b;} x; x.a=1; x.b=2; struct t y=x; x.b; })");
   assert(3, ({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; }), "({ struct t {int a; int b;} x; x.a=3; struct t y; struct t *z=&y; *z=x; y.a; })");
 
-  // assert(2, ({short x; sizeof(x); }), "({short x; sizeof(x); })");
-  // assert(4, ({struct {char a; short b; } x; sizeof(x); }), "({struct {char a; short b; } x; sizeof(x); })");
-  // assert(8, ({long x; sizeof(x); }), "({long x; sizeof(x); })");
-  // assert(16, ({struct {char a; long b; } x; sizeof(x); }), "({struct {char a; long b; } x; sizeof(x); })");
-  // assert(1, sub_short(3, 1, 1), "sub_short(3, 1, 1)");
-  // assert(1, sub_long(3, 1, 1), "sub_long(3, 1, 1)");
+  assert(2, ({short x; sizeof(x); }), "({short x; sizeof(x); })");
+  assert(4, ({struct {char a; short b; } x; sizeof(x); }), "({struct {char a; short b; } x; sizeof(x); })");
+  assert(8, ({long x; sizeof(x); }), "({long x; sizeof(x); })");
+  assert(16, ({struct {char a; long b; } x; sizeof(x); }), "({struct {char a; long b; } x; sizeof(x); })");
+  assert(1, sub_short(3, 1, 1), "sub_short(3, 1, 1)");
+  assert(1, sub_long(3, 1, 1), "sub_long(3, 1, 1)");
 
-  // assert(24, ({int *x[3]; sizeof(x); }), "({int *x[3]; sizeof(x); })");
-  // assert(8, ({int (*x)[3]; sizeof(x); }), "({int (*x)[3]; sizeof(x); })");
-  // assert(3, ({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; }), "({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; })");
-  // assert(4, ({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; }), "({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; })");
-  // assert(777, ret_777(), "ret_777()");
+  assert(24, ({int *x[3]; sizeof(x); }), "({int *x[3]; sizeof(x); })");
+  assert(8, ({int (*x)[3]; sizeof(x); }), "({int (*x)[3]; sizeof(x); })");
+  assert(3, ({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; }), "({int *x[3]; int y; x[0]=&y; y=3; x[0][0]; })");
+  assert(4, ({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; }), "({int *x[3]; int (*y)[3]=x; y[0][0]=4; y[0][0]; })");
+  assert(777, ret_777(), "ret_777()");
 
-//   {
-//     void *x;
-//   }
+  {
+    void *x;
+  }
 
-//   assert(1, ({char x; sizeof(x); }), "({char x; sizeof(x); })");
-//   assert(2, ({short int x; sizeof(x); }), "({short int x; sizeof(x); })");
-//   assert(2, ({int short x; sizeof(x); }), "({int short x; sizeof(x); })");
-//   assert(4, ({int x; sizeof(x); }), "({int x; sizeof(x); })");
-//   assert(8, ({long int x; sizeof(x); }), "({long int x; sizeof(x); })");
-//   assert(8, ({int long x; sizeof(x); }), "({int long x; sizeof(x); })");
-//   assert(8, ({long long x; sizeof(x); }), "({long long x; sizeof(x); })");
-//   assert(8, ({long long int x; sizeof(x); }), "({long long int x; sizeof(x); })");
-//   assert(8, ({long int long x; sizeof(x); }), "({long int long x; sizeof(x); })");
+  assert(1, ({char x; sizeof(x); }), "({char x; sizeof(x); })");
+  assert(2, ({short int x; sizeof(x); }), "({short int x; sizeof(x); })");
+  assert(2, ({int short x; sizeof(x); }), "({int short x; sizeof(x); })");
+  assert(4, ({int x; sizeof(x); }), "({int x; sizeof(x); })");
+  assert(8, ({long int x; sizeof(x); }), "({long int x; sizeof(x); })");
+  assert(8, ({int long x; sizeof(x); }), "({int long x; sizeof(x); })");
+  assert(8, ({long long x; sizeof(x); }), "({long long x; sizeof(x); })");
+  assert(8, ({long long int x; sizeof(x); }), "({long long int x; sizeof(x); })");
+  assert(8, ({long int long x; sizeof(x); }), "({long int long x; sizeof(x); })");
 
-//   assert(1, ({ typedef int t; t x=1; x; }), "({typedef int t; t x=1; x; })");
-//   assert(1, ({ typedef struct {int a;} t; t x; x.a=1; x.a; }), "({typedef struct {int a;} t; t x; x.a=1; x.a; })");
-//   assert(1, ({ typedef int t; t t = 1; t; }), "({ typedef int t; t t = 1; t; })");
-//   assert(2, ({ typedef struct {int a;} t; {typedef int t;} t x; x.a=2; x.a; }), "({ typedef struct {int a;} t; {typedef int t;} t x; x.a=2; x.a; })");
-//   assert(4, ({ typedef t; t x; sizeof(x); }), "({ typedef t; t x; sizeof(x); })");
-//   assert(4, ({ typedef typedef t; t x; sizeof(x); }), "({ typedef typedef t; t x; sizeof(x); })");
-//   assert(3, ({ MyInt x=3; x; }), "({ MyInt x=3; x; })");
-//   assert(16, ({ MyInt2 x; sizeof(x); }), "({ MyInt2 x; sizeof(x); })");
+  assert(1, ({ typedef int t; t x=1; x; }), "({typedef int t; t x=1; x; })");
+  assert(1, ({ typedef struct {int a;} t; t x; x.a=1; x.a; }), "({typedef struct {int a;} t; t x; x.a=1; x.a; })");
+  assert(1, ({ typedef int t; t t = 1; t; }), "({ typedef int t; t t = 1; t; })");
+  assert(2, ({ typedef struct {int a;} t; {typedef int t;} t x; x.a=2; x.a; }), "({ typedef struct {int a;} t; {typedef int t;} t x; x.a=2; x.a; })");
+  assert(4, ({ typedef t; t x; sizeof(x); }), "({ typedef t; t x; sizeof(x); })");
+  assert(4, ({ typedef typedef t; t x; sizeof(x); }), "({ typedef typedef t; t x; sizeof(x); })");
+  assert(3, ({ MyInt x=3; x; }), "({ MyInt x=3; x; })");
+  assert(16, ({ MyInt2 x; sizeof(x); }), "({ MyInt2 x; sizeof(x); })");
 
-//   assert(1, ({ sizeof(char); }), "({ sizeof(char); })");
-//   assert(2, ({ sizeof(short); }), "({ sizeof(short); })");
-//   assert(2, ({ sizeof(short int); }), "({ sizeof(short int); })");
-//   assert(2, ({ sizeof(int short); }), "({ sizeof(int short); })");
-//   assert(4, ({ sizeof(int); }), "({ sizeof(int); })");
-//   assert(8, ({ sizeof(long); }), "({ sizeof(long); })");
-//   assert(8, ({ sizeof(long int); }), "({ sizeof(long int); })");
-//   assert(8, ({ sizeof(int long); }), "({ sizeof(int long); })");
-//   assert(8, ({ sizeof(char *); }), "({ sizeof(char *); })");
-//   assert(8, ({ sizeof(int *); }), "({ sizeof(int *); })");
-//   assert(8, ({ sizeof(long *); }), "({ sizeof(long *); })");
-//   assert(8, ({ sizeof(int **); }), "({ sizeof(int **); })");
-//   assert(8, ({ sizeof(int(*)[4]); }), "({ sizeof(int(*)[4]); })");
-//   assert(16, ({ sizeof(int[4]); }), "({ sizeof(int[4]); })");
-//   assert(24, ({ sizeof(int[2][3]); }), "({ sizeof(int[2][3]); })");
-//   assert(8, ({ sizeof(struct { int a; int b; }); }), "({ sizeof(struct { int a; int b; }); })");
+  assert(1, ({ sizeof(char); }), "({ sizeof(char); })");
+  assert(2, ({ sizeof(short); }), "({ sizeof(short); })");
+  assert(2, ({ sizeof(short int); }), "({ sizeof(short int); })");
+  assert(2, ({ sizeof(int short); }), "({ sizeof(int short); })");
+  assert(4, ({ sizeof(int); }), "({ sizeof(int); })");
+  assert(8, ({ sizeof(long); }), "({ sizeof(long); })");
+  assert(8, ({ sizeof(long int); }), "({ sizeof(long int); })");
+  assert(8, ({ sizeof(int long); }), "({ sizeof(int long); })");
+  assert(8, ({ sizeof(char *); }), "({ sizeof(char *); })");
+  assert(8, ({ sizeof(int *); }), "({ sizeof(int *); })");
+  assert(8, ({ sizeof(long *); }), "({ sizeof(long *); })");
+  assert(8, ({ sizeof(int **); }), "({ sizeof(int **); })");
+  assert(8, ({ sizeof(int(*)[4]); }), "({ sizeof(int(*)[4]); })");
+  assert(16, ({ sizeof(int[4]); }), "({ sizeof(int[4]); })");
+  assert(24, ({ sizeof(int[2][3]); }), "({ sizeof(int[2][3]); })");
+  assert(8, ({ sizeof(struct { int a; int b; }); }), "({ sizeof(struct { int a; int b; }); })");
 
 //   assert(131586, (int)8590066178, "(int)8590066178");
 //   assert(514, (short)8590066178, "(short)8590066178");
