@@ -50,6 +50,7 @@ static void gen_addi(char *rd, char *rs, long imm)
   if (-2048 <= imm && imm <= 2047)
   {
     println("  addi %s, %s, %ld", rd, rs, imm);
+    return;
   }
 
   println("  li t1, %ld", imm);
@@ -64,6 +65,7 @@ static void gen_offset_instr(char *instr, char *rd, char *r1, long offset)
   if (-2048 <= offset && offset <= 2047)
   {
     println("  %s %s, %ld(%s)", instr, rd, offset, r1);
+    return;
   }
 
   println("  li t1, %ld", offset);
