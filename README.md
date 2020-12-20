@@ -35,7 +35,7 @@ $ make
 
 ```bash
 # in development environment
-$ ./test.sh
+$ make test
 ```
 
 ## Compile a C program for RISC-V and run it on QEMU user-mode emulation
@@ -53,9 +53,14 @@ $ riscv64-unknown-linux-gnu-gcc -g -O0 foo.c
 # run on QEMU user-mode emulation
 $ qemu-riscv64 a.out
 
-# debuggin with gdb
+# debugging with gdb
 $ riscv64-unknown-linux-gnu-gdb a.out
 (gdb) shell qemu-riscv64 -g 1234 a.out &
+(gdb) target remote :1234
+
+# debugging kiwicc with kiwicc
+$ riscv64-unknown-linux-gnu-gdb kiwicc
+(gdb) shell qemu-riscv64 -g 1234 ./kiwicc tests/tests.c -I./tests -fno-pic -o tmp.s  &
 (gdb) target remote :1234
 ```
 
