@@ -20,7 +20,7 @@ static char *reg(int idx)
 {
   static char *r[] = {"s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11"};
   if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
-    error("register out of range: &d", idx);
+    error("register out of range: %d", idx);
   return r[idx];
 }
 
@@ -41,6 +41,34 @@ static char *freg(int idx)
   if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
     error("register out of range: %d", idx);
   return r[idx];
+}
+
+// In RISC-V, `addi` can take only sign-extended 12-bit immediate [-2048, 2047].
+// This function allows to take larger/smaller immediates.
+static void gen_addi(char *rd, char *rs, long imm)
+{
+  if (-2048 <= imm && imm <= 2047)
+  {
+    println("  addi %s, %s, %ld", rd, rs, imm);
+  }
+
+  println("  li t1, %ld", imm);
+  println("  add %s, %s, t1", rd, rs);
+}
+
+// For `lb`, `ls`, `lw`, `ld`, `sb`, `ss`, `sw`, `sd`
+static void gen_offset_instr(char *instr, char *rd, char *r1, long offset)
+{
+  // If offset can be represented as sign-extended 12-bit
+  // immediate [-2048, 2047].
+  if (-2048 <= offset && offset <= 2047)
+  {
+    println("  %s %s, %ld(%s)", instr, rd, offset, r1);
+  }
+
+  println("  li t1, %ld", offset);
+  println("  add t2, %s, t1", r1);
+  println("  %s %s, (t2)", instr, rd);
 }
 
 static void load(Type *ty)
@@ -210,7 +238,7 @@ static void gen_addr(Node *node)
     Var *var = node->var;
     if (var->is_local)
     {
-      println("  addi %s, s0, -%d", reg(top++), var->offset);
+      gen_addi(reg(top++), "s0", -1 * var->offset);
       return;
     }
     
@@ -494,13 +522,13 @@ static void gen_expr(Node *node)
       char *movop = arg->ty->is_unsigned ? "movz" : "movs";
       int sz = size_of(arg->ty);
       if (sz == 1)
-        println("  lb %s, -%d(s0)", argreg[gp++], arg->offset);
+        gen_offset_instr("lb", argreg[gp++], "s0", -1 * arg->offset);
       else if (sz == 2)
         println("  %sxw -%d(%%rbp), %%%s", movop, arg->offset, argreg32[gp++]);
       else if (sz == 4)
-        println("  lw %s, -%d(s0)", argreg[gp++], arg->offset);
+        gen_offset_instr("lw", argreg[gp++], "s0", -1 * arg->offset);
       else
-        println("  ld %s, -%d(s0)", argreg[gp++], arg->offset);
+        gen_offset_instr("ld", argreg[gp++], "s0", -1 * arg->offset);
     }
     // // Set the number of vector registers used to rax
     // println("  mov $%d, %%rax", fp);
@@ -861,7 +889,7 @@ static void gen_stmt(Node *node)
       {
         println("# gen_stmt() !is_flonum(node->lhs->ty)");
         println("  mv a0, %s", reg(--top));
-    }
+      }
     }
     println("  j .L.return.%s", current_fn->name);
     return;
@@ -950,7 +978,7 @@ static void emit_text(Program *prog)
     println("  sd s0, (sp)");
 
     println("  mv s0, sp");
-    println("  addi sp, sp, -%d", fn->stack_size);
+    gen_addi("sp", "sp", -1 * fn->stack_size);
     // println("  sd s0, -8(s0)");
     println("  sd s1, -16(s0)");
     println("  sd s2, -24(s0)");
@@ -1005,13 +1033,13 @@ static void emit_text(Program *prog)
       {
         int sz = size_of(var->ty);
         if (sz == 1)
-          println("  sb %s, -%d(s0)", argreg[--gp], var->offset);
+          gen_offset_instr("sb", argreg[--gp], "s0", -1 * var->offset);
         else if (sz == 2)
-          println("  sh %s, -%d(s0)", argreg[--gp], var->offset);
+          gen_offset_instr("sh", argreg[--gp], "s0", -1 * var->offset);
         else if (sz == 4)
-          println("  sw %s, -%d(s0)", argreg[--gp], var->offset);
+          gen_offset_instr("sw", argreg[--gp], "s0", -1 * var->offset);
         else
-          println("  sd %s, -%d(s0)", argreg[--gp], var->offset);
+          gen_offset_instr("sd", argreg[--gp], "s0", -1 * var->offset);
       }
     }
 

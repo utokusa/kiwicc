@@ -214,5 +214,7 @@ return 1; }'
 assert 2 'int main() { int x=2; {int x=3;} return x; }'
 assert 2 'int main() { int x=2; {int x=3;} {int y=4; return x; }}'
 assert 3 'int main() { int x=2; {x=3;} return x; }'
+assert 5 'int main() { int a[100]; return a[99] = 5;}'
+assert 5 'int retval(int x){return x;} int main() { int a[1000]; return a[999] = retval(5);}'
 
 echo OK
