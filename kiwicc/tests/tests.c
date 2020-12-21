@@ -690,28 +690,28 @@ int main()
   assert(13, 0B1101, "0b1101");
   assert(668, 01234, "01234");
 
-//   assert(0, !1, "!1");
-//   assert(0, !2, "!2");
-//   assert(1, !0, "!0");
-//   assert(1, !(char)0, "!(char)0");
-//   assert(0, !(long)5, "!(long)5");
-//   assert(4, sizeof(!(char)0), "sizeof(!(char)0)");
-//   assert(4, sizeof(!(long)5), "sizeof(!(long)5)");
+  assert(0, !1, "!1");
+  assert(0, !2, "!2");
+  assert(1, !0, "!0");
+  assert(1, !(char)0, "!(char)0");
+  assert(0, !(long)5, "!(long)5");
+  assert(4, sizeof(!(char)0), "sizeof(!(char)0)");
+  assert(4, sizeof(!(long)5), "sizeof(!(long)5)");
 
-//   assert(-1, ~0, "~0");
-//   assert(0, ~-1, "~-1");
+  assert(-1, ~0, "~0");
+  assert(0, ~-1, "~-1");
 
-//   assert(5, 17 % 6, "17%6");
-//   assert(5, (short)17 % 6, "(short)17%6");
-//   assert(5, (long)17 % 6, "(long)17%6");
-//   assert(2, ({ int i=10; i%=4; i; }), "({ int i=10; i%=4; i; })");
-//   assert(2, ({ short i=10; i%=4; i; }), "({ short i=10; i%=4; i; })");
-//   assert(2, ({ long i=10; i%=4; i; }), "({ long i=10; i%=4; i; })");
+  assert(5, 17 % 6, "17%6");
+  assert(5, (short)17 % 6, "(short)17%6");
+  assert(5, (long)17 % 6, "(long)17%6");
+  assert(2, ({ int i=10; i%=4; i; }), "({ int i=10; i%=4; i; })");
+  assert(2, ({ short i=10; i%=4; i; }), "({ short i=10; i%=4; i; })");
+  assert(2, ({ long i=10; i%=4; i; }), "({ long i=10; i%=4; i; })");
 
-//   assert(0, 0 & 1, "0 & 1");
-//   assert(1, 3 & 1, "3 & 1");
-//   assert(3, 7 & 3, "7 & 3");
-//   assert(10, -1 & 10, "-1 & 10");
+  // assert(0, 0 & 1, "0 & 1");
+  // assert(1, 3 & 1, "3 & 1");
+  // assert(3, 7 & 3, "7 & 3");
+  // assert(10, -1 & 10, "-1 & 10");
 
 //   assert(1, 0 | 1, "0 | 1");
 //   assert(0b101010, 0b101000 | 0b000010, "0b101000 | 0b000010");

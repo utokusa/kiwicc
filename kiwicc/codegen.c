@@ -459,13 +459,13 @@ static void gen_expr(Node *node)
     println("# ND_NOT");
     gen_expr(node->lhs);
     cmp_zero(node->lhs->ty);
-    println("  sete %%%sb", reg(top));
-    println("  movzx %%%sb, %%%s", reg(top), reg(top));
+    println("  snez %s, %s", reg(top), reg(top));
+    println("  andi %s, %s, 0xff", reg(top), reg(top));
     top++;
     return;
   case ND_BITNOT:
     gen_expr(node->lhs);
-    println("  not %%%s", reg(top - 1));
+    println("  not %s, %s", reg(top - 1), reg(top - 1));
     return;
   case ND_LOGAND:
   {
@@ -641,7 +641,10 @@ static void gen_expr(Node *node)
     }
     break;
   case ND_MOD:
-    divmod(node, rd, rs, "rdx", "edx");
+    if (node->ty->is_unsigned)
+      println("  rem %s, %s, %s", rd, rd, rs);
+    else
+      println("  remu %s, %s, %s", rd, rd, rs);
     return;
   case ND_BITAND:
     println("  and %%%s, %%%s", rs, rd);
