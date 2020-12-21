@@ -211,19 +211,32 @@ static void cast(Type *from, Type *to)
     return;
   }
 
-  char *movop = to->is_unsigned ? "movzx" : "movsx";
+  // TODO: handle unsigned. The dist register is sign-extended.
+  char *suffix = to->is_unsigned ? "u" : "";
 
   if (size_of(to) == 1)
-    println("  %s %%%sb, %%%s", movop, r, r);
+  {
+    println("  addi sp, sp, -8");
+    println("  sd %s, (sp)", r);
+    println("  lb%s %s, (sp)", suffix, r);
+    println("  addi sp, sp, 8");
+  }
   else if (size_of(to) == 2)
-    println("  %s %%%sw, %%%s", movop, r, r);
+  {
+    println("  addi sp, sp, -8");
+    println("  sd %s, (sp)", r);
+    println("  lh%s %s, (sp)", suffix, r);
+    println("  addi sp, sp, 8");
+  }
   else if (size_of(to) == 4)
   {
-    println("# cast() size_of(to) == 4");
-    println("  mov %%%sd, %%%sd", r, r);
+    println("  addi sp, sp, -8");
+    println("  sd %s, (sp)", r);
+    println("  lw%s %s, (sp)", suffix, r);
+    println("  addi sp, sp, 8");
   }
   else if (is_integer(from) && size_of(from) < 8 && !from->is_unsigned)
-    println("  movsx %%%sd, %%%s", r, r);
+    println("  mv %s, %s", r, r);
 }
 
 static void gen_expr(Node *node);
@@ -426,7 +439,7 @@ static void gen_expr(Node *node)
     return;
   case ND_CAST:
     gen_expr(node->lhs);
-    // cast(node->lhs->ty, node->ty);
+    cast(node->lhs->ty, node->ty);
     return;
   case ND_COND:
   {

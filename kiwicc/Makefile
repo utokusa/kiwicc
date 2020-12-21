@@ -63,6 +63,10 @@ tmp-gcc:
 	$(CC) -o tmp tests/tmp_test.c
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
+tmp-gcc-x64:
+	gcc -o tmp tests/tmp_test.c
+	echo './tmp; echo $$?' | sh -
+
 clean:
 	rm -rf kiwicc kiwicc-stage* *.o *~ tmp* tests/*~ tests/*.o tests/tmp*
 
