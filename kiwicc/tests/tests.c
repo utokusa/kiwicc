@@ -605,29 +605,29 @@ int main()
   assert(0, ({ int x = 8193; *((char *)(&x) + 2); }), "({ int x = 8193; *((char *)(&x) + 2); })");
   assert(0, ({ int x = 8193; *((char *)(&x) + 3); }), "({ int x = 8193; *((char *)(&x) + 3); })");
 
-  // assert(4, sizeof(-10 + 5), "sizeof(-10 + 5)");
-  // assert(4, sizeof(-10 - 5), "sizeof(-10 + 5)");
-  // assert(4, sizeof(-10 * 5), "sizeof(-10 + 5)");
-  // assert(4, sizeof(-10 / 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 + 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 - 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 * 5), "sizeof(-10 + 5)");
+  assert(4, sizeof(-10 / 5), "sizeof(-10 + 5)");
 
-  // assert(8, sizeof(-10 + (long)5), "sizeof(-10 + 5)");
-  // assert(8, sizeof(-10 - (long)5), "sizeof(-10 + 5)");
-  // assert(8, sizeof(-10 * (long)5), "sizeof(-10 + 5)");
-  // assert(8, sizeof(-10 / (long)5), "sizeof(-10 + 5)");
-  // assert(8, sizeof((long)-10 + 5), "sizeof(-10 + 5)");
-  // assert(8, sizeof((long)-10 - 5), "sizeof(-10 + 5)");
-  // assert(8, sizeof((long)-10 * 5), "sizeof(-10 + 5)");
-  // assert(8, sizeof((long)-10 / 5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 + (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 - (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 * (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof(-10 / (long)5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 + 5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 - 5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 * 5), "sizeof(-10 + 5)");
+  assert(8, sizeof((long)-10 / 5), "sizeof(-10 + 5)");
 
-//   assert(3, ({ g1 = 3; *g1_ptr(); }), "({ g1 = 3; *g1_ptr(); })");
-//   assert(261, int_to_int(261), "int_to_int(261)");
-//   assert(261, ({ int x = int_to_int(261); x; }), "({ int x = int_to_int(261); x; })");
-//   assert(5, int_to_char(261), "int_to_char(261)");
-//   assert(5, ({ int x = int_to_char(261); x; }), "({ int x = int_to_char(261); x; })");
+  assert(3, ({ g1 = 3; *g1_ptr(); }), "({ g1 = 3; *g1_ptr(); })");
+  assert(261, int_to_int(261), "int_to_int(261)");
+  assert(261, ({ int x = int_to_int(261); x; }), "({ int x = int_to_int(261); x; })");
+  assert(5, int_to_char(261), "int_to_char(261)");
+  assert(5, ({ int x = int_to_char(261); x; }), "({ int x = int_to_char(261); x; })");
 
-//   assert(-5, div_long(-10, 2), "div_long(-10, 2)");
+  assert(-5, div_long(-10, 2), "div_long(-10, 2)");
 
-//   assert(0, ({ _Bool x=0; x; }), "({ _Bool x=0; x; })");
+  // assert(0, ({ _Bool x=0; x; }), "({ _Bool x=0; x; })");
 //   assert(1, ({ _Bool x=1; x; }), "({ _Bool x=1; x; })");
 //   assert(1, ({ _Bool x=5; x; }), "({ _Bool x=5; x; })");
 //   assert(1, (_Bool)1, "(_Bool)1");
