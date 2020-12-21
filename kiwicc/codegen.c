@@ -169,8 +169,8 @@ static void cast(Type *from, Type *to)
   if (to->kind == TY_BOOL)
   {
     cmp_zero(from);
-    println("  setne %%%sb", reg(top));
-    println("  movzx %%%sb, %%%s", reg(top), reg(top));
+    println("  seqz %s, %s", reg(top), reg(top));
+    println("  andi %s, %s, 0xff", reg(top), reg(top));
     top++;
     return;
   }
@@ -556,11 +556,10 @@ static void gen_expr(Node *node)
     
     println("  jalr %s", reg(--top));
 
-    // The System V x86-64 ABI has a special rule regarding a boolean return
-    // value that onlyu the lower 8 bits are valid for it and the upper
+    // If return type is boolean, only the lower 8 bits are valid for it and the upper
     // 56 bits may contain garbage. Here, we clear the upper 56 bits.
     if (node->ty->kind == TY_BOOL)
-      println("  movzx %%al, %%rax");
+      println("  andi a0, a0, 0xff");
 
 
     // Restore caaller-saved registers

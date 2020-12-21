@@ -193,14 +193,14 @@ int div_long(long a, long b)
 {
   return a / b;
 }
-// _Bool bool_fn_add(_Bool x)
-// {
-//   return x + 1;
-// }
-// _Bool bool_fn_sub(_Bool x)
-// {
-//   return x - 1;
-// }
+_Bool bool_fn_add(_Bool x)
+{
+  return x + 1;
+}
+_Bool bool_fn_sub(_Bool x)
+{
+  return x - 1;
+}
 static int static_fn()
 {
   return 3;
@@ -627,18 +627,18 @@ int main()
 
   assert(-5, div_long(-10, 2), "div_long(-10, 2)");
 
-  // assert(0, ({ _Bool x=0; x; }), "({ _Bool x=0; x; })");
-//   assert(1, ({ _Bool x=1; x; }), "({ _Bool x=1; x; })");
-//   assert(1, ({ _Bool x=5; x; }), "({ _Bool x=5; x; })");
-//   assert(1, (_Bool)1, "(_Bool)1");
-//   assert(1, (_Bool)5, "(_Bool)5");
-//   assert(0, (_Bool)(char)256, "(_Bool)(char)256");
-//   assert(1, bool_fn_add(3), "bool_fn_add(3)");
-//   assert(0, bool_fn_sub(3), "bool_fn_add(3)");
-//   assert(1, bool_fn_add(-3), "bool_fn_add(-3)");
-//   assert(0, bool_fn_sub(-3), "bool_fn_add(-3)");
-//   assert(1, bool_fn_add(0), "bool_fn_add(0)");
-//   assert(1, bool_fn_sub(0), "bool_fn_add(0)");
+  assert(0, ({ _Bool x=0; x; }), "({ _Bool x=0; x; })");
+  assert(1, ({ _Bool x=1; x; }), "({ _Bool x=1; x; })");
+  assert(1, ({ _Bool x=5; x; }), "({ _Bool x=5; x; })");
+  assert(1, (_Bool)1, "(_Bool)1");
+  assert(1, (_Bool)5, "(_Bool)5");
+  assert(0, (_Bool)(char)256, "(_Bool)(char)256");
+  assert(1, bool_fn_add(3), "bool_fn_add(3)");
+  assert(0, bool_fn_sub(3), "bool_fn_add(3)");
+  assert(1, bool_fn_add(-3), "bool_fn_add(-3)");
+  assert(0, bool_fn_sub(-3), "bool_fn_add(-3)");
+  assert(1, bool_fn_add(0), "bool_fn_add(0)");
+  assert(1, bool_fn_sub(0), "bool_fn_add(0)");
 
 //   assert(97, 'a', "'a'");
 //   assert(10, '\n', "'\\n'");
