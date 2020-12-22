@@ -733,15 +733,15 @@ int main()
   assert(1, 2 || 1, "2 || 1");
   assert(1, (1 - 1) || 1, "(1 - 1) || 1");
 
-//   assert(8, sizeof(int(*)[10]), "sizeof(int(*)[10])");
-//   assert(8, sizeof(int(*)[][10]), "sizeof(int(*)[][10])");
+  assert(8, sizeof(int(*)[10]), "sizeof(int(*)[10])");
+  assert(8, sizeof(int(*)[][10]), "sizeof(int(*)[][10])");
 
-//   assert(2, ({ int x[2]; x[0]=2; param_decay(x); }), "({ int x[2]; x[0]=2; param_decay(x); })");
+  assert(2, ({ int x[2]; x[0]=2; param_decay(x); }), "({ int x[2]; x[0]=2; param_decay(x); })");
 
-//   assert(8, ({ struct foo *bar; sizeof(bar); }), "({ struct foo *bar; sizeof(bar); })");
-//   assert(4, ({ struct T *foo; struct T {int x; }; sizeof(struct T); }), "({ struct T *foo; struct T {int x; }; sizeof(struct T); })");
-//   assert(12, ({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); }), "({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); })");
-//   assert(14, ({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; }), "({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; })");
+  assert(8, ({ struct foo *bar; sizeof(bar); }), "({ struct foo *bar; sizeof(bar); })");
+  assert(4, ({ struct T *foo; struct T {int x; }; sizeof(struct T); }), "({ struct T *foo; struct T {int x; }; sizeof(struct T); })");
+  assert(12, ({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); }), "({ typedef struct T T; struct T { int x, y, z; }; sizeof(T); })");
+  assert(14, ({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; }), "({ struct T { struct T *next; int x; } a; struct T b; b.x=14; a.next=&b; a.next->x; })");
 
 //   assert(15, ({ int j=0; for (int i=0;i<100;i++) { j+=i; if (i==5) break; } j; }), "({ int j=0; for (int i=0;i<100;i++) { j+=i; if (i==5) break; } j; })");
 //   assert(9, ({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) sum+=i*j; sum; }), "({ int sum=0; for (int i=1; i<=2; i++) for (int j=1; j<=2; j++) sum+=i*j; sum; })");
