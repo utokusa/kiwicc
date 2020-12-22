@@ -472,14 +472,14 @@ static void gen_expr(Node *node)
     int seq = labelseq++;
     gen_expr(node->lhs);
     cmp_zero(node->lhs->ty);
-    println("  je  .L.false.%d", seq);
+    println("  bne %s, zero, .L.false.%d", reg(top), seq);
     gen_expr(node->rhs);
     cmp_zero(node->rhs->ty);
-    println("  je  .L.false.%d", seq);
-    println("  mov $1, %%%s", reg(top));
-    println("  jmp .L.end.%d", seq);
+    println("  bne %s, zero, .L.false.%d", reg(top), seq);
+    println("  li %s, 1", reg(top));
+    println("  j .L.end.%d", seq);
     println(".L.false.%d:", seq);
-    println("  mov $0, %%%s", reg(top++));
+    println("  mv %s, zero", reg(top++));
     println("  .L.end.%d:", seq);
     return;
   }
@@ -488,14 +488,14 @@ static void gen_expr(Node *node)
     int seq = labelseq++;
     gen_expr(node->lhs);
     cmp_zero(node->lhs->ty);
-    println("  jne .L.true.%d", seq);
+    println("  beq %s, zero, .L.true.%d", reg(top), seq);
     gen_expr(node->rhs);
     cmp_zero(node->rhs->ty);
-    println("  jne .L.true.%d", seq);
-    println("  mov $0, %%%s", reg(top));
-    println("  jmp .L.end.%d", seq);
+    println("  beq %s, zero, .L.true.%d", reg(top), seq);
+    println("  mv %s, zero", reg(top));
+    println("  j .L.end.%d", seq);
     println(".L.true.%d:", seq);
-    println("  mov $1, %%%s", reg(top++));
+    println("  li %s, 1", reg(top++));
     println("  .L.end.%d:", seq);
     return;
   }
@@ -647,13 +647,13 @@ static void gen_expr(Node *node)
       println("  remu %s, %s, %s", rd, rd, rs);
     return;
   case ND_BITAND:
-    println("  and %%%s, %%%s", rs, rd);
+    println("  and %s, %s, %s", rd, rd, rs);
     return;
   case ND_BITOR:
-    println("  or %%%s, %%%s", rs, rd);
+    println("  or %s, %s, %s", rd, rd, rs);
     return;
   case ND_BITXOR:
-    println("  xor %%%s, %%%s", rs, rd);
+    println("  xor %s, %s, %s", rd, rd, rs);
     return;
   case ND_EQ:
     if (node->lhs->ty->kind == TY_FLOAT)
