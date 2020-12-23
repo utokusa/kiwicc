@@ -446,10 +446,10 @@ static void gen_expr(Node *node)
     int seq = labelseq++;
     gen_expr(node->cond);
     cmp_zero(node->cond->ty);
-    println("  je  .L.else.%d", seq);
+    println("  bne %s, zero, .L.else.%d", reg(top), seq);
     gen_expr(node->then);
     top--;
-    println("  jmp .L.end.%d", seq);
+    println("  j .L.end.%d", seq);
     println(".L.else.%d:", seq);
     gen_expr(node->els);
     println(".L.end.%d:", seq);

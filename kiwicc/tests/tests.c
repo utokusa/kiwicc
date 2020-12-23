@@ -777,16 +777,16 @@ int main()
   assert(2, ({ int i=5; i>>=1; i; }), "({ int i=5; i>>=1; i; })");
   assert(-1, ({ int i=-1; i>>=1; i; }), "({ int i=-1; i>>=1; i; })");
 
-//   assert(2, 0 ? 1 : 2, "0 ?: 1 : 2");
-//   assert(1, 1 ? 1 : 2, "1 ?: 1 : 2");
-//   assert(-1, 0 ? -2 : -1, "0 ?: -2 : -1");
-//   assert(-2, 1 ? -2 : -1, "1 ?: -2 : -1");
-//   assert(4, sizeof(0 ? 1 : 2), "sizeof(0 ? 1 : 2)");
-//   assert(8, sizeof(0 ? (long)1 : (long)2), "sizeof(0 ? (long)1 : (long)2)");
-//   assert(8, sizeof(0 ? 1 : (long)2), "sizeof(0 ? 1 : (long)2)");
-//   assert(8, sizeof(0 ? (long)1 : 2), "sizeof(0 ? (long)1 : 2)");
+  assert(2, 0 ? 1 : 2, "0 ?: 1 : 2");
+  assert(1, 1 ? 1 : 2, "1 ?: 1 : 2");
+  assert(-1, 0 ? -2 : -1, "0 ?: -2 : -1");
+  assert(-2, 1 ? -2 : -1, "1 ?: -2 : -1");
+  assert(4, sizeof(0 ? 1 : 2), "sizeof(0 ? 1 : 2)");
+  assert(8, sizeof(0 ? (long)1 : (long)2), "sizeof(0 ? (long)1 : (long)2)");
+  assert(8, sizeof(0 ? 1 : (long)2), "sizeof(0 ? 1 : (long)2)");
+  assert(8, sizeof(0 ? (long)1 : 2), "sizeof(0 ? (long)1 : 2)");
 
-//   1 ? -2 : (void)-1;
+  1 ? -2 : (void)-1;
 
 //   assert(10, ({ enum { ten=1+2+3+4 }; ten; }), "({ enum { ten=1+2+3+4 }; ten; })");
 //   assert(1, ({ int i=0; switch(3){case 5-2+0*3: i++; } i; }), "({ int i=0; switch(3){case 5-2+0*3: i++; } i; })");
