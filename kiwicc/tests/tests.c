@@ -766,16 +766,16 @@ int main()
   assert(2, ({ int i=0; switch(1) {case 0: 0; case 1: 0; case 2: 0; i=2; } i; }), "({ int i=0; switch(1) {case 0: 0; case 1: 0; case 2: 0; i=2; } i; })");
   assert(0, ({ int i=0; switch(3) {case 0: 0; case 1: 0; case 2: 0; i=2; } i; }), "({ int i=0; switch(3) {case 0: 0; case 1: 0; case 2: 0; i=2; } i; })");
 
-//   assert(1, 1 << 0, "1 << 0");
-//   assert(8, 1 << 3, "1 << 3");
-//   assert(1, 8 >> 3, "8 >> 3");
-//   assert(2, 5 >> 1, "5 >> 1");
-//   assert(-1, -1 >> 1, "-1 >> 1");
-//   assert(1, ({ int i=1; i<<=0; i; }), "({ int i=1; i<<=0; i; })");
-//   assert(8, ({ int i=1; i<<=3; i; }), "({ int i=1; i<<=3; i; })");
-//   assert(1, ({ int i=8; i>>=3; i; }), "({ int i=8; i>>=3; i; })");
-//   assert(2, ({ int i=5; i>>=1; i; }), "({ int i=5; i>>=1; i; })");
-//   assert(-1, ({ int i=-1; i>>=1; i; }), "({ int i=-1; i>>=1; i; })");
+  assert(1, 1 << 0, "1 << 0");
+  assert(8, 1 << 3, "1 << 3");
+  assert(1, 8 >> 3, "8 >> 3");
+  assert(2, 5 >> 1, "5 >> 1");
+  assert(-1, -1 >> 1, "-1 >> 1");
+  assert(1, ({ int i=1; i<<=0; i; }), "({ int i=1; i<<=0; i; })");
+  assert(8, ({ int i=1; i<<=3; i; }), "({ int i=1; i<<=3; i; })");
+  assert(1, ({ int i=8; i>>=3; i; }), "({ int i=8; i>>=3; i; })");
+  assert(2, ({ int i=5; i>>=1; i; }), "({ int i=5; i>>=1; i; })");
+  assert(-1, ({ int i=-1; i>>=1; i; }), "({ int i=-1; i>>=1; i; })");
 
 //   assert(2, 0 ? 1 : 2, "0 ?: 1 : 2");
 //   assert(1, 1 ? 1 : 2, "1 ?: 1 : 2");
@@ -1085,14 +1085,15 @@ int main()
   
   assert(0, -1 < (unsigned)1, "-1 < (unsigned)1");
   assert(-1, (unsigned long)-1, "(unsigned long)-1");
-//   assert(0x7f, ((unsigned char)-1) >> 1, "((unsigned char)-1) >> 1");
-//   assert(0x7fff, ((unsigned short)-1) >> 1, "((unsigned shor)-1) >> 1");
-//   assert(0x7fffffff, ((unsigned)-1) >> 1, "((unsigned)-1) >> 1");
-//   assert(0x7fffffffffffffff, ((unsigned long)-1) >> 1, "((unsigned long)-1) >> 1");
-//   assert(0x1fe, ((unsigned char)-1) << 1, "((unsigned char)-1) << 1");
-//   assert(0x1fffe, ((unsigned short)-1) << 1, "((unsigned shor)-1) << 1");
-//   assert(0xfffffffe, ((unsigned)-1) << 1, "((unsigned)-1) << 1");
-//   assert(0xfffffffffffffffe, ((unsigned long)-1) << 1, "((unsigned long)-1) << 1");
+  assert(0x7f, ((unsigned char)-1) >> 1, "((unsigned char)-1) >> 1");
+  assert(0x7fff, ((unsigned short)-1) >> 1, "((unsigned shor)-1) >> 1");
+  assert(0x7fffffff, ((unsigned)-1) >> 1, "((unsigned)-1) >> 1");
+  assert(0x7fffffffffffffff, ((unsigned long)-1) >> 1, "((unsigned long)-1) >> 1");
+  assert(0x1fe, ((unsigned char)-1) << 1, "((unsigned char)-1) << 1");
+  assert(0x1fffe, ((unsigned short)-1) << 1, "((unsigned shor)-1) << 1");
+  assert(0xffffffff, ((unsigned)-1), "((unsigned)-1)");
+  assert(0x1fffffffe, ((unsigned)-1) << 1, "((unsigned)-1) << 1");
+  assert(0xfffffffffffffffe, ((unsigned long)-1) << 1, "((unsigned long)-1) << 1");
 
 //   assert(5, (unsigned char)10 / (unsigned char)2, "(unsigned char)10 / (unsigned char)2");
 //   assert(5, (unsigned short)10 / (unsigned short)2, "(unsigned short)10 / (unsigned short)2");

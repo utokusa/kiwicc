@@ -723,15 +723,13 @@ static void gen_expr(Node *node)
     // println("  movzb %%al, %%%s", rd);
     break;
   case ND_SHL:
-    println("  mov %%%s, %%rcx", reg(top));
-    println("  shl %%cl, %%%s", rd);
+    println("  sll %s, %s, %s", rd, rd, rs);
     return;
   case ND_SHR:
-    println("  mov %%%s, %%rcx", reg(top));
     if (node->lhs->ty->is_unsigned)
-      println("  shr %%cl, %%%s", rd);
+      println("  srl %s, %s, %s", rd, rd, rs);
     else
-      println("  sar %%cl, %%%s", rd);
+      println("  sra %s, %s, %s", rd, rd, rs);
     return;
   default:
     error_tok(node->tok, "invalid statement");
