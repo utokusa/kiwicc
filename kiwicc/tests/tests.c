@@ -956,24 +956,24 @@ int main()
   assert(16, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; sizeof(a); }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } sizeof(a); })");
   assert(16, ({ struct T { _Alignas(16) char x, y; }; _Alignof(struct T); }), "({ struct T { _Alignas(16) char x, y; } _Alignof(struct T); })");
 
-//   assert(5, counter(), "counter()");
-//   assert(6, counter(), "counter()");
-//   assert(7, counter(), "counter()");
+  assert(5, counter(), "counter()");
+  assert(6, counter(), "counter()");
+  assert(7, counter(), "counter()");
 
-//   assert(1, (int){1}, "(int){1}");
-//   assert(2, ((int[]){1, 2})[1], "((int[]){1, 2})[1]");
-//   assert('a', ((struct {char a; int b; }){'a', 3}).a, "((struct {char a; int b; }){'a', 3}).a");
-//   assert(5, ({ int x=5; (int){x}; }), "({ int x=5; (int){x}; })");
+  assert(1, (int){1}, "(int){1}");
+  assert(2, ((int[]){1, 2})[1], "((int[]){1, 2})[1]");
+  assert('a', ((struct {char a; int b; }){'a', 3}).a, "((struct {char a; int b; }){'a', 3}).a");
+  assert(5, ({ int x=5; (int){x}; }), "({ int x=5; (int){x}; })");
 
-//   assert(1, tree->val, "tree->val");
-//   assert(2, tree->lhs->val, "tree->lhs->val");
-//   assert(3, tree->lhs->lhs->val, "tree->lhs->lhs->val");
-//   assert(4, tree->lhs->rhs->val, "tree->lhs->rhs->val");
+  assert(1, tree->val, "tree->val");
+  assert(2, tree->lhs->val, "tree->lhs->val");
+  assert(3, tree->lhs->lhs->val, "tree->lhs->lhs->val");
+  assert(4, tree->lhs->rhs->val, "tree->lhs->rhs->val");
 
-//   assert(3, ext3, "ext3");
+  assert(3, ext3, "ext3");
 
-//   assert(0, false_fn(), "false_fn()");
-//   assert(1, true_fn(), "true_fn()");
+  // assert(0, false_fn(), "false_fn()");
+  // assert(1, true_fn(), "true_fn()");
 
 //   ret_none();
 
