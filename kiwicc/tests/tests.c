@@ -231,8 +231,8 @@ const int const_rest_func(int x)
   return x;
 }
 
-// _Bool true_fn();
-// _Bool false_fn();
+_Bool true_fn();
+_Bool false_fn();
 
 _Noreturn noreturn_fn()
 {
@@ -972,12 +972,12 @@ int main()
 
   assert(3, ext3, "ext3");
 
-  // assert(0, false_fn(), "false_fn()");
-  // assert(1, true_fn(), "true_fn()");
+  assert(0, false_fn(), "false_fn()");
+  assert(1, true_fn(), "true_fn()");
 
-//   ret_none();
+  ret_none();
 
-//   assert(6, add_all1(1, 2, 3, 0), "add_all1(1, 2, 3, 0)");
+  // assert(6, add_all1(1, 2, 3, 0), "add_all1(1, 2, 3, 0)");
 //   assert(10, add_all1(1, 2, 3, 4, 0), "add_all1(1, 2, 3, 4, 0)");
 //   assert(15, add_all1(1, 2, 3, 4, 5, 0), "add_all1(1, 2, 3, 4, 5, 0)");
 
