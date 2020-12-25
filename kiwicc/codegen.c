@@ -923,6 +923,17 @@ static void gen_stmt(Node *node)
   }
 }
 
+static int int_log2(int x) {
+  int i = 0;
+  int v = 1;
+  while (v < x)
+  {
+    v = v << 1;
+    i++;
+  }
+  return (v == x) ? i : -1;
+}
+
 static void emit_bss(Program *prog)
 {
   println(".bss");
@@ -933,7 +944,10 @@ static void emit_bss(Program *prog)
     if (var->init_data)
       continue;
 
-    println("  .align %d", var->align);
+    int align = int_log2(var->align);
+    if (align == -1)
+      error_tok(var->tok, "requested alignment is not a positive power of 2");
+    println("  .align %d", align);
     if (!var->is_static)
       println("  .globl %s", var->name);
     println("%s:", var->name);
@@ -950,7 +964,10 @@ static void emit_data(Program *prog)
     if (!var->init_data)
       continue;
 
-    println("  .align %d", var->align);
+    int align = int_log2(var->align);
+    if (align == -1)
+      error_tok(var->tok, "requested alignment is not a positive power of 2");
+    println("  .align %d", align);
     if (!var->is_static)
       println("  .globl %s", var->name);
     println("%s:", var->name);

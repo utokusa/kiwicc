@@ -106,9 +106,9 @@ typedef struct
 
 typedef int MyInt, MyInt2[4];
 
-// int _Alignas(512) g_aligned1;
-// int _Alignas(512) g_aligned2;
-// int _Alignas(128) g_aligned3;
+int _Alignas(512) g_aligned1;
+int _Alignas(512) g_aligned2;
+int _Alignas(128) g_aligned3;
 
 int assert(long expected, long actual, char *code)
 {
@@ -945,16 +945,16 @@ int main()
   assert(1, _Alignof(struct {char a; char b; }[2]), "_Alignof(struct {char a; char b; }[2]");
   assert(8, _Alignof(struct {char a; long b; }[2]), "_Alignof(struct {char a; char b; }[2]");
 
-  // assert(0, (long)(char *)&g_aligned1 % 512, "(long)(char *)&g_aligned1 % 512");
-  // assert(0, (long)(char *)&g_aligned2 % 512, "(long)(char *)&g_aligned2 % 512");
-  // assert(0, (long)(char *)&g_aligned3 % 128, "(long)(char *)&g_aligned3 % 128");
-  // assert(1, ({ _Alignas(char) char x, y; &y - &x; }), "({ _Alignas(char) char x, y; &y - &x; })");
-  // assert(2, ({ _Alignas(short) char x, y; &y - &x; }), "({ _Alignas(short) char x, y; &y - &x; })");
-  // assert(64, ({ _Alignas(64) char x, y; &y - &x; }), "({ _Alignas(64) char x, y; &y - &x; })");
-  // assert(16, ({ struct { _Alignas(16) char x, y; } a; &a.y - &a.x; }), "({ struct { _Alignas(16) char x, y; } a; &a.y - &a.x; })");
-  // assert(9, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; &a.z - &a.x; }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; &a.z - &a.x; })");
-  // assert(16, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; sizeof(a); }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } sizeof(a); })");
-  // assert(16, ({ struct T { _Alignas(16) char x, y; }; _Alignof(struct T); }), "({ struct T { _Alignas(16) char x, y; } _Alignof(struct T); })");
+  assert(0, (long)(char *)&g_aligned1 % 512, "(long)(char *)&g_aligned1 % 512");
+  assert(0, (long)(char *)&g_aligned2 % 512, "(long)(char *)&g_aligned2 % 512");
+  assert(0, (long)(char *)&g_aligned3 % 128, "(long)(char *)&g_aligned3 % 128");
+  assert(1, ({ _Alignas(char) char x, y; &y - &x; }), "({ _Alignas(char) char x, y; &y - &x; })");
+  assert(2, ({ _Alignas(short) char x, y; &y - &x; }), "({ _Alignas(short) char x, y; &y - &x; })");
+  assert(64, ({ _Alignas(64) char x, y; &y - &x; }), "({ _Alignas(64) char x, y; &y - &x; })");
+  assert(16, ({ struct { _Alignas(16) char x, y; } a; &a.y - &a.x; }), "({ struct { _Alignas(16) char x, y; } a; &a.y - &a.x; })");
+  assert(9, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; &a.z - &a.x; }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; &a.z - &a.x; })");
+  assert(16, ({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } a; sizeof(a); }), "({ struct { _Alignas(16) char x; _Alignas(8) char y; char z; } sizeof(a); })");
+  assert(16, ({ struct T { _Alignas(16) char x, y; }; _Alignof(struct T); }), "({ struct T { _Alignas(16) char x, y; } _Alignof(struct T); })");
 
 //   assert(5, counter(), "counter()");
 //   assert(6, counter(), "counter()");

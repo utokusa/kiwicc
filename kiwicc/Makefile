@@ -60,11 +60,13 @@ tmp-as:
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
 tmp-gcc:
-	$(CC) -o tmp tests/tmp_test.c
+	$(CC) -S -O0 -o tmp.s tests/tmp_test.c
+	$(CC) -o tmp tmp.s
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
 tmp-gcc-x64:
-	gcc -o tmp tests/tmp_test.c
+	gcc -S -O0 -o tmp.s tests/tmp_test.c
+	gcc -o tmp tmp.s
 	echo './tmp; echo $$?' | sh -
 
 clean:
