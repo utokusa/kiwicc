@@ -94,15 +94,15 @@ static void load(Type *ty)
 
   char *rs = reg(top - 1);
   char *rd = xreg(ty, top - 1);
-  char *movop = ty->is_unsigned ? "movz" : "movs";
+  char *suffix = ty->is_unsigned ? "u" : "";
   int sz = size_of(ty);
 
   if (sz == 1)
-    println("  lb %s, (%s)", rd, rs);
+    println("  lb%s %s, (%s)", suffix, rd, rs);
   else if (sz == 2)
-    println("  lh %s, (%s)", rd, rs);
+    println("  lh%s %s, (%s)", suffix, rd, rs);
   else if (sz == 4)
-    println("  lw %s, (%s)", rd, rs);
+    println("  lw%s %s, (%s)", suffix, rd, rs);
   else
     println("  ld %s, (%s)", rd, rs);
 }
@@ -213,7 +213,6 @@ static void cast(Type *from, Type *to)
     return;
   }
 
-  // TODO: handle unsigned. The dist register is sign-extended.
   char *suffix = to->is_unsigned ? "u" : "";
 
   if (size_of(to) == 1)
