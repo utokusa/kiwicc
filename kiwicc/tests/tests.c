@@ -984,26 +984,26 @@ int main()
   assert(15, ({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; })");
   assert(10, ({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; })");
 
-//   // #include directive
-//   assert(17, g33 + ret7(), "g33 + ret7()");
-//   assert(8, ret8(), "ret8()");
+  // #include directive
+  assert(17, g33 + ret7(), "g33 + ret7()");
+  assert(8, ret8(), "ret8()");
 
-//   // Object-like macro
-//   assert(2020, ({MY_INT x = M1; x; }), "({MY_INT x = M1; x;})");
-//   assert(3, ret3(), "ret3()");
-//   int M2 = 6;
-//   #define M2 M2 + 3
-//   assert(9, M2, "M2");
+  // Object-like macro
+  assert(2020, ({MY_INT x = M1; x; }), "({MY_INT x = M1; x;})");
+  assert(3, ret3(), "ret3()");
+  int M2 = 6;
+  #define M2 M2 + 3
+  assert(9, M2, "M2");
 
-//   #define M3 M2 + 3
-//   assert(12, M3, "M3");
+  #define M3 M2 + 3
+  assert(12, M3, "M3");
 
-//   int M4 = 3;
-//   #define M4 M5 * 5
-//   #define M5 M4 + 2
-//   // M4 -> M5 * 5      -> M4 + 2 * 5   -> 3 + 2 * 5
-//   //    ^ M4 exppand   ^ M5 expand       ^ M4 = 3
-//   assert(13, M4, "M4");
+  int M4 = 3;
+  #define M4 M5 * 5
+  #define M5 M4 + 2
+  // M4 -> M5 * 5      -> M4 + 2 * 5   -> 3 + 2 * 5
+  //    ^ M4 exppand   ^ M5 expand       ^ M4 = 3
+  assert(13, M4, "M4");
 
   assert(4, ({ sizeof(signed); }), "({ sizeof(signed); })");
   assert(1, ({ sizeof(signed char); }), "({ sizeof(signed char); })");
@@ -1089,34 +1089,34 @@ int main()
   assert(0x1fffffffe, ((unsigned)-1) << 1, "((unsigned)-1) << 1");
   assert(0xfffffffffffffffe, ((unsigned long)-1) << 1, "((unsigned long)-1) << 1");
 
-//   assert(5, (unsigned char)10 / (unsigned char)2, "(unsigned char)10 / (unsigned char)2");
-//   assert(5, (unsigned short)10 / (unsigned short)2, "(unsigned short)10 / (unsigned short)2");
-//   assert(5, (unsigned)10 / (unsigned)2, "(unsigned)10 / (unsigned)2");
-//   assert(5, (unsigned long)10 / (unsigned long)2, "(unsigned long)10 / (unsigned long)2");
-//   assert(1, (unsigned char)11 % (unsigned char)2, "(unsigned char)11 %% (unsigned char)2");
-//   assert(1, (unsigned short)11 % (unsigned short)2, "(unsigned short)11 %% (unsigned short)2");
-//   assert(1, (unsigned)11 % (unsigned)2, "(unsigned)11 %% (unsigned)2");
-//   assert(1, (unsigned long)11 % (unsigned long)2, "(unsigned long)11 %% (unsigned long)2");
-//   assert(5, 10 / (unsigned char)2, "10 / (unsigned char)2");
-//   assert(5, 10 / (unsigned short)2, "10 / (unsigned short)2");
-//   assert(5, 10 / (unsigned)2, "10 / (unsigned)2");
-//   assert(5, 10 / (unsigned long)2, "10 / (unsigned long)2");
-//   assert(1, 11 % (unsigned char)2, "11 %% (unsigned char)2");
-//   assert(1, 11 % (unsigned short)2, "11 %% (unsigned short)2");
-//   assert(1, 11 % (unsigned)2, "11 %% (unsigned)2");
-//   assert(1, 11 % (unsigned long)2, "11 %% (unsigned long)2");
-//   assert(5, (unsigned char)10 / 2, "(unsigned char)10 / 2");
-//   assert(5, (unsigned short)10 / 2, "(unsigned short)10 / 2");
-//   assert(5, (unsigned)10 / 2, "(unsigned)10 / 2");
-//   assert(5, (unsigned long)10 / 2, "(unsigned long)10 / 2");
-//   assert(1, (unsigned char)11 % 2, "(unsigned char)11 %% 2");
-//   assert(1, (unsigned short)11 % 2, "(unsigned short)11 %% 2");
-//   assert(1, (unsigned)11 % 2, "(unsigned)11 %% 2");
-//   assert(1, (unsigned long)11 % 2, "(unsigned long)11 %% 2");
-//   assert(-1, ({ short x = 0xffff; (int)x; }), "({ short x = 0xffff; (int)x; })");
-//   assert(0xffff, ({ unsigned short x = 0xffff; (int)x; }), "({ unsigned short x = 0xffff; (int)x; })");
-//   assert(-1, ({ typedef short T; T x = 0xffff; (int)x; }), "({unsigned T; T x = 0xffff; (int)x; })");
-//   assert(0xffff, ({ typedef unsigned short T; T x = 0xffff; (int)x; }), "({unsigned short T; T x = 0xffff; (int)x; })");
+  assert(5, (unsigned char)10 / (unsigned char)2, "(unsigned char)10 / (unsigned char)2");
+  assert(5, (unsigned short)10 / (unsigned short)2, "(unsigned short)10 / (unsigned short)2");
+  assert(5, (unsigned)10 / (unsigned)2, "(unsigned)10 / (unsigned)2");
+  assert(5, (unsigned long)10 / (unsigned long)2, "(unsigned long)10 / (unsigned long)2");
+  assert(1, (unsigned char)11 % (unsigned char)2, "(unsigned char)11 %% (unsigned char)2");
+  assert(1, (unsigned short)11 % (unsigned short)2, "(unsigned short)11 %% (unsigned short)2");
+  assert(1, (unsigned)11 % (unsigned)2, "(unsigned)11 %% (unsigned)2");
+  assert(1, (unsigned long)11 % (unsigned long)2, "(unsigned long)11 %% (unsigned long)2");
+  assert(5, 10 / (unsigned char)2, "10 / (unsigned char)2");
+  assert(5, 10 / (unsigned short)2, "10 / (unsigned short)2");
+  assert(5, 10 / (unsigned)2, "10 / (unsigned)2");
+  assert(5, 10 / (unsigned long)2, "10 / (unsigned long)2");
+  assert(1, 11 % (unsigned char)2, "11 %% (unsigned char)2");
+  assert(1, 11 % (unsigned short)2, "11 %% (unsigned short)2");
+  assert(1, 11 % (unsigned)2, "11 %% (unsigned)2");
+  assert(1, 11 % (unsigned long)2, "11 %% (unsigned long)2");
+  assert(5, (unsigned char)10 / 2, "(unsigned char)10 / 2");
+  assert(5, (unsigned short)10 / 2, "(unsigned short)10 / 2");
+  assert(5, (unsigned)10 / 2, "(unsigned)10 / 2");
+  assert(5, (unsigned long)10 / 2, "(unsigned long)10 / 2");
+  assert(1, (unsigned char)11 % 2, "(unsigned char)11 %% 2");
+  assert(1, (unsigned short)11 % 2, "(unsigned short)11 %% 2");
+  assert(1, (unsigned)11 % 2, "(unsigned)11 %% 2");
+  assert(1, (unsigned long)11 % 2, "(unsigned long)11 %% 2");
+  assert(-1, ({ short x = 0xffff; (int)x; }), "({ short x = 0xffff; (int)x; })");
+  // assert(0xffff, ({ unsigned short x = 0xffff; (int)x; }), "({ unsigned short x = 0xffff; (int)x; })");
+  // assert(-1, ({ typedef short T; T x = 0xffff; (int)x; }), "({unsigned T; T x = 0xffff; (int)x; })");
+  // assert(0xffff, ({ typedef unsigned short T; T x = 0xffff; (int)x; }), "({unsigned short T; T x = 0xffff; (int)x; })");
 
 //   assert(4, sizeof(2147483647), "sizeof(2147483647)"); //1 << 31 - 1 = 2147483647, int
 //   assert(8, sizeof(2147483648), "sizeof(2147483647)"); //1 << 31     = 2147483648, long
