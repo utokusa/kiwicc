@@ -60,7 +60,7 @@ $ riscv64-unknown-linux-gnu-gdb a.out
 
 # debugging kiwicc with gdb
 $ riscv64-unknown-linux-gnu-gdb kiwicc
-(gdb) shell qemu-riscv64 -g 1234 ./kiwicc tests/tests.c -I./tests -fno-pic -o tmp.s  &
+(gdb) shell qemu-riscv64 -g 1234 ./kiwicc tests/tests.c -I./tests -fno-pic -o tmp.s &
 (gdb) target remote :1234
 ```
 

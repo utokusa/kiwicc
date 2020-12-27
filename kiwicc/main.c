@@ -164,7 +164,7 @@ int main(int argc, char **argv)
   {
     // Besides local variables, callee-saved registers take 32 bytes
     // and the variable-argument save takes 48 bytes in the stack.
-    int offset = fn->is_variadic ? 128 : 96;
+    int offset = fn->is_variadic ? 152 : 88;
 
     for (VarList *vl = fn->locals; vl; vl = vl->next)
     {

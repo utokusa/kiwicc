@@ -51,7 +51,7 @@ test-gcc:
 
 tmp-kiwicc: kiwicc
 # TODO: remove  -fno-pic
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tmp_test.c -o -fno-pic -o  tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tmp_test.c -I./tests -fno-pic -o tmp.s
 	$(CC) -o tmp tmp.s
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 

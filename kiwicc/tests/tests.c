@@ -261,28 +261,22 @@ char *func_name()
   return __func__;
 }
 
-// typedef struct
-// {
-//   int gp_offset;
-//   int fp_offset;
-//   void *overflow_arg_area;
-//   void *reg_save_area;
-// } va_list[1];
+typedef void * va_list;
 
-// int add_all1(int x, ...);
-// int add_all3(int x, int y, int z, ...);
+int add_all1(int x, ...);
+int add_all3(int x, int y, int z, ...);
 // float add_float(float x, float y);
 // double add_double(double x, double y);
 
-// int sprintf(char *buf, char *fmt, ...);
-// int vsprintf(char *buf, char *fmt, ...);
+int sprintf(char *buf, char *fmt, ...);
+int vsprintf(char *buf, char *fmt, ...);
 
-// char *fmt(char *buf, char *fmt, ...)
-// {
-//   va_list ap;
-//   __builtin_va_start(ap, fmt);
-//   vsprintf(buf, fmt, ap);
-// }
+char *fmt(char *buf, char *fmt, ...)
+{
+  va_list ap;
+  __builtin_va_start(ap, fmt);
+  vsprintf(buf, fmt, ap);
+}
 
 int main()
 {
@@ -977,15 +971,15 @@ int main()
 
   ret_none();
 
-  // assert(6, add_all1(1, 2, 3, 0), "add_all1(1, 2, 3, 0)");
-//   assert(10, add_all1(1, 2, 3, 4, 0), "add_all1(1, 2, 3, 4, 0)");
-//   assert(15, add_all1(1, 2, 3, 4, 5, 0), "add_all1(1, 2, 3, 4, 5, 0)");
+  assert(6, add_all1(1, 2, 3, 0), "add_all1(1, 2, 3, 0)");
+  assert(10, add_all1(1, 2, 3, 4, 0), "add_all1(1, 2, 3, 4, 0)");
+  assert(15, add_all1(1, 2, 3, 4, 5, 0), "add_all1(1, 2, 3, 4, 5, 0)");
 
-//   assert(6, add_all3(1, 2, 3, 0), "add_all3(1, 2, 3, 0)");
-//   assert(10, add_all3(1, 2, 3, 4, 0), "add_all3(1, 2, 3, 4, 0)");
-//   assert(15, add_all3(1, 2, 3, 4, 5, 0), "add_all3(1, 2, 3, 4, 5, 0)");
-//   assert(0, ({ char buf[100]; sprintf(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }), "({ char buf[100]; sprintf(buf, \"%d %d %s\", 1, 2, \"foo\"); strcmp(\"1 2 foo\", buf); })");
-//   assert(0, ({ char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }), "({ char buf[100]; fmt(buf, \"%d %d %s\", 1, 2, \"foo\"); strcmp(\"1 2 foo\", buf); })");
+  assert(6, add_all3(1, 2, 3, 0), "add_all3(1, 2, 3, 0)");
+  assert(10, add_all3(1, 2, 3, 4, 0), "add_all3(1, 2, 3, 4, 0)");
+  assert(15, add_all3(1, 2, 3, 4, 5, 0), "add_all3(1, 2, 3, 4, 5, 0)");
+  assert(0, ({ char buf[100]; sprintf(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }), "({ char buf[100]; sprintf(buf, \"%d %d %s\", 1, 2, \"foo\"); strcmp(\"1 2 foo\", buf); })");
+  assert(0, ({ char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }), "({ char buf[100]; fmt(buf, \"%d %d %s\", 1, 2, \"foo\"); strcmp(\"1 2 foo\", buf); })");
 
 //   assert(15, ({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; })");
 //   assert(10, ({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; })");

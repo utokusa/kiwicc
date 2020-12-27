@@ -14,6 +14,8 @@ static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char *argreg[] = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
+static int reg_save_area_offset[] = {-152/*a0*/, -144/*a1*/, -136/*a2*/, -128/*a3*/,
+                                     -120/*a4*/, -112/*a5*/, -104/*a6*/, -96/*a7*/};
 static char *fargreg[] = {"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"};
 
 static char *reg(int idx)
@@ -346,6 +348,7 @@ typedef struct {
 // so only initialize gp_offset and reg_save_area
 static void builtin_va_start(Node *node)
 {
+  println("# builtin_va_start");
   // g stands for general purpose registers.
   // f stands for floating point registers
   int gp = 0, fp = 0;
@@ -359,23 +362,12 @@ static void builtin_va_start(Node *node)
       gp++;
   }
 
-  // Store the pointer to va_list in rax.
-  // Now node->args[0] should be va_list.
-  // Note that the pointer to va_list and the pointer to gp_offset are equal.
-  println("  mov -%d(%%rbp), %%rax", node->args[0]->offset);
-  // Initialize gp_offset.
-  // gp_offset holds the byte offset from reg_save_area to where
-  // the next available general purpose argument register is saved.
-  println("  movl $%d, (%%rax)", gp * 8);
-  // Initialize fp_offset.
-  // fp_offset holds the offset in bytes from reg_save_area to the
-  // place where the next available floating point argument register is saved.
-  println("  movl $%d, 4(%%rax)", 48 + fp * 8);
+  // Initializes va_list argument to point to the start of the vararg save area
+  println("  addi t1, s0, %d", reg_save_area_offset[gp]);
+  // The offset for va_list from s0 is node->args[0]->offset + 8.
+  // `+8` is for ra saved in stack
 
-  // Initialize reg_save_area.
-  // reg_save_area points to the start of the register save area.
-  println("  mov %%rbp, 16(%%rax)");
-  println("  subq $128 ,16(%%rax)");
+  println("  sd t1, -%d(s0)", node->args[0]->offset + 8);
   top++;
 }
 
@@ -521,8 +513,6 @@ static void gen_expr(Node *node)
     // Load arguments from the stack.
 
     // Index of argreg and fargreg.
-    // Named according to "System V Application Binary Interface".
-    // https://www.uclibc.org/docs/psABI-x86_64.pdf
     // g stands for general purpose registers.
     // f stands for floating point registers
     int gp = 0, fp = 0;
@@ -551,8 +541,6 @@ static void gen_expr(Node *node)
       else
         gen_offset_instr("ld", argreg[gp++], "s0", -1 * arg->offset);
     }
-    // // Set the number of vector registers used to rax
-    // println("  mov $%d, %%rax", fp);
     
     println("  jalr %s", reg(--top));
 
@@ -821,10 +809,6 @@ static void gen_stmt(Node *node)
       println("# for cond start");
       gen_expr(node->cond);
       println("# for cond end");
-      // char *rd = reg(--top);
-      // char *rs = rd;
-      // println("  seqz %s, %s", rd, rs);
-      // println("  bne %s, zero, .L.break.%d", rd, seq);
       println("  beq %s, zero, .L.break.%d", reg(--top), seq);
     }
     println("# for then start");
@@ -1017,36 +1001,30 @@ static void emit_text(Program *prog)
 
     println("  mv s0, sp");
     gen_addi("sp", "sp", -1 * fn->stack_size);
-    // println("  sd s0, -8(s0)");
-    println("  sd s1, -16(s0)");
-    println("  sd s2, -24(s0)");
-    println("  sd s3, -32(s0)");
-    println("  sd s4, -40(s0)");
-    println("  sd s5, -48(s0)");
-    println("  sd s6, -56(s0)");
-    println("  sd s7, -64(s0)");
-    println("  sd s8, -72(s0)");
-    println("  sd s9, -80(s0)");
-    println("  sd s10, -88(s0)");
-    println("  sd s11, -96(s0)");
+    println("  sd s1, -8(s0)");
+    println("  sd s2, -16(s0)");
+    println("  sd s3, -24(s0)");
+    println("  sd s4, -32(s0)");
+    println("  sd s5, -40(s0)");
+    println("  sd s6, -48(s0)");
+    println("  sd s7, -56(s0)");
+    println("  sd s8, -64(s0)");
+    println("  sd s9, -72(s0)");
+    println("  sd s10, -80(s0)");
+    println("  sd s11, -88(s0)");
 
     // Save arg registers to the register save area
     // if the function is the variadic
     if (fn->is_variadic)
     {
-      println("  mov %%rdi, -128(%%rbp)");
-      println("  mov %%rsi, -120(%%rbp)");
-      println("  mov %%rdx, -112(%%rbp)");
-      println("  mov %%rcx, -104(%%rbp)");
-      println("  mov %%r8, -96(%%rbp)");
-      println("  mov %%r9, -88(%%rbp)");
-
-      println("  movsd %%xmm0, -80(%%rbp)");
-      println("  movsd %%xmm1, -72(%%rbp)");
-      println("  movsd %%xmm2, -64(%%rbp)");
-      println("  movsd %%xmm3, -56(%%rbp)");
-      println("  movsd %%xmm4, -48(%%rbp)");
-      println("  movsd %%xmm5, -40(%%rbp)");
+      println("  sd a0, -152(s0)");
+      println("  sd a1, -144(s0)");
+      println("  sd a2, -136(s0)");
+      println("  sd a3, -128(s0)");
+      println("  sd a4, -120(s0)");
+      println("  sd a5, -112(s0)");
+      println("  sd a6, -104(s0)");
+      println("  sd a7, -96(s0)");
     }
 
     // Save arguments to the stack
@@ -1059,7 +1037,6 @@ static void emit_text(Program *prog)
         fp++;
       else
         gp++;
-
     for (VarList *param = fn->params; param; param = param->next)
     {
       Var *var = param->var;
@@ -1092,18 +1069,17 @@ static void emit_text(Program *prog)
     // Restore the values of sp, s0 ~ s11
     println(".L.return.%s:", fn->name);
   
-    // println("  ld s0, -8(s0)");
-    println("  ld s1, -16(s0)");
-    println("  ld s2, -24(s0)");
-    println("  ld s3, -32(s0)");
-    println("  ld s4, -40(s0)");
-    println("  ld s5, -48(s0)");
-    println("  ld s6, -56(s0)");
-    println("  ld s7, -64(s0)");
-    println("  ld s8, -72(s0)");
-    println("  ld s9, -80(s0)");
-    println("  ld s10, -88(s0)");
-    println("  ld s11, -96(s0)");
+    println("  ld s1, -8(s0)");
+    println("  ld s2, -16(s0)");
+    println("  ld s3, -24(s0)");
+    println("  ld s4, -32(s0)");
+    println("  ld s5, -40(s0)");
+    println("  ld s6, -48(s0)");
+    println("  ld s7, -56(s0)");
+    println("  ld s8, -64(s0)");
+    println("  ld s9, -72(s0)");
+    println("  ld s10, -80(s0)");
+    println("  ld s11, -88(s0)");
   
     println("  mv sp, s0");
     println("  ld s0, (sp)");
