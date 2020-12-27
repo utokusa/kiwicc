@@ -1016,14 +1016,14 @@ static void emit_text(Program *prog)
     // if the function is the variadic
     if (fn->is_variadic)
     {
-      println("  sd a0, -152(s0)");
-      println("  sd a1, -144(s0)");
-      println("  sd a2, -136(s0)");
-      println("  sd a3, -128(s0)");
-      println("  sd a4, -120(s0)");
-      println("  sd a5, -112(s0)");
-      println("  sd a6, -104(s0)");
-      println("  sd a7, -96(s0)");
+      println("  sd a0, %d(s0)", reg_save_area_offset[0]);
+      println("  sd a1, %d(s0)", reg_save_area_offset[1]);
+      println("  sd a2, %d(s0)", reg_save_area_offset[2]);
+      println("  sd a3, %d(s0)", reg_save_area_offset[3]);
+      println("  sd a4, %d(s0)", reg_save_area_offset[4]);
+      println("  sd a5, %d(s0)", reg_save_area_offset[5]);
+      println("  sd a6, %d(s0)", reg_save_area_offset[6]);
+      println("  sd a7, %d(s0)", reg_save_area_offset[7]);
     }
 
     // Save arguments to the stack
