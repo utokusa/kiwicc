@@ -981,8 +981,8 @@ int main()
   assert(0, ({ char buf[100]; sprintf(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }), "({ char buf[100]; sprintf(buf, \"%d %d %s\", 1, 2, \"foo\"); strcmp(\"1 2 foo\", buf); })");
   assert(0, ({ char buf[100]; fmt(buf, "%d %d %s", 1, 2, "foo"); strcmp("1 2 foo", buf); }), "({ char buf[100]; fmt(buf, \"%d %d %s\", 1, 2, \"foo\"); strcmp(\"1 2 foo\", buf); })");
 
-//   assert(15, ({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; })");
-//   assert(10, ({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; })");
+  assert(15, ({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i;} while (i++<5); sum; })");
+  assert(10, ({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; }), "({ int i=1, sum=0; do {sum+=i; if (sum==10) break; continue; sum*=100; } while (i++<5); sum; })");
 
 //   // #include directive
 //   assert(17, g33 + ret7(), "g33 + ret7()");

@@ -785,7 +785,7 @@ static void gen_stmt(Node *node)
     println(".L.continue.%d:", seq);
     gen_expr(node->cond);
     cmp_zero(node->cond->ty);
-    println("  jne .L.begin.%d", seq);
+    println("  beq %s, zero, .L.begin.%d", reg(top), seq);
     println(".L.break.%d:", seq);
 
     brkseq = brk;
