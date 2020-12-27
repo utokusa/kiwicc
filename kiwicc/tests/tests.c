@@ -1118,85 +1118,85 @@ int main()
   assert(-1, ({ typedef short T; T x = 0xffff; (int)x; }), "({unsigned T; T x = 0xffff; (int)x; })");
   assert(0xffff, ({ typedef unsigned short T; T x = 0xffff; (int)x; }), "({unsigned short T; T x = 0xffff; (int)x; })");
 
-//   assert(4, sizeof(2147483647), "sizeof(2147483647)"); //1 << 31 - 1 = 2147483647, int
-//   assert(8, sizeof(2147483648), "sizeof(2147483647)"); //1 << 31     = 2147483648, long
-//   assert(8, sizeof(4611686018427387904), "sizeof(4611686018427387904)"); //1 << 63 - 1 = 4611686018427387904, long
-//   // assert(16, sizeof(9223372036854775808), "sizeof(9223372036854775808)"); //1 << 63 = 9223372036854775808 __int128_t
+  assert(4, sizeof(2147483647), "sizeof(2147483647)"); //1 << 31 - 1 = 2147483647, int
+  assert(8, sizeof(2147483648), "sizeof(2147483647)"); //1 << 31     = 2147483648, long
+  assert(8, sizeof(4611686018427387904), "sizeof(4611686018427387904)"); //1 << 63 - 1 = 4611686018427387904, long
+  // assert(16, sizeof(9223372036854775808), "sizeof(9223372036854775808)"); //1 << 63 = 9223372036854775808 __int128_t
 
-//   assert(4, sizeof(0xfffffffe), "sizeof(0xffffffff)"); // unsigned int
-//   assert(4, sizeof(0x7fffffff), "sizeof(0x7fffffff)"); // int
-//   assert(8, sizeof(0x100000000), "sizeof(0x100000000)"); // long
-//   assert(8, sizeof(0x3fffffffffffffff), "sizeof(0x3fffffffffffffff)"); // long
-//   assert(8, sizeof(0x7fffffffffffffff), "sizeof(0x7fffffffffffffff)"); // long
-//   assert(8, sizeof(0x8000000000000000), "sizeof(0x8000000000000000)"); // unsigned long
+  assert(4, sizeof(0xfffffffe), "sizeof(0xffffffff)"); // unsigned int
+  assert(4, sizeof(0x7fffffff), "sizeof(0x7fffffff)"); // int
+  assert(8, sizeof(0x100000000), "sizeof(0x100000000)"); // long
+  assert(8, sizeof(0x3fffffffffffffff), "sizeof(0x3fffffffffffffff)"); // long
+  assert(8, sizeof(0x7fffffffffffffff), "sizeof(0x7fffffffffffffff)"); // long
+  assert(8, sizeof(0x8000000000000000), "sizeof(0x8000000000000000)"); // unsigned long
 
-//   assert(4, sizeof(0), "sizeof(0)");
-//   assert(4, sizeof(0U), "sizeof(0U)");
-//   assert(8, sizeof(0L), "sizeof(0L)");
-//   assert(4, sizeof(0u), "sizeof(0u)");
-//   assert(8, sizeof(0l), "sizeof(0l)");
-//   assert(8, sizeof(0UL), "sizeof(0UL)");
-//   assert(8, sizeof(0uL), "sizeof(0uL)");
-//   assert(8, sizeof(0Ul), "sizeof(0Ul)");
-//   assert(8, sizeof(0ul), "sizeof(0ul)");
-//   assert(8, sizeof(0LLU), "sizeof(0LLU)");
-//   assert(8, sizeof(0LLu), "sizeof(LLu)");
-//   assert(8, sizeof(0ULL), "sizeof(ULL)");
-//   assert(8, sizeof(0Ull), "sizeof(0Ull)");
-//   assert(8, sizeof(0uLL), "sizeof(0uLL)");
-//   assert(8, sizeof(0ull), "sizeof(0ull)");
+  assert(4, sizeof(0), "sizeof(0)");
+  assert(4, sizeof(0U), "sizeof(0U)");
+  assert(8, sizeof(0L), "sizeof(0L)");
+  assert(4, sizeof(0u), "sizeof(0u)");
+  assert(8, sizeof(0l), "sizeof(0l)");
+  assert(8, sizeof(0UL), "sizeof(0UL)");
+  assert(8, sizeof(0uL), "sizeof(0uL)");
+  assert(8, sizeof(0Ul), "sizeof(0Ul)");
+  assert(8, sizeof(0ul), "sizeof(0ul)");
+  assert(8, sizeof(0LLU), "sizeof(0LLU)");
+  assert(8, sizeof(0LLu), "sizeof(LLu)");
+  assert(8, sizeof(0ULL), "sizeof(ULL)");
+  assert(8, sizeof(0Ull), "sizeof(0Ull)");
+  assert(8, sizeof(0uLL), "sizeof(0uLL)");
+  assert(8, sizeof(0ull), "sizeof(0ull)");
 
-//   assert(4, sizeof(10), "sizeof(10)");
-//   assert(4, sizeof(10U), "sizeof(10U)");
-//   assert(8, sizeof(10L), "sizeof(10L)");
-//   assert(4, sizeof(10u), "sizeof(10u)");
-//   assert(8, sizeof(10l), "sizeof(10l)");
-//   assert(8, sizeof(10UL), "sizeof(10UL)");
-//   assert(8, sizeof(10uL), "sizeof(10uL)");
-//   assert(8, sizeof(10Ul), "sizeof(10Ul)");
-//   assert(8, sizeof(10ul), "sizeof(10ul)");
-//   assert(8, sizeof(10LLU), "sizeof(10LLU)");
-//   assert(8, sizeof(10LLu), "sizeof(LLu)");
-//   assert(8, sizeof(10ULL), "sizeof(ULL)");
-//   assert(8, sizeof(10Ull), "sizeof(10Ull)");
-//   assert(8, sizeof(10uLL), "sizeof(10uLL)");
-//   assert(8, sizeof(10ull), "sizeof(10ull)");
+  assert(4, sizeof(10), "sizeof(10)");
+  assert(4, sizeof(10U), "sizeof(10U)");
+  assert(8, sizeof(10L), "sizeof(10L)");
+  assert(4, sizeof(10u), "sizeof(10u)");
+  assert(8, sizeof(10l), "sizeof(10l)");
+  assert(8, sizeof(10UL), "sizeof(10UL)");
+  assert(8, sizeof(10uL), "sizeof(10uL)");
+  assert(8, sizeof(10Ul), "sizeof(10Ul)");
+  assert(8, sizeof(10ul), "sizeof(10ul)");
+  assert(8, sizeof(10LLU), "sizeof(10LLU)");
+  assert(8, sizeof(10LLu), "sizeof(LLu)");
+  assert(8, sizeof(10ULL), "sizeof(ULL)");
+  assert(8, sizeof(10Ull), "sizeof(10Ull)");
+  assert(8, sizeof(10uLL), "sizeof(10uLL)");
+  assert(8, sizeof(10ull), "sizeof(10ull)");
 
-//   assert(-1, (int)(4294967295U), "(int)(4294967296U)"); // (1 << 32) - 1
-//   assert(-1, (long)(18446744073709551615UL), "(long)(18446744073709551615UL)"); //  (1 << 64) - 1
-//   assert(1, 9223372036854775808 >> 63  /* (1 << 63) >> 63 */, "9223372036854775808 >> 63");
+  assert(-1, (int)(4294967295U), "(int)(4294967296U)"); // (1 << 32) - 1
+  assert(-1, (long)(18446744073709551615UL), "(long)(18446744073709551615UL)"); //  (1 << 64) - 1
+  assert(1, 9223372036854775808 >> 63  /* (1 << 63) >> 63 */, "9223372036854775808 >> 63");
 
-//   { const int x; }
-//   { const x; }
-//   { int const x; }
-//   { const int const const x; }
-//   assert(5, ({ const int  x = 5; x; }), "({ const int x = 5; x; })");
-//   assert(5, ({ const int x = 5; int * const y = &x; *y; }), "({ const int x = 5; int * const y = &x; *y; })");
-//   assert(5, ({ const int x = 5; const int * const y = &x; *y; }), "({ const int x = 5; const int * const y = &x; *y; })");
-//   assert(5, ({ const int x = 5; const int * const const y = &x; *y; }), "({ const int x = 5; const int * const const y = &x; *y; })");
+  { const int x; }
+  { const x; }
+  { int const x; }
+  { const int const const x; }
+  assert(5, ({ const int  x = 5; x; }), "({ const int x = 5; x; })");
+  assert(5, ({ const int x = 5; int * const y = &x; *y; }), "({ const int x = 5; int * const y = &x; *y; })");
+  assert(5, ({ const int x = 5; const int * const y = &x; *y; }), "({ const int x = 5; const int * const y = &x; *y; })");
+  assert(5, ({ const int x = 5; const int * const const y = &x; *y; }), "({ const int x = 5; const int * const const y = &x; *y; })");
 
-//   assert(5, const_arg_func(5), "const_arg_func(5)");
-//   assert(5, const_rest_func(5), "const_rest_func(5)");
+  assert(5, const_arg_func(5), "const_arg_func(5)");
+  assert(5, const_rest_func(5), "const_rest_func(5)");
 
-//   assert(8, sizeof(_Alignof(char)), "sizeof(_Alignof(char))");
-//   assert(1, sizeof(char) << 63 >> 63, "sizeof(char) << 31 >> 31");
-//   assert(1, _Alignof(char) << 63 >> 63, "_Alignof(char) << 63 >> 63");
+  assert(8, sizeof(_Alignof(char)), "sizeof(_Alignof(char))");
+  assert(1, sizeof(char) << 63 >> 63, "sizeof(char) << 31 >> 31");
+  assert(1, _Alignof(char) << 63 >> 63, "_Alignof(char) << 63 >> 63");
 
-//   assert(9, ({ char x[(char)0xffffffff + 10]; sizeof(x); }), "({ char x[(char)0xffffffff + 10]; sizeof(x); })");
-//   assert(255, ({ char x[(unsigned char)0xffffffff]; sizeof(x); }), "({ char x[(unsigned char)0xffffffff]; sizeof(x); })");
-//   assert(0xffff, ({ char x[(unsigned short)0xffffffff]; sizeof(x); }), "({ char x[(unsigned short)0xffffffff]; sizeof(x); })");
-//   assert(1, ({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); }), "({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); })");
-//   assert(1, ({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); }), "({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); })");
+  assert(265, ({ char x[(char)0xffffffff + 10]; sizeof(x); }), "({ char x[(char)0xffffffff + 10]; sizeof(x); })");
+  assert(255, ({ char x[(unsigned char)0xffffffff]; sizeof(x); }), "({ char x[(unsigned char)0xffffffff]; sizeof(x); })");
+  assert(0xffff, ({ char x[(unsigned short)0xffffffff]; sizeof(x); }), "({ char x[(unsigned short)0xffffffff]; sizeof(x); })");
+  assert(1, ({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); }), "({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); })");
+  assert(1, ({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); }), "({ char x[(unsigned long) 0xffffffffffffffff >> 63]; sizeof(x); })");
 
-//   { volatile x; }
-//   { int volatile x; }
-//   { volatile int x; }
-//   { volatile int volatile volatile x; }
-//   { volatile int * volatile volatile x; }
-//   { int ** restrict const volatile *x; }
-//   { register int x = 1; }
+  { volatile x; }
+  { int volatile x; }
+  { volatile int x; }
+  { volatile int volatile volatile x; }
+  { volatile int * volatile volatile x; }
+  { int ** restrict const volatile *x; }
+  { register int x = 1; }
 
-//   { typedef int ;}
+  { typedef int ;}
 
 //   0.0;
 //   1.0;
