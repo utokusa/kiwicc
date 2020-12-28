@@ -1369,303 +1369,303 @@ int main()
   assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");
   assert(1, g36 - 5.0 < 0.001, "g36 - 5.0 < 0.001");
 
-//   assert(11, (add)(2,9), "(add)(2,9)");
-//   assert(11, (&add)(2,9), "(add)(2,9)");
-//   assert(5, ({ int (*fn)(int, int) = add; fn(2,3); }), "({ int (*fn)(int, int) = add; fn(2,3); })");
-//   assert(3, fnptr()(), "fnptr()()");
+  assert(11, (add)(2,9), "(add)(2,9)");
+  assert(11, (&add)(2,9), "(add)(2,9)");
+  assert(5, ({ int (*fn)(int, int) = add; fn(2,3); }), "({ int (*fn)(int, int) = add; fn(2,3); })");
+  assert(3, fnptr()(), "fnptr()()");
 
-// #if 0 * 1 + 2 - 2
-// #include "file/which/does/not/exist"
-//   assert(0, 1, "1");
-// # if nested
-// # endif
-// # if 1
-//   assert(0, 1, "1");
-// # endif
-// #endif
-//   {
-//     int m = 0;
-// #if 1
-//     m = 5;
-// #if 1 * 1
-//     m++;
-// #endif
-// #endif
-//     assert(6, m, "m");
+#if 0 * 1 + 2 - 2
+#include "file/which/does/not/exist"
+  assert(0, 1, "1");
+# if nested
+# endif
+# if 1
+  assert(0, 1, "1");
+# endif
+#endif
+  {
+    int m = 0;
+#if 1
+    m = 5;
+#if 1 * 1
+    m++;
+#endif
+#endif
+    assert(6, m, "m");
 
-// #if 1-1
-//     m = 1;
-// #else
-//     m = 3;
-// #endif
-//     assert(3, m, "m");
+#if 1-1
+    m = 1;
+#else
+    m = 3;
+#endif
+    assert(3, m, "m");
 
-// #if 1-1
-//     m = 1;
-// #else
-// # if 100-100
-//   m = 7;
-// # else
-//   m = 8;
-// # endif
-// #endif
-//     assert(8, m, "m");
-//   }
+#if 1-1
+    m = 1;
+#else
+# if 100-100
+  m = 7;
+# else
+  m = 8;
+# endif
+#endif
+    assert(8, m, "m");
+  }
 
-//   {
-//     int m = 5;
-// #if 0
-//     m = 0;
-// #elif 0
-//     m = 0;
-// #elif 1
-//     m=100;
-// #else
-//     m = 0;
-// #endif
-//     assert(100, m, "m");
+  {
+    int m = 5;
+#if 0
+    m = 0;
+#elif 0
+    m = 0;
+#elif 1
+    m=100;
+#else
+    m = 0;
+#endif
+    assert(100, m, "m");
 
-// #if 0
-//     m = 0;
-// #elif 0
-//     m = 0;
-// #elif 1
-//     m=101;
-// #elif 1
-//     m = 0;
-// #else
-//     m = 0;
-// #endif
-//     assert(101, m, "m");
+#if 0
+    m = 0;
+#elif 0
+    m = 0;
+#elif 1
+    m=101;
+#elif 1
+    m = 0;
+#else
+    m = 0;
+#endif
+    assert(101, m, "m");
 
-// #if 0
-//     m = 0;
-// #elif 0
-//     m = 0;
-// #elif 1
-// # if 0
-//     m = 0;
-// # elif 1
-//     m = 102;
-// # else
-//     m = 0;
-// # endif
-// #elif 1
-//     m = 0;1
-// #else
-//     m = 0;
-// #endif
-//     assert(102, m, "m");
+#if 0
+    m = 0;
+#elif 0
+    m = 0;
+#elif 1
+# if 0
+    m = 0;
+# elif 1
+    m = 102;
+# else
+    m = 0;
+# endif
+#elif 1
+    m = 0;1
+#else
+    m = 0;
+#endif
+    assert(102, m, "m");
 
-//   }
+  }
 
-//   int M6 = 6;
-//   #define M6 M6 + 3
-//   assert(9, M6, "M6");
-//   #undef M6
-//   assert(6, M6, "M6");
-//   {
-//   #define M7 7
-//   int m = 1;
-// #if M7 - 7
-//   m = 2;
-// #endif
-//   assert(1, m, "m");
-// #if M7
-//   m = 2;
-// #endif
-//   assert(2, m, "m");
-// #if M7 - 7
-//   m = 2;
-// #elif M7
-//   m = 3;
-// #endif
-//   assert(3, m, "m");
+  int M6 = 6;
+  #define M6 M6 + 3
+  assert(9, M6, "M6");
+  #undef M6
+  assert(6, M6, "M6");
+  {
+  #define M7 7
+  int m = 1;
+#if M7 - 7
+  m = 2;
+#endif
+  assert(1, m, "m");
+#if M7
+  m = 2;
+#endif
+  assert(2, m, "m");
+#if M7 - 7
+  m = 2;
+#elif M7
+  m = 3;
+#endif
+  assert(3, m, "m");
 
-// #ifdef M7
-//   m = 4;
-// #endif
-//   assert(4, m, "m");
+#ifdef M7
+  m = 4;
+#endif
+  assert(4, m, "m");
 
-// #ifdef THIS_MACRO_DOES_NOT_EXIST
-//   m = 0;
-// #else
-//   m = 5;
-// #endif
-//   assert(5, m, "m");
+#ifdef THIS_MACRO_DOES_NOT_EXIST
+  m = 0;
+#else
+  m = 5;
+#endif
+  assert(5, m, "m");
 
-// #ifndef THIS_MACRO_DOES_NOT_EXIST
-//   m = 6;
-// #else
-//   m = 0;
-// #endif
-//   assert(6, m, "m");
-//   }
+#ifndef THIS_MACRO_DOES_NOT_EXIST
+  m = 6;
+#else
+  m = 0;
+#endif
+  assert(6, m, "m");
+  }
 
-// #define M8() 1
-//   int M8 = 5;
-//   assert(1, M8(), "M8()");
-//   assert(5, M8, "M8");
-// #define M8 ()
-//   assert(3, ret3 M8, "ret3 M8");
+#define M8() 1
+  int M8 = 5;
+  assert(1, M8(), "M8()");
+  assert(5, M8, "M8");
+#define M8 ()
+  assert(3, ret3 M8, "ret3 M8");
 
-// #define M9(x,y) x+y
-//   assert(9, M9(3,6), "M9(3, 6)");
-// #define M9(x, y) x*y
-//   assert(18, M9(3, 6), "M9(3, 6)");
-//   assert(18, M9((1*3), (1+5)), "M9(3, (1+5))");
-// #define M9(x,y,z) x*y+z
-//   assert(20, M9(3, 6, 2), "M9(3, 6, 2)");
-// #define M9(x, y) (x)*(y)
-//   assert(18, M9(1+2, 2*2+2), "M9(1+2, 2*2+2)");
-// #define M9(x,y) x y
-//   assert(9, M9(,3+6), "M9(,3+6)");
-//   assert(9, M9(3+6, ), "M9(3+6, )");
+#define M9(x,y) x+y
+  assert(9, M9(3,6), "M9(3, 6)");
+#define M9(x, y) x*y
+  assert(18, M9(3, 6), "M9(3, 6)");
+  assert(18, M9((1*3), (1+5)), "M9(3, (1+5))");
+#define M9(x,y,z) x*y+z
+  assert(20, M9(3, 6, 2), "M9(3, 6, 2)");
+#define M9(x, y) (x)*(y)
+  assert(18, M9(1+2, 2*2+2), "M9(1+2, 2*2+2)");
+#define M9(x,y) x y
+  assert(9, M9(,3+6), "M9(,3+6)");
+  assert(9, M9(3+6, ), "M9(3+6, )");
 
-// #define M10(x) M11(x) * x
-// #define M11(x) M10(x) + 3
-//   assert(10, M10(2), "M10(2)");
+#define M10(x) M11(x) * x
+#define M11(x) M10(x) + 3
+  assert(10, M10(2), "M10(2)");
 
-// #define M12(x) #x
+#define M12(x) #x
 
-//   assert('a', M12(a!b 1""c)[0], "M12(a!b 1\"\"c)[0]");
-//   assert('!', M12(a!b 1""c)[1], "M12(a!b 1\"\"c)[1]");
-//   assert('b', M12(a!b 1""c)[2], "M12(a!b 1\"\"c)[2]");
-//   assert(' ', M12(a!b 1""c)[3], "M12(a!b 1\"\"c)[3]");
-//   assert('1', M12(a!b 1""c)[4], "M12(a!b 1\"\"c)[4]");
-//   assert('"', M12(a!b 1""c)[5], "M12(a!b 1\"\"c)[5]");
-//   assert('"', M12(a!b 1""c)[6], "M12(a!b 1\"\"c)[6]");
-//   assert('c', M12(a!b 1""c)[7], "M12(a!b 1\"\"c)[7]");
-//   assert(0, M12(a!b 1""c)[8], "M12(a!b 1\"\"c)[8]");
+  assert('a', M12(a!b 1""c)[0], "M12(a!b 1\"\"c)[0]");
+  assert('!', M12(a!b 1""c)[1], "M12(a!b 1\"\"c)[1]");
+  assert('b', M12(a!b 1""c)[2], "M12(a!b 1\"\"c)[2]");
+  assert(' ', M12(a!b 1""c)[3], "M12(a!b 1\"\"c)[3]");
+  assert('1', M12(a!b 1""c)[4], "M12(a!b 1\"\"c)[4]");
+  assert('"', M12(a!b 1""c)[5], "M12(a!b 1\"\"c)[5]");
+  assert('"', M12(a!b 1""c)[6], "M12(a!b 1\"\"c)[6]");
+  assert('c', M12(a!b 1""c)[7], "M12(a!b 1\"\"c)[7]");
+  assert(0, M12(a!b 1""c)[8], "M12(a!b 1\"\"c)[8]");
 
-// #define paste(x,y) x##y
-//   assert(15, paste(1,5), "paste(1,5)");
-//   assert(255, paste(0, xff), "paste(0x, ff)");
-//   assert(3, ({ int ab = 3; paste(a,b); }), "({ int ab = 3; paste(a,b); })");
-//   assert(5, paste(5, ), "paste(5, )");
-//   assert(5, paste(, 5), "paste(, 5)");
+#define paste(x,y) x##y
+  assert(15, paste(1,5), "paste(1,5)");
+  assert(255, paste(0, xff), "paste(0x, ff)");
+  assert(3, ({ int ab = 3; paste(a,b); }), "({ int ab = 3; paste(a,b); })");
+  assert(5, paste(5, ), "paste(5, )");
+  assert(5, paste(, 5), "paste(, 5)");
 
-// #define i 5
-//   assert(101, ({ int i3 = 100; paste(1+i, 3); }), "({ int i3 = 100; paste(1+i, 3); })");
-// #undef i
+#define i 5
+  assert(101, ({ int i3 = 100; paste(1+i, 3); }), "({ int i3 = 100; paste(1+i, 3); })");
+#undef i
 
-// #define paste2(x) x##5
-//   assert(26, paste2(1+2), "paste2(1+2)");
+#define paste2(x) x##5
+  assert(26, paste2(1+2), "paste2(1+2)");
 
-// #define paste3(x) 1##x
-//   assert(13, paste3(1+2), "paste2(1+2)");
+#define paste3(x) 1##x
+  assert(13, paste3(1+2), "paste2(1+2)");
 
-// #define M13 13
-//   {
-//   int m = 3;
-// #if defined(M12)
-//   m = 3;
-// #endif 
-//   assert(3, m, "m");
-// #if defined M12
-//   m = 4;
-// #endif 
-//   assert(4, m, "m");
+#define M13 13
+  {
+  int m = 3;
+#if defined(M12)
+  m = 3;
+#endif 
+  assert(3, m, "m");
+#if defined M12
+  m = 4;
+#endif 
+  assert(4, m, "m");
 
-// #if defined(M13) && (M13 == 13)
-//   m = 13;
-// #endif
-//   assert(13, m, "m");
-// #if defined(M13) && (M13 == 1311)
-//   m = 13;
-// #else
-//   m = 131;
-// #endif
-//   assert(131, m, "m");
+#if defined(M13) && (M13 == 13)
+  m = 13;
+#endif
+  assert(13, m, "m");
+#if defined(M13) && (M13 == 1311)
+  m = 13;
+#else
+  m = 131;
+#endif
+  assert(131, m, "m");
 
-// #if defined(NO_SUCH_MACRO)
-//   m = 1;
-// #else
-//   m = 2;
-// #endif
-//   assert(2, m, "m");
+#if defined(NO_SUCH_MACRO)
+  m = 1;
+#else
+  m = 2;
+#endif
+  assert(2, m, "m");
 
-// #if no_such_symbol == 0
-//   m = 3;
-// #else
-//   m = 4;
-// #endif
-//   assert(3, m, "m");
-//   }
+#if no_such_symbol == 0
+  m = 3;
+#else
+  m = 4;
+#endif
+  assert(3, m, "m");
+  }
 
-//   assert(1, size\
-// of(char), \
-//   "sizeof(char)");
+  assert(1, size\
+of(char), \
+  "sizeof(char)");
 
-// #include <include3.h>
-//   assert(3, INCLUDE3_MACRO, "INCLUDE3_MACRO");
-// #define M14 < include4.h
-// #include M14 >
-//   assert(4, INCLUDE4_MACRO, "INCLUDE4_MACRO");
+#include <include3.h>
+  assert(3, INCLUDE3_MACRO, "INCLUDE3_MACRO");
+#define M14 < include4.h
+#include M14 >
+  assert(4, INCLUDE4_MACRO, "INCLUDE4_MACRO");
 
-//   assert(1, __STDC__, "__STDC__");
+  assert(1, __STDC__, "__STDC__");
 
-//   assert(0, strcmp(main_filename, "tests.c"), "strcmp(main_filename, \"tests.c\")");
-//   assert(2, main_line, "main_line");
-//   assert(0, strcmp(include_filename, "include.h"), "strcmp(include_filename, \"include.h\")");
-//   assert(2, include_line, "include_line");
+  assert(0, strcmp(main_filename, "tests.c"), "strcmp(main_filename, \"tests.c\")");
+  assert(2, main_line, "main_line");
+  assert(0, strcmp(include_filename, "include.h"), "strcmp(include_filename, \"include.h\")");
+  assert(2, include_line, "include_line");
 
-// #define M15(...) 3
-//   assert(3, M15(), "M15");
+#define M15(...) 3
+  assert(3, M15(), "M15");
 
-// #define M15(...) __VA_ARGS__
-//   assert(5, M15(5), "M15(5)");
+#define M15(...) __VA_ARGS__
+  assert(5, M15(5), "M15(5)");
 
-// #define M15(...) add(__VA_ARGS__)
-//   assert(8, M15(5, 3), "M15(5, 3)");
+#define M15(...) add(__VA_ARGS__)
+  assert(8, M15(5, 3), "M15(5, 3)");
 
-// #define M15(...) add6(__VA_ARGS__)
-//   assert(21, M15(1, 2, 3, 4, 5, 6), "M15(1, 2, 3, 4, 5, 6)");
+#define M15(...) add6(__VA_ARGS__)
+  assert(21, M15(1, 2, 3, 4, 5, 6), "M15(1, 2, 3, 4, 5, 6)");
 
-// #define M15(...) add6(1, 2, __VA_ARGS__, 6)
-//   assert(21, M15(3, 4, 5), "M15(3, 4, 5)");
+#define M15(...) add6(1, 2, __VA_ARGS__, 6)
+  assert(21, M15(3, 4, 5), "M15(3, 4, 5)");
 
-//   assert(5, sizeof(__func__), "sizeof(__func__)");
-//   assert(0, strcmp(__func__, "main"), "strcmp(__func__, \"main\")");
-//   assert(0, strcmp(func_name(), "func_name"), "strcmp(func_name(), \"func_name\")");
+  assert(5, sizeof(__func__), "sizeof(__func__)");
+  assert(0, strcmp(__func__, "main"), "strcmp(__func__, \"main\")");
+  assert(0, strcmp(func_name(), "func_name"), "strcmp(func_name(), \"func_name\")");
 
-//   assert(7, sizeof("abc" "def"), "sizeof(\"abc\" \"def\")");
-//   assert(9, sizeof("abc" "def" "gh"), "sizeof(\"abc\" \"def\" \"gh\")");
-//   assert(0, strcmp("abc" "def", "abcdef"), "strcmp(\"abc\" \"def\", \"abcdef\")");
-//   assert(0, strcmp("abc" "def" "gh", "abcdefgh"), "strcmp(\"abc\" \"def\" \"gh\", \"abcdefgh\")");
+  assert(7, sizeof("abc" "def"), "sizeof(\"abc\" \"def\")");
+  assert(9, sizeof("abc" "def" "gh"), "sizeof(\"abc\" \"def\" \"gh\")");
+  assert(0, strcmp("abc" "def", "abcdef"), "strcmp(\"abc\" \"def\", \"abcdef\")");
+  assert(0, strcmp("abc" "def" "gh", "abcdefgh"), "strcmp(\"abc\" \"def\" \"gh\", \"abcdefgh\")");
 
-// #if 1
-// #include "include4.h"
-// #endif
+#if 1
+#include "include4.h"
+#endif
 
-// #if defined _Noreturn
-// #endif
+#if defined _Noreturn
+#endif
 
-// #if (!defined _Noreturn && 1)
-// #endif
+#if (!defined _Noreturn && 1)
+#endif
 
-// #define _Noreturn 5
-//   assert(5, _Noreturn, "_Noreturn");
-// #undef _Noreturn
+#define _Noreturn 5
+  assert(5, _Noreturn, "_Noreturn");
+#undef _Noreturn
 
-// #include "include5.h"
+#include "include5.h"
 
-// #define EMPTY_MACR
-//   assert(1, 1 EMPTY_MACR EMPTY_MACR, "1 EMPTY_MACR EMPTY_MACR");
+#define EMPTY_MACR
+  assert(1, 1 EMPTY_MACR EMPTY_MACR, "1 EMPTY_MACR EMPTY_MACR");
 
-// #include "include6.h"
-// #undef MACRO_INCLUDE6
-// #include "include7.h"
+#include "include6.h"
+#undef MACRO_INCLUDE6
+#include "include7.h"
 
-//   {
-// #include "include8.h"
-// #if 1
-//   int INCLUDE8(2) m = 1;
-// #endif
-//   }
+  {
+#include "include8.h"
+#if 1
+  int INCLUDE8(2) m = 1;
+#endif
+  }
 
-// #include "include9.h"
-//   assert(10, include9_var, "include9_var");
+#include "include9.h"
+  assert(10, include9_var, "include9_var");
 
 
   
