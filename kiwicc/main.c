@@ -42,10 +42,11 @@ static void add_default_include_paths(char *argv0)
   add_include_path(buf);
 
   // Add standard include paths.
-  add_include_path("/usr/lib/gcc/x86_64-linux-gnu/9/include");
-  add_include_path("/usr/local/include");
-  add_include_path("/usr/include/x86_64-linux-gnu");
-  add_include_path("/usr/include");
+  // You can get these paths by "echo | riscv64-unknown-linux-gnu-gcc -E -Wp,-v -".
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include-fixed");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/../../../../riscv64-unknown-linux-gnu/include");
+  add_include_path("/opt/riscv/sysroot/usr/include");
   
 }
 

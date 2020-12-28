@@ -1114,6 +1114,8 @@ static Token *line_macro(Token *tmpl)
 static void init_macros()
 {
   // Define predefined macros
+  // You can check predifined macros of gcc
+  // with "riscv64-unknown-linux-gnu-gcc -dM -E - < /dev/null".
   define_macro("__kiwicc__", "1");
   define_macro("_LP64", "1");
   define_macro("__ELF__", "1");
@@ -1139,15 +1141,14 @@ static void init_macros()
   define_macro("__STDC_VERSION__", "201112L");
   define_macro("__STDC__", "1");
   define_macro("__USER_LABEL_PREFIX__", "");
-  define_macro("__amd64", "1");
-  define_macro("__amd64__", "1");
+  define_macro("__riscv", "1");
+  define_macro("__riscv_xlen", "64");
+  define_macro("__riscv_flen", "64");
   define_macro("__gnu_linux__", "1");
   define_macro("__linux", "1");
   define_macro("__linux__", "1");
   define_macro("__unix", "1");
   define_macro("__unix__", "1");
-  define_macro("__x86_64", "1");
-  define_macro("__x86_64__", "1");
   define_macro("linux", "1");
   define_macro("__alignof__", "_Alignof");
   define_macro("__const__", "const");
