@@ -1047,8 +1047,8 @@ int main()
   assert(1, sizeof(unsigned char unsigned), "sizeof(unsigned char unsigned)");
   assert(8, sizeof(unsigned long long), "sizeof(unsigned long long)");
   assert(8, sizeof(unsigned long long int), "sizeof(unsigned long long int)");
-  assert(-1, (char)255, "(char)255");
-  assert(-2, (char)254, "(char)254");
+  assert(255, (char)255, "(char)255"); // gcc for RISC-V treats char as unsigned
+  assert(254, (char)254, "(char)254"); // gcc for RISC-V treats char as unsigned
   assert(-1, (signed char)255, "(signed char)255");
   assert(255, (unsigned char)255, "(unsigned char)255");
   assert(-1, (short)0xffff, "(short)0xffff");
@@ -1182,6 +1182,7 @@ int main()
   assert(1, sizeof(char) << 63 >> 63, "sizeof(char) << 31 >> 31");
   assert(1, _Alignof(char) << 63 >> 63, "_Alignof(char) << 63 >> 63");
 
+  // gcc for RISC-V treats char as unsigned
   assert(265, ({ char x[(char)0xffffffff + 10]; sizeof(x); }), "({ char x[(char)0xffffffff + 10]; sizeof(x); })");
   assert(255, ({ char x[(unsigned char)0xffffffff]; sizeof(x); }), "({ char x[(unsigned char)0xffffffff]; sizeof(x); })");
   assert(0xffff, ({ char x[(unsigned short)0xffffffff]; sizeof(x); }), "({ char x[(unsigned short)0xffffffff]; sizeof(x); })");
