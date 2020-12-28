@@ -523,9 +523,15 @@ static void gen_expr(Node *node)
       if (is_flonum(arg->ty))
       {
         if (arg->ty->kind == TY_FLOAT)
+        {
           gen_offset_instr("flw", fargreg[fp++], "s0", -1 * arg->offset);
+          println("  fmv.x.w  %s, %s", argreg[gp++], fargreg[fp - 1]);
+        }
         else
+        {
           gen_offset_instr("fld", fargreg[fp++], "s0", -1 * arg->offset);
+          println("  fmv.x.d  %s, %s", argreg[gp++], fargreg[fp - 1]);
+        }
         continue;
       }
 

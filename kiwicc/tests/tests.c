@@ -75,9 +75,9 @@ char *g32 = {"foobar"};
 #define MY_INT int
 #define RET3 ret3()
 
-// float g34 = 1.5141;
-// double g35 = 0.0 ? 5 : (0, 1 + 3.5 * 2.2 / 2  - 1.0 );
-// double g36 = 1.0 + 3. ? ((double)3 + (float)2 ) : 345;
+float g34 = 1.5141;
+double g35 = 0.0 ? 5 : (0, 1 + 3.5 * 2.2 / 2  - 1.0 );
+double g36 = 1.0 + 3. ? ((double)3 + (float)2 ) : 345;
 
 typedef struct Tree
 {
@@ -1362,11 +1362,12 @@ int main()
   assert(5, add_float3(1.1,2.3,2.2), "add_float3(1.1,2.3,2.2)");
   assert(5, add_double3(1.1,2.3,2.2), "add_double3(1.1,2.3,2.2)");
 
-  // assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
-//   assert(0, ({ char buf[100]; fmt(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; fmt(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
-//   assert(1, g34 - 1.5141 < 0.001, "g34 - 1.5141 < 0.001");
-//   assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");
-//   assert(1, g36 - 5.0 < 0.001, "g36 - 5.0 < 0.001");
+  assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
+  assert(0, ({ char buf[100]; sprintf(buf, "%.1lf", 3.5); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1lf\", 3.5); strcmp(buf, \"3.5\"); })");
+  assert(0, ({ char buf[100]; fmt(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; fmt(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
+  assert(1, g34 - 1.5141 < 0.001, "g34 - 1.5141 < 0.001");
+  assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");
+  assert(1, g36 - 5.0 < 0.001, "g36 - 5.0 < 0.001");
 
 //   assert(11, (add)(2,9), "(add)(2,9)");
 //   assert(11, (&add)(2,9), "(add)(2,9)");
