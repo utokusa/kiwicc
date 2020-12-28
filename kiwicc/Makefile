@@ -17,8 +17,7 @@ kiwicc-stage3: kiwicc-stage2
 	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
 
 test: kiwicc
-# TODO: remove  -fno-pic
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests -fno-pic -o tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests -o tmp.s
 	$(CC) -xc -c -o tmp2.o tests/extern.c
 	$(CC) -o tmp tmp.s tmp2.o
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
@@ -50,8 +49,7 @@ test-gcc:
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
 
 tmp-kiwicc: kiwicc
-# TODO: remove  -fno-pic
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tmp_test.c -I./tests -fno-pic -o tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tmp_test.c -I./tests -o tmp.s
 	$(CC) -o tmp tmp.s
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
@@ -60,7 +58,7 @@ tmp-as:
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
 tmp-gcc:
-	$(CC) -S -O0 -o tmp.s tests/tmp_test.c
+	$(CC) -S -O0 -fpic -o tmp.s tests/tmp_test.c
 	$(CC) -o tmp tmp.s
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 

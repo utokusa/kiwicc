@@ -259,20 +259,9 @@ static void gen_addr(Node *node)
       return;
     }
     
-    if (!opt_fpic)
-    {
-      println("  la %s, %s", reg(top++), var->name);
-    }
-    else if (var->is_static)
-    {
-      // Set %RIP+addend to a register.
-      println("  lea %s(%%rip), %%%s", var->name, reg(top++));
-    }
-    else
-    {
-      // Load a 64-bit address value from memory and set it to a register.
-      println("  mov %s@GOTPCREL(%%rip), %%%s", var->name, reg(top++));
-    }
+    // TODO: handle "-fpic" option
+    println("  la %s, %s", reg(top++), var->name);
+
     return;
   }
   case ND_DEREF:
