@@ -162,9 +162,9 @@ int main(int argc, char **argv)
   // Assign offsets to local variables.
   for (Function *fn = prog->fns; fn; fn = fn->next)
   {
-    // Besides local variables, callee-saved registers take 32 bytes
-    // and the variable-argument save takes 48 bytes in the stack.
-    int offset = fn->is_variadic ? 152 : 88;
+    // Besides local variables, callee-saved registers take 23 bytes
+    // and the variable-argument save takes 31 bytes in the stack.
+    int offset = fn->is_variadic ? 248 : 184;
 
     for (VarList *vl = fn->locals; vl; vl = vl->next)
     {

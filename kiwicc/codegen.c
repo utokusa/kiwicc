@@ -14,8 +14,8 @@ static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char *argreg[] = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
-static int reg_save_area_offset[] = {-152/*a0*/, -144/*a1*/, -136/*a2*/, -128/*a3*/,
-                                     -120/*a4*/, -112/*a5*/, -104/*a6*/, -96/*a7*/};
+static int reg_save_area_offset[] = {-248/*a0*/, -240/*a1*/, -232/*a2*/, -224/*a3*/,
+                                     -216/*a4*/, -208/*a5*/, -200/*a6*/, -192/*a7*/};
 static char *fargreg[] = {"fa0", "fa1", "fa2", "fa3", "fa4", "fa5", "fa6", "fa7"};
 static char *reg(int idx)
 {
@@ -986,7 +986,7 @@ static void emit_text(Program *prog)
       println(".global %s", fn->name);
     println("%s:", fn->name);
 
-    // Prologue. s0 ~ s11 are callee-saved registers.
+    // Prologue. s0 ~ s11 and fs0 ~ fs11 are callee-saved registers.
     // For frame pointer
     println("  addi sp, sp, -8");
     // Save frame pointer
@@ -1005,6 +1005,19 @@ static void emit_text(Program *prog)
     println("  sd s9, -72(s0)");
     println("  sd s10, -80(s0)");
     println("  sd s11, -88(s0)");
+
+    println("  fsd fs0, -96(s0)");
+    println("  fsd fs1, -104(s0)");
+    println("  fsd fs2, -112(s0)");
+    println("  fsd fs3, -120(s0)");
+    println("  fsd fs4, -128(s0)");
+    println("  fsd fs5, -136(s0)");
+    println("  fsd fs6, -144(s0)");
+    println("  fsd fs7, -152(s0)");
+    println("  fsd fs8, -160(s0)");
+    println("  fsd fs9, -168(s0)");
+    println("  fsd fs10, -176(s0)");
+    println("  fsd fs11, -184(s0)");
 
     // Save arg registers to the register save area
     // if the function is the variadic
@@ -1073,6 +1086,19 @@ static void emit_text(Program *prog)
     println("  ld s9, -72(s0)");
     println("  ld s10, -80(s0)");
     println("  ld s11, -88(s0)");
+
+    println("  fld fs0, -96(s0)");
+    println("  fld fs1, -104(s0)");
+    println("  fld fs2, -112(s0)");
+    println("  fld fs3, -120(s0)");
+    println("  fld fs4, -128(s0)");
+    println("  fld fs5, -136(s0)");
+    println("  fld fs6, -144(s0)");
+    println("  fld fs7, -152(s0)");
+    println("  fld fs8, -160(s0)");
+    println("  fld fs9, -168(s0)");
+    println("  fld fs10, -176(s0)");
+    println("  fld fs11, -184(s0)");
   
     println("  mv sp, s0");
     println("  ld s0, (sp)");
