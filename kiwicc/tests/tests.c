@@ -161,6 +161,8 @@ int fib(int x)
   return fib(x - 1) + fib(x - 2);
 }
 int sum_arr_elems(int *a) { return a[0] + a[1] + a[2]; }
+int need_large_stack() {int a[1000]; return a[999]=1; }
+
 int add_char1(char a, char b, char c) { return a + b + c; }
 char add_char2(char a, char b, char c) { return a + b + c; }
 int add6(int a, int b, int c, int d, int e, int f)
@@ -259,13 +261,7 @@ char *func_name()
   return __func__;
 }
 
-typedef struct
-{
-  int gp_offset;
-  int fp_offset;
-  void *overflow_arg_area;
-  void *reg_save_area;
-} va_list[1];
+typedef void * va_list;
 
 int add_all1(int x, ...);
 int add_all3(int x, int y, int z, ...);
@@ -364,8 +360,10 @@ int main()
   assert(6, sub(10, 4), "sub(10, 4)");
   assert(10, add5(2, 1, 1, 1, 5), "add5(2, 1, 1, 1, 5)");
   assert(5, retx(5), "retx(5)");
+  assert(7, retx(5) + 2, "retx(5) + 2");
   assert(5, ({ int x=5; retx(x); }), "({ int x=5; retx(x); })");
   assert(55, fib(9), "fib(9)");
+  assert(1, need_large_stack(), "need_large_stack");
 
   assert(3, ({int x=3; int *y=&x; *y; }), "({int x=3; int *y=&x; *y; })");
   assert(5, ({int x=5; int *y=&x; int **z=&y; **z; }), "({int x=5; int *y=&x; int **z=&y; **z; })");
@@ -493,7 +491,7 @@ int main()
   assert(1, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.a; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.a; })");
   assert(2, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.b; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.b; })");
   assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.c; }), "({ struct {int a; struct {char b; char c;} y;} x; x.a=1; x.y.b=2; x.y.c=3; x.y.c; })");
-  assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+5); }), "({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+9); })");
+  assert(3, ({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+5); }), "({ struct {int a; struct {char b; char c;} y;} x; x.y.c=3; char *p=&x; *(p+5); })");
   assert(3, ({ struct {int a; struct {char b; char c[5];} y[2];} x; x.y[1].c[3]=3; x.y[1].c[3]; }), "({ struct {int a; struct {char b; char c[5];} y[2];} x; x.y[1].c[3]=3; x.y[1].c[3]; })");
   assert(1, ({ struct {int a, b;} x; x.a=1; x.b=2; x.a; }), "({ struct {int a, b;} x; x.a=1; x.b=2; x.a; })");
   assert(2, ({ struct {int a, b;} x; x.a=1; x.b=2; x.b; }), "({ struct {int a, b;} x; x.a=1; x.b=2; x.b; })");
@@ -502,7 +500,7 @@ int main()
   assert(3, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.c; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.c; })");
   assert(4, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.d; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.d; })");
   assert(5, ({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.e; }), "({ struct {int a, b; char c, d, e, f;} x; x.a=1; x.b=2; x.c=3; x.d=4; x.e=5; x.e; })");
-  assert(3, ({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+4); }), "({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+8); })");
+  assert(3, ({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+4); }), "({ struct {char a; int b;} x; x.b = 3; char *p=&x.a; *(p+4); })");
   assert(8, ({ struct {int a; int b;} x; sizeof(x); }), "({ struct {int a; int b;} x; sizeof(x); })");
   assert(8, ({ struct {int a; char b;} x; sizeof(x); }), "({ struct {int a; char b;} x; sizeof(x); })");
   assert(16, ({ struct {int a; int b;} x[2]; sizeof(x); }), "({ struct {int a; int b;} x[2]; sizeof(x); })");
@@ -1049,8 +1047,8 @@ int main()
   assert(1, sizeof(unsigned char unsigned), "sizeof(unsigned char unsigned)");
   assert(8, sizeof(unsigned long long), "sizeof(unsigned long long)");
   assert(8, sizeof(unsigned long long int), "sizeof(unsigned long long int)");
-  assert(-1, (char)255, "(char)255");
-  assert(-2, (char)254, "(char)254");
+  assert(255, (char)255, "(char)255"); // gcc for RISC-V treats char as unsigned
+  assert(254, (char)254, "(char)254"); // gcc for RISC-V treats char as unsigned
   assert(-1, (signed char)255, "(signed char)255");
   assert(255, (unsigned char)255, "(unsigned char)255");
   assert(-1, (short)0xffff, "(short)0xffff");
@@ -1058,6 +1056,14 @@ int main()
   assert(-1, (signed)0xffffffff, "(signed)0xffffffff");
   assert(0xffffffff, (unsigned)0xffffffff, "(unsigned)0xffffffff");
   assert(-1, (int)(unsigned int)(-1), "(int)(unsigned int)(-1)");
+
+  assert(32767, (short)32767, "(short)32767");
+  assert(-32768, (short)32768, "(short)32768");
+  assert(-32767, (short)32769, "(short)32769");
+  assert(-32766, (short)32770, "(short)32770");
+  assert(65535, (unsigned short)65535, "(unsigned short)65535");
+  assert(0, (unsigned short)65536, "(unsigned short)65536");
+  assert(1, (unsigned short)65537, "(unsigned short)65537");
 
   assert(4, sizeof((char)12 + (char)12), "sizeof((char)12 + (char)12)");
   assert(4, sizeof((short)12 + (short)12), "sizeof((short)12 + (short)12)");
@@ -1079,7 +1085,8 @@ int main()
   assert(0x7fffffffffffffff, ((unsigned long)-1) >> 1, "((unsigned long)-1) >> 1");
   assert(0x1fe, ((unsigned char)-1) << 1, "((unsigned char)-1) << 1");
   assert(0x1fffe, ((unsigned short)-1) << 1, "((unsigned shor)-1) << 1");
-  assert(0xfffffffe, ((unsigned)-1) << 1, "((unsigned)-1) << 1");
+  assert(0xffffffff, ((unsigned)-1), "((unsigned)-1)");
+  assert(0x1fffffffe, ((unsigned)-1) << 1, "((unsigned)-1) << 1");
   assert(0xfffffffffffffffe, ((unsigned long)-1) << 1, "((unsigned long)-1) << 1");
 
   assert(5, (unsigned char)10 / (unsigned char)2, "(unsigned char)10 / (unsigned char)2");
@@ -1175,7 +1182,8 @@ int main()
   assert(1, sizeof(char) << 63 >> 63, "sizeof(char) << 31 >> 31");
   assert(1, _Alignof(char) << 63 >> 63, "_Alignof(char) << 63 >> 63");
 
-  assert(9, ({ char x[(char)0xffffffff + 10]; sizeof(x); }), "({ char x[(char)0xffffffff + 10]; sizeof(x); })");
+  // gcc for RISC-V treats char as unsigned
+  assert(265, ({ char x[(char)0xffffffff + 10]; sizeof(x); }), "({ char x[(char)0xffffffff + 10]; sizeof(x); })");
   assert(255, ({ char x[(unsigned char)0xffffffff]; sizeof(x); }), "({ char x[(unsigned char)0xffffffff]; sizeof(x); })");
   assert(0xffff, ({ char x[(unsigned short)0xffffffff]; sizeof(x); }), "({ char x[(unsigned short)0xffffffff]; sizeof(x); })");
   assert(1, ({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); }), "({ char x[(unsigned) 0xffffffff >> 31]; sizeof(x); })");
@@ -1241,6 +1249,9 @@ int main()
   assert(1, 2e3f==2e3f, "2e3f==2e3f");
   assert(0, 2e3f==2e4f, "2e3f==2e4f");
   assert(1, 2.0f==2f, "2.0f==2ƒ");
+  assert(0, 2e3f!=2e3f, "2e3f!=2e3f");
+  assert(1, 2e3f!=2e4f, "2e3f!=2e4f");
+  assert(0, 2.0f!=2f, "2.0f!=2ƒ");
   assert(1, 1.1f < 1.2f, "1.1f < 1.2ƒ");
   assert(0, 1.1f < 1.0f, "1,1f < 1.0f");
   assert(1, 1.3F <= 1.3F, "1.3F <= 1.3F");
@@ -1253,6 +1264,9 @@ int main()
   assert(1, 2e3==2e3, "2e3==2e3");
   assert(0, 2e3==2e4, "2e3==2e4");
   assert(1, 2.0==2, "2.0==2");
+  assert(0, 2e3!=2e3, "2e3!=2e3");
+  assert(1, 2e3!=2e4, "2e3!=2e4");
+  assert(0, 2.0!=2, "2.0!=2");
   assert(1, 1.1 < 1.2, "1.1 < 1.2");
   assert(0, 1.1 < 1.0, "1,1 < 1.0");
   assert(1, 1.3 <= 1.3, "1.3 <= 1.3");
@@ -1290,6 +1304,7 @@ int main()
   assert(5, 2.3f+2.8f, "2.3f+2.8f");
   assert(-2, 2.3f-4.7f, "2.3-4.7f");
   assert(6, 2.3f*2.7f, "2.3f*2.7f");
+  assert(31, 3.1f*10.0f, "3.1f*10.0f");
   assert(10, 27.3f/2.7f, "27.3f/2.7f");
 
   assert(5, 2.3f+2.8, "2.3f+2.8");
@@ -1305,6 +1320,7 @@ int main()
   assert(5, 2.3+2.8, "2.3+2.8");
   assert(-2, 2.3-4.7, "2.3-4.7");
   assert(6, 2.3*2.7, "2.3*2.7");
+  assert(31, 3.1*10.0, "3.1*10.0");
   assert(10, 27.3/2.7, "27.3/2.7");
 
   assert(3, ({ float x=3.1; (int)x; }), "({ float x=3.1; (int)x; })");
@@ -1312,7 +1328,7 @@ int main()
   assert(5, ({ float x=3.1; double y=2.3; (int)(x+y); }), "({ float x=3.1; double y=2.3; (int)(x+y); })");
   assert(-1, ({ float x=3.1; double y=4.3; (int)(x-y); }), "({ float x=3.1; double y=4.3; (int)(x-y); })");
   assert(7, ({ float x=3.1; double y=2.3; (int)(x*y); }), "({ float x=3.1; double y=2.3; (int)(x*y); })");
-  assert(3, ({ float x=9.1; double y=2.3; (int)(x/y); }), "({ float x=9.1; double y=2.3; (int)(x/y); })");
+  assert(3, ({ float x=9.1; double y=2.3; (int)(x/y); }), "({ float x=9.1; double y=2.8; (int)(x/y); })");
 
   assert(15, ({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; }), "({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; })");
   assert(15, ({ int x=0, i=0; while(i<5.23) x+=i++; x; }), "({ int x=0, i=0; while(i<5.23) x+=i++; x; })");
@@ -1348,6 +1364,7 @@ int main()
   assert(5, add_double3(1.1,2.3,2.2), "add_double3(1.1,2.3,2.2)");
 
   assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
+  assert(0, ({ char buf[100]; sprintf(buf, "%.1lf", 3.5); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1lf\", 3.5); strcmp(buf, \"3.5\"); })");
   assert(0, ({ char buf[100]; fmt(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; fmt(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
   assert(1, g34 - 1.5141 < 0.001, "g34 - 1.5141 < 0.001");
   assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");

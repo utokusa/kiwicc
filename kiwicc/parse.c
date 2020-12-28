@@ -740,10 +740,12 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
     case BOOL:
       ty = bool_type;
       break;
-    case CHAR:
     case SIGNED + CHAR:
       ty = char_type;
       break;
+    // gcc for RISC-V treats char as unsigned
+    // https://github.com/riscv/riscv-gnu-toolchain/issues/228
+    case CHAR:
     case UNSIGNED + CHAR:
       ty = uchar_type;
       break;

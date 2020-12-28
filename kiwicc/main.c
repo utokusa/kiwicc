@@ -42,10 +42,11 @@ static void add_default_include_paths(char *argv0)
   add_include_path(buf);
 
   // Add standard include paths.
-  add_include_path("/usr/lib/gcc/x86_64-linux-gnu/9/include");
-  add_include_path("/usr/local/include");
-  add_include_path("/usr/include/x86_64-linux-gnu");
-  add_include_path("/usr/include");
+  // You can get these paths by "echo | riscv64-unknown-linux-gnu-gcc -E -Wp,-v -".
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include-fixed");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/../../../../riscv64-unknown-linux-gnu/include");
+  add_include_path("/opt/riscv/sysroot/usr/include");
   
 }
 
@@ -88,7 +89,7 @@ static void parse_args(int argc, char **argv)
       continue;
     }
 
-    if (!strncmp(argv[i], "-I", 1))
+    if (!strncmp(argv[i], "-I", 2))
     {
       add_include_path(argv[i] + 2);
       continue;
@@ -162,9 +163,9 @@ int main(int argc, char **argv)
   // Assign offsets to local variables.
   for (Function *fn = prog->fns; fn; fn = fn->next)
   {
-    // Besides local variables, callee-saved registers take 32 bytes
-    // and the variable-argument save takes 48 bytes in the stack.
-    int offset = fn->is_variadic ? 128 : 32;
+    // Besides local variables, callee-saved registers take 23 bytes
+    // and the variable-argument save takes 31 bytes in the stack.
+    int offset = fn->is_variadic ? 248 : 184;
 
     for (VarList *vl = fn->locals; vl; vl = vl->next)
     {

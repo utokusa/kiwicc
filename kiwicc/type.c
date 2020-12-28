@@ -19,7 +19,7 @@ Type *ulong_type = &(Type){TY_LONG, 8, 8, true};
 
 static Type *new_type(TypeKind kind, int size, int align)
 {
-  Type *ty = malloc(sizeof(Type));
+  Type *ty = calloc(1, sizeof(Type));
   ty->kind = kind;
   ty->size = size;
   ty->align = align;
