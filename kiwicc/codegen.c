@@ -9,10 +9,6 @@ static int labelseq = 1;
 static int brkseq;
 static int contseq;
 static Function *current_fn;
-static char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
-static char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
-static char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
-static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char *argreg[] = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 static int reg_save_area_offset[] = {-248/*a0*/, -240/*a1*/, -232/*a2*/, -224/*a3*/,
                                      -216/*a4*/, -208/*a5*/, -200/*a6*/, -192/*a7*/};
@@ -292,40 +288,7 @@ static void gen_lval(Node *node)
   gen_addr(node);
 }
 
-static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
-{
-  if (size_of(node->ty) == 8)
-  {
-    println("  mov %%%s, %%rax", rd);
-    if (node->ty->is_unsigned) {
-      println("  mov $0, %%rdx");
-      println("  div %%%s", rs);
-    }
-    else {
-      println("  cqo");
-      println("  idiv %%%s", rs);
-    }
-    println("  mov %%%s, %%%s", r64, rd);
-  }
-  else
-  {
-    println("  mov %%%s, %%eax", rd);
-    if (node->ty->is_unsigned) {
-      println("  mov $0, %%edx");
-      println("  div %%%s", rs);
-    }
-    else {
-      println("  cdq");
-      println("  idiv %%%s", rs);
-    }
-    println("  mov %%%s, %%%s", r32, rd);
-  }
-}
-
 // Initialize va_list.
-//
-// Currently we only support up to 6 arguments
-// so only initialize gp_offset and reg_save_area
 static void builtin_va_start(Node *node)
 {
   println("# builtin_va_start");
@@ -344,9 +307,9 @@ static void builtin_va_start(Node *node)
 
   // Initializes va_list argument to point to the start of the vararg save area
   println("  addi t1, s0, %d", reg_save_area_offset[gp]);
+
   // The offset for va_list from s0 is node->args[0]->offset + 8.
   // `+8` is for ra saved in stack
-
   println("  sd t1, -%d(s0)", node->args[0]->offset + 8);
   top++;
 }
@@ -489,8 +452,6 @@ static void gen_expr(Node *node)
       return;
     }
 
-    // So far we only support up to 6 arguments.
-    //
     // We should push ra becouse they are caller saved registers.
     println("  addi sp, sp, -8");
     println("  sd ra, (sp)");
@@ -951,18 +912,6 @@ static void emit_data(Program *prog)
         println("  .byte %d", var->init_data[pos++]);
     }
   }
-}
-
-static char *get_argreg(int sz, int idx)
-{
-  if (sz == 1)
-    return argreg8[idx];
-  if (sz == 2)
-    return argreg16[idx];
-  if (sz == 4)
-    return argreg32[idx];
-  assert(sz == 8);
-  return argreg64[idx];
 }
 
 static void emit_text(Program *prog)
