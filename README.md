@@ -1,18 +1,9 @@
 # kiwicc
-kiwicc is a hobby C compilor for RISC-V.
+kiwicc is a hobby C compiler for RISC-V.
 
-## Reference
-https://www.sigbus.info/compilerbook
+It can compile itself include preprocessor.
 
-http://port70.net/~nsz/c/c11/n1570.html
-
-https://riscv.org/technical/specifications/
-
-https://github.com/riscv/riscv-asm-manual/blob/master/riscv-asm.md
-
-https://github.com/riscv/riscv-elf-psabi-doc/blob/master/riscv-elf.md
-
-https://msyksphinz-self.github.io/riscv-isadoc/html/index.html#
+kiwicc is inspired by [chibicc](https://github.com/rui314/chibicc) which is a C compiler for x86-64 and [compilerbook](https://www.sigbus.info/compilerbook).
 
 ## Setup
 ```bash
@@ -37,7 +28,19 @@ $ make
 
 ```bash
 # in development environment
+
+# test kiwicc compiled with gcc (stage 1)
 $ make test
+
+# test stage 2 kiwicc
+$ make kiwicc-stage2
+
+# test stage 3 kiwicc
+$ make kiwicc-stage3
+
+# test kiwicc from stage 1 to stage 3
+# https://stackoverflow.com/questions/60567540/why-does-gcc-compile-itself-3-times
+$ make test-all
 ```
 
 ## Compile a C program for RISC-V and run it on QEMU user-mode emulation
@@ -66,3 +69,18 @@ $ riscv64-unknown-linux-gnu-gdb kiwicc
 (gdb) target remote :1234
 ```
 
+## Reference
+
+https://www.sigbus.info/compilerbook (Japanese)
+
+https://github.com/rui314/chibicc
+
+http://port70.net/~nsz/c/c11/n1570.html
+
+https://riscv.org/technical/specifications/
+
+https://github.com/riscv/riscv-asm-manual/blob/master/riscv-asm.md
+
+https://github.com/riscv/riscv-elf-psabi-doc/blob/master/riscv-elf.md
+
+https://msyksphinz-self.github.io/riscv-isadoc/html/index.html#

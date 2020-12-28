@@ -8,11 +8,9 @@ kiwicc: $(OBJS) kiwicc.h
 
 $(OBJS): kiwicc.h
 
-# Not available
 kiwicc-stage2: kiwicc $(SRCS) kiwicc.h self.sh
 	./self.sh tmp-stage2 ./kiwicc kiwicc-stage2
 
-# Not available
 kiwicc-stage3: kiwicc-stage2
 	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
 
@@ -28,18 +26,15 @@ test-nopic: kiwicc
 	$(CC) -o tmp tmp.s tmp2.o
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
 
-# Not available
 test-stage2: kiwicc-stage2
-	./kiwicc-stage2 tests/tests.c -I./tests  -o tmp.s
-	gcc -xc -c -o tmp2.o tests/extern.c
-	gcc -static -fno-common -o tmp tmp.s tmp2.o
-	./tmp
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc-stage2 tests/tests.c -I./tests  -o tmp.s
+	$(CC) -xc -c -o tmp2.o tests/extern.c
+	$(CC) -static -fno-common -o tmp tmp.s tmp2.o
+	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
 
-# Not available
 test-stage3: kiwicc-stage3
 	diff kiwicc-stage2 kiwicc-stage3
 
-# Not available
 test-all: test test-nopic test-stage2 test-stage3
 
 test-gcc:
