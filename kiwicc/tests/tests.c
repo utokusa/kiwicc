@@ -239,15 +239,15 @@ _Noreturn noreturn_fn()
   exit(0);
 }
 
-// float add_float3(float x, float y, float z)
-// {
-//   return x + y + z;
-// }
+float add_float3(float x, float y, float z)
+{
+  return x + y + z;
+}
 
-// double add_double3(double x, double y, double z)
-// {
-//   return x + y + z;
-// }
+double add_double3(double x, double y, double z)
+{
+  return x + y + z;
+}
 
 int (*fnptr(void))(int)
 {
@@ -265,8 +265,8 @@ typedef void * va_list;
 
 int add_all1(int x, ...);
 int add_all3(int x, int y, int z, ...);
-// float add_float(float x, float y);
-// double add_double(double x, double y);
+float add_float(float x, float y);
+double add_double(double x, double y);
 
 int sprintf(char *buf, char *fmt, ...);
 int vsprintf(char *buf, char *fmt, ...);
@@ -1198,163 +1198,171 @@ int main()
 
   { typedef int ;}
 
-//   0.0;
-//   1.0;
-//   3e+8;
-//   0x10.1p13;
-//   .1E4;
-//   .1E4f;
-//   1.4f;
-//   assert(4, sizeof(1.2f), "sizeof(1.2f)");
-//   assert(4, sizeof(1.2F), "sizeof(1.2F)");
-//   assert(8, sizeof(1.2), "sizeof(1.2)");
-//   assert(8, sizeof(1.2l), "sizeof(1.2l)");
-//   assert(8, sizeof(1.2L), "sizeof(1.2L)");
-//   assert(8, sizeof(.0), "sizeof(.0)");
-//   assert(8, sizeof(0.), "sizeof(0.)");
-//   assert(8, sizeof((double)1), "sizeof((double)1)");
-//   assert(4, sizeof((float)1), "sizeof((float)1)");
-//   assert(8, sizeof((double)1U), "sizeof((double)1U)");
-//   assert(4, sizeof((float)1U), "sizeof((float)1U)");
-//   assert(8, sizeof((double)1L), "sizeof((double)1L)");
-//   assert(4, sizeof((float)1L), "sizeof((float)1L)");
-//   assert(8, sizeof((double)34.4F), "sizeof((double)34.4F)");
-//   assert(4, sizeof((float)34.4), "sizeof((float)34.4)");
-//   assert(8, sizeof((long double)34.4F), "sizeof((long double)34.4F)");
+  0.0;
+  1.0;
+  3e+8;
+  0x10.1p13;
+  .1E4;
+  .1E4f;
+  1.4f;
+  assert(4, sizeof(1.2f), "sizeof(1.2f)");
+  assert(4, sizeof(1.2F), "sizeof(1.2F)");
+  assert(8, sizeof(1.2), "sizeof(1.2)");
+  assert(8, sizeof(1.2l), "sizeof(1.2l)");
+  assert(8, sizeof(1.2L), "sizeof(1.2L)");
+  assert(8, sizeof(.0), "sizeof(.0)");
+  assert(8, sizeof(0.), "sizeof(0.)");
+  assert(8, sizeof((double)1), "sizeof((double)1)");
+  assert(4, sizeof((float)1), "sizeof((float)1)");
+  assert(8, sizeof((double)1U), "sizeof((double)1U)");
+  assert(4, sizeof((float)1U), "sizeof((float)1U)");
+  assert(8, sizeof((double)1L), "sizeof((double)1L)");
+  assert(4, sizeof((float)1L), "sizeof((float)1L)");
+  assert(8, sizeof((double)34.4F), "sizeof((double)34.4F)");
+  assert(4, sizeof((float)34.4), "sizeof((float)34.4)");
+  assert(8, sizeof((long double)34.4F), "sizeof((long double)34.4F)");
 
-//   assert(0, (_Bool)0.0f, "(_Bool)0.0f");
-//   assert(1, (_Bool)0.1f, "(_Bool)0.1f");
-//   assert(0, (_Bool)0.0, "(_Bool)0.0");
-//   assert(1, (_Bool)0.1, "(_Bool)0.1");
-//   assert(3, (char)3.3, "(char)3.3");
-//   assert(3, (char)3.3f, "(char)3.3f");
-//   assert(3, (short)3.3, "(short)3.3");
-//   assert(3, (short)3.3f, "(short)3.3f");
-//   assert(3, (unsigned short)3.3, "(unsigned short)3.3");
-//   assert(3, (unsigned short)3.3f, "(unsigned short)3.3f");
-//   assert(3, (int)3.3, "(int)3.3");
-//   assert(3, (int)3.3f, "(int)3.3f");
-//   assert(3, (int)3.3L, "(int)3.3L");
-//   assert(2, (int)((double)2.3f), "(int)((double)2.3f)");
-//   assert(2, (int)((float)2.3), "(int)((float)2.3)");
+  assert(0, (_Bool)0.0f, "(_Bool)0.0f");
+  assert(1, (_Bool)0.1f, "(_Bool)0.1f");
+  assert(0, (_Bool)0.0, "(_Bool)0.0");
+  assert(1, (_Bool)0.1, "(_Bool)0.1");
+  assert(3, (char)3.3, "(char)3.3");
+  assert(3, (char)3.3f, "(char)3.3f");
+  assert(3, (short)3.3, "(short)3.3");
+  assert(3, (short)3.3f, "(short)3.3f");
+  assert(3, (unsigned short)3.3, "(unsigned short)3.3");
+  assert(3, (unsigned short)3.3f, "(unsigned short)3.3f");
+  assert(3, (int)3.3, "(int)3.3");
+  assert(3, (int)3.3f, "(int)3.3f");
+  assert(3, (int)3.3L, "(int)3.3L");
+  assert(2, (int)((double)2.3f), "(int)((double)2.3f)");
+  assert(2, (int)((float)2.3), "(int)((float)2.3)");
 
-//   assert(3, ({ float x = 3.3; (int)x; }), "({ float x = 3.3; (int)x; })");
-//   assert(3, ({ float x = 3.3f; (int)x; }), "({ float x = 3.3f; (int)x; })");
-//   assert(3, ({ double x = 3.3f; (int)x; }), "({ double x = 3.3f; (int)x; })");
-//   assert(3, ({ double x = 3.3f; (int)x; }), "({ double x = 3.3f; (int)x; })");
-//   assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
-//   assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
+  assert(3, ({ float x = 3.3; (int)x; }), "({ float x = 3.3; (int)x; })");
+  assert(3, ({ float x = 3.3f; (int)x; }), "({ float x = 3.3f; (int)x; })");
+  assert(3, ({ double x = 3.3f; (int)x; }), "({ double x = 3.3f; (int)x; })");
+  assert(3, ({ double x = 3.3f; (int)x; }), "({ double x = 3.3f; (int)x; })");
+  assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
+  assert(3, ({ long double x = 3.3f; (int)x; }), "({ long double x = 3.3f; (int)x; })");
 
-//   assert(1, 2e3f==2e3f, "2e3f==2e3f");
-//   assert(0, 2e3f==2e4f, "2e3f==2e4f");
-//   assert(1, 2.0f==2f, "2.0f==2ƒ");
-//   assert(1, 1.1f < 1.2f, "1.1f < 1.2ƒ");
-//   assert(0, 1.1f < 1.0f, "1,1f < 1.0f");
-//   assert(1, 1.3F <= 1.3F, "1.3F <= 1.3F");
-//   assert(1, 1.1F <= 1.2F, "1.1F < 1.2F");
-//   assert(0, 1.1F > 1.2F, "1.1F > 1.2F");
-//   assert(1, 1.1F > 1.0F, "1,1F > 1.0F");
-//   assert(1, 1.3F >= 1.3F, "1.3F >= 1.3F");
-//   assert(0, 1.1F >= 1.2F, "1.1F > 1.2F");
+  assert(1, 2e3f==2e3f, "2e3f==2e3f");
+  assert(0, 2e3f==2e4f, "2e3f==2e4f");
+  assert(1, 2.0f==2f, "2.0f==2ƒ");
+  assert(0, 2e3f!=2e3f, "2e3f!=2e3f");
+  assert(1, 2e3f!=2e4f, "2e3f!=2e4f");
+  assert(0, 2.0f!=2f, "2.0f!=2ƒ");
+  assert(1, 1.1f < 1.2f, "1.1f < 1.2ƒ");
+  assert(0, 1.1f < 1.0f, "1,1f < 1.0f");
+  assert(1, 1.3F <= 1.3F, "1.3F <= 1.3F");
+  assert(1, 1.1F <= 1.2F, "1.1F < 1.2F");
+  assert(0, 1.1F > 1.2F, "1.1F > 1.2F");
+  assert(1, 1.1F > 1.0F, "1,1F > 1.0F");
+  assert(1, 1.3F >= 1.3F, "1.3F >= 1.3F");
+  assert(0, 1.1F >= 1.2F, "1.1F > 1.2F");
 
-//   assert(1, 2e3==2e3, "2e3==2e3");
-//   assert(0, 2e3==2e4, "2e3==2e4");
-//   assert(1, 2.0==2, "2.0==2");
-//   assert(1, 1.1 < 1.2, "1.1 < 1.2");
-//   assert(0, 1.1 < 1.0, "1,1 < 1.0");
-//   assert(1, 1.3 <= 1.3, "1.3 <= 1.3");
-//   assert(1, 1.1 <= 1.2, "1.1 < 1.2");
-//   assert(0, 1.1 > 1.2, "1.1 > 1.2");
-//   assert(1, 1.1 > 1.0, "1,1 > 1.0");
-//   assert(1, 1.3 >= 1.3, "1.3 >= 1.3");
-//   assert(0, 1.1 >= 1.2, "1.1 > 1.2");
+  assert(1, 2e3==2e3, "2e3==2e3");
+  assert(0, 2e3==2e4, "2e3==2e4");
+  assert(1, 2.0==2, "2.0==2");
+  assert(0, 2e3!=2e3, "2e3!=2e3");
+  assert(1, 2e3!=2e4, "2e3!=2e4");
+  assert(0, 2.0!=2, "2.0!=2");
+  assert(1, 1.1 < 1.2, "1.1 < 1.2");
+  assert(0, 1.1 < 1.0, "1,1 < 1.0");
+  assert(1, 1.3 <= 1.3, "1.3 <= 1.3");
+  assert(1, 1.1 <= 1.2, "1.1 < 1.2");
+  assert(0, 1.1 > 1.2, "1.1 > 1.2");
+  assert(1, 1.1 > 1.0, "1,1 > 1.0");
+  assert(1, 1.3 >= 1.3, "1.3 >= 1.3");
+  assert(0, 1.1 >= 1.2, "1.1 > 1.2");
 
-//   assert(1, 2e3l==2e3l, "2e3l==2e3l");
-//   assert(0, 2e3l==2e4l, "2e3l==2e4l");
-//   assert(1, 2.0l==2l, "2.0l==2l");
-//   assert(1, 1.1l < 1.2l, "1.1l < 1.2l");
-//   assert(0, 1.1l < 1.0l, "1,1l < 1.0l");
-//   assert(1, 1.3L <= 1.3L, "1.3L <= 1.3L");
-//   assert(1, 1.1L <= 1.2L, "1.1L < 1.2L");
-//   assert(0, 1.1L > 1.2L, "1.1L > 1.2L");
-//   assert(1, 1.1L > 1.0L, "1,1L > 1.0L");
-//   assert(1, 1.3L >= 1.3L, "1.3L >= 1.3L");
-//   assert(0, 1.1L >= 1.2L, "1.1L > 1.2L");
+  assert(1, 2e3l==2e3l, "2e3l==2e3l");
+  assert(0, 2e3l==2e4l, "2e3l==2e4l");
+  assert(1, 2.0l==2l, "2.0l==2l");
+  assert(1, 1.1l < 1.2l, "1.1l < 1.2l");
+  assert(0, 1.1l < 1.0l, "1,1l < 1.0l");
+  assert(1, 1.3L <= 1.3L, "1.3L <= 1.3L");
+  assert(1, 1.1L <= 1.2L, "1.1L < 1.2L");
+  assert(0, 1.1L > 1.2L, "1.1L > 1.2L");
+  assert(1, 1.1L > 1.0L, "1,1L > 1.0L");
+  assert(1, 1.3L >= 1.3L, "1.3L >= 1.3L");
+  assert(0, 1.1L >= 1.2L, "1.1L > 1.2L");
 
-//   assert(1, 1.1f < 1.2l, "1.1f < 1.2l");
-//   assert(1, (float)1==(int)1.1, "(float)1==(int)1.1");
-//   assert(1, (double)1==(int)1.1, "(double)1==(unsigned long)1.1");
+  assert(1, 1.1f < 1.2l, "1.1f < 1.2l");
+  assert(1, (float)1==(int)1.1, "(float)1==(int)1.1");
+  assert(1, (double)1==(int)1.1, "(double)1==(unsigned long)1.1");
 
-//   assert(4, sizeof(1f+2), "sizeof(1f+2)");
-//   assert(8, sizeof(1.+2), "sizeof(1.+2)");
-//   assert(4, sizeof(1f-2), "sizeof(1f-2)");
-//   assert(8, sizeof(1.-2), "sizeof(1.-2)");
-//   assert(4, sizeof(1f*2), "sizeof(1f*2)");
-//   assert(8, sizeof(1.*2), "sizeof(1.*2)");
-//   assert(4, sizeof(1f/2), "sizeof(1f/2)");
-//   assert(8, sizeof(1./2), "sizeof(1./2)");
+  assert(4, sizeof(1f+2), "sizeof(1f+2)");
+  assert(8, sizeof(1.+2), "sizeof(1.+2)");
+  assert(4, sizeof(1f-2), "sizeof(1f-2)");
+  assert(8, sizeof(1.-2), "sizeof(1.-2)");
+  assert(4, sizeof(1f*2), "sizeof(1f*2)");
+  assert(8, sizeof(1.*2), "sizeof(1.*2)");
+  assert(4, sizeof(1f/2), "sizeof(1f/2)");
+  assert(8, sizeof(1./2), "sizeof(1./2)");
 
-//   assert(5, 2.3f+2.8f, "2.3f+2.8f");
-//   assert(-2, 2.3f-4.7f, "2.3-4.7f");
-//   assert(6, 2.3f*2.7f, "2.3f*2.7f");
-//   assert(10, 27.3f/2.7f, "27.3f/2.7f");
+  assert(5, 2.3f+2.8f, "2.3f+2.8f");
+  assert(-2, 2.3f-4.7f, "2.3-4.7f");
+  assert(6, 2.3f*2.7f, "2.3f*2.7f");
+  assert(31, 3.1f*10.0f, "3.1f*10.0f");
+  assert(10, 27.3f/2.7f, "27.3f/2.7f");
 
-//   assert(5, 2.3f+2.8, "2.3f+2.8");
-//   assert(-2, 2.3f-4.7, "2.3f-4.7");
-//   assert(6, 2.3f*2.7, "2.3f*2.7");
-//   assert(10, 27.3f/2.7, "27.3f/2.7");
+  assert(5, 2.3f+2.8, "2.3f+2.8");
+  assert(-2, 2.3f-4.7, "2.3f-4.7");
+  assert(6, 2.3f*2.7, "2.3f*2.7");
+  assert(10, 27.3f/2.7, "27.3f/2.7");
   
-//   assert(5, 2.3+2.8f, "2.3+2.8f");
-//   assert(-2, 2.3-4.7f, "2.3-4.7f");
-//   assert(6, 2.3*2.7f, "2.3*2.7f");
-//   assert(10, 27.3/2.7f, "27.3/2.7f");
+  assert(5, 2.3+2.8f, "2.3+2.8f");
+  assert(-2, 2.3-4.7f, "2.3-4.7f");
+  assert(6, 2.3*2.7f, "2.3*2.7f");
+  assert(10, 27.3/2.7f, "27.3/2.7f");
 
-//   assert(5, 2.3+2.8, "2.3+2.8");
-//   assert(-2, 2.3-4.7, "2.3-4.7");
-//   assert(6, 2.3*2.7, "2.3*2.7");
-//   assert(10, 27.3/2.7, "27.3/2.7");
+  assert(5, 2.3+2.8, "2.3+2.8");
+  assert(-2, 2.3-4.7, "2.3-4.7");
+  assert(6, 2.3*2.7, "2.3*2.7");
+  assert(31, 3.1*10.0, "3.1*10.0");
+  assert(10, 27.3/2.7, "27.3/2.7");
 
-//   assert(3, ({ float x=3.1; (int)x; }), "({ float x=3.1; (int)x; })");
-//   assert(3, ({ double x=3.1; (int)x; }), "({ double x=3.1; (int)x; })");
-//   assert(5, ({ float x=3.1; double y=2.3; (int)(x+y); }), "({ float x=3.1; double y=2.3; (int)(x+y); })");
-//   assert(-1, ({ float x=3.1; double y=4.3; (int)(x-y); }), "({ float x=3.1; double y=4.3; (int)(x-y); })");
-//   assert(7, ({ float x=3.1; double y=2.3; (int)(x*y); }), "({ float x=3.1; double y=2.3; (int)(x*y); })");
-//   assert(3, ({ float x=9.1; double y=2.3; (int)(x/y); }), "({ float x=9.1; double y=2.3; (int)(x/y); })");
+  assert(3, ({ float x=3.1; (int)x; }), "({ float x=3.1; (int)x; })");
+  assert(3, ({ double x=3.1; (int)x; }), "({ double x=3.1; (int)x; })");
+  assert(5, ({ float x=3.1; double y=2.3; (int)(x+y); }), "({ float x=3.1; double y=2.3; (int)(x+y); })");
+  assert(-1, ({ float x=3.1; double y=4.3; (int)(x-y); }), "({ float x=3.1; double y=4.3; (int)(x-y); })");
+  assert(7, ({ float x=3.1; double y=2.3; (int)(x*y); }), "({ float x=3.1; double y=2.3; (int)(x*y); })");
+  assert(3, ({ float x=9.1; double y=2.3; (int)(x/y); }), "({ float x=9.1; double y=2.8; (int)(x/y); })");
 
-//   assert(15, ({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; }), "({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; })");
-//   assert(15, ({ int x=0, i=0; while(i<5.23) x+=i++; x; }), "({ int x=0, i=0; while(i<5.23) x+=i++; x; })");
-//   assert(14, ({ float x=1.; if(x) x=14; else x=3; (int)x; }), "({ float x=1.; if(x) x=14; else x=3; (int)x; })");
-//   assert(3, ({ float x=0.; if(x) x=14; else x=3; (int)x; }), "({ float x=0.; if(x) x=14; else x=3; (int)x; })");
-//   assert(14, ({ double x=1.; if(x) x=14; else x=3; (int)x; }), "({ double x=1.; if(x) x=14; else x=3; (int)x; })");
-//   assert(3, ({ double x=0.; if(x) x=14; else x=3; (int)x; }), "({ double x=0.; if(x) x=14; else x=3; (int)x; })");
-//   assert(1, 1.f?1:0, "1.f?1:0");
-//   assert(0, 0.f?1:0, "1.f?1:0");
-//   assert(1, 1.?1:0, "1.?1:0");
-//   assert(0, 0.?1:0, "1.?1:0");
-//   assert(1, 1.l?1:0, "1.l?1:0");
-//   assert(0, 0.l?1:0, "1.l?1:0");
+  assert(15, ({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; }), "({ int x=0; for(int i=0; i<5.5; i++) x+=i; x; })");
+  assert(15, ({ int x=0, i=0; while(i<5.23) x+=i++; x; }), "({ int x=0, i=0; while(i<5.23) x+=i++; x; })");
+  assert(14, ({ float x=1.; if(x) x=14; else x=3; (int)x; }), "({ float x=1.; if(x) x=14; else x=3; (int)x; })");
+  assert(3, ({ float x=0.; if(x) x=14; else x=3; (int)x; }), "({ float x=0.; if(x) x=14; else x=3; (int)x; })");
+  assert(14, ({ double x=1.; if(x) x=14; else x=3; (int)x; }), "({ double x=1.; if(x) x=14; else x=3; (int)x; })");
+  assert(3, ({ double x=0.; if(x) x=14; else x=3; (int)x; }), "({ double x=0.; if(x) x=14; else x=3; (int)x; })");
+  assert(1, 1.f?1:0, "1.f?1:0");
+  assert(0, 0.f?1:0, "1.f?1:0");
+  assert(1, 1.?1:0, "1.?1:0");
+  assert(0, 0.?1:0, "1.?1:0");
+  assert(1, 1.l?1:0, "1.l?1:0");
+  assert(0, 0.l?1:0, "1.l?1:0");
 
-//   assert(0, !54.3f, "54.3f");
-//   assert(1, !0.f, "!0.f");
-//   assert(0, !54.3, "54.3");
-//   assert(1, !0., "!0.");
-//   assert(1, 34. && 3.f, "34. && 3.f");
-//   assert(0, 34. && 0.f, "34. && 0.f");
-//   assert(0, 34.f && 0., "34.f && 0.");
-//   assert(0, 34.f && 0.f, "34.f && 0.f");
-//   assert(0, 0 && 0.f, "0 && 0.f");
-//   assert(1, 34. || 3.f, "34. || 3.f");
-//   assert(1, 34. || 0.f, "34. || 0.f");
-//   assert(1, 34.f || 0., "34.f || 0.");
-//   assert(1, 34.f || 0.f, "34.f || 0.f");
-//   assert(0, 0 || 0.f, "0 || 0.f");
+  assert(0, !54.3f, "54.3f");
+  assert(1, !0.f, "!0.f");
+  assert(0, !54.3, "54.3");
+  assert(1, !0., "!0.");
+  assert(1, 34. && 3.f, "34. && 3.f");
+  assert(0, 34. && 0.f, "34. && 0.f");
+  assert(0, 34.f && 0., "34.f && 0.");
+  assert(0, 34.f && 0.f, "34.f && 0.f");
+  assert(0, 0 && 0.f, "0 && 0.f");
+  assert(1, 34. || 3.f, "34. || 3.f");
+  assert(1, 34. || 0.f, "34. || 0.f");
+  assert(1, 34.f || 0., "34.f || 0.");
+  assert(1, 34.f || 0.f, "34.f || 0.f");
+  assert(0, 0 || 0.f, "0 || 0.f");
 
-//   assert(6, add_float(2.65463, 3.65), "add_float(2.65463, 3.65)");
-//   assert(6, add_double(2.65463, 3.65), "add_double(2.65463, 3.65)");
-//   assert(5, add_float3(1.1,2.3,2.2), "add_float3(1.1,2.3,2.2)");
-//   assert(5, add_double3(1.1,2.3,2.2), "add_double3(1.1,2.3,2.2)");
+  assert(6, add_float(2.65463, 3.65), "add_float(2.65463, 3.65)");
+  assert(6, add_double(2.65463, 3.65), "add_double(2.65463, 3.65)");
+  assert(5, add_float3(1.1,2.3,2.2), "add_float3(1.1,2.3,2.2)");
+  assert(5, add_double3(1.1,2.3,2.2), "add_double3(1.1,2.3,2.2)");
 
-//   assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
+  // assert(0, ({ char buf[100]; sprintf(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; sprintf(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
 //   assert(0, ({ char buf[100]; fmt(buf, "%.1f", 3.5f); strcmp(buf, "3.5"); }), "({ char buf[100]; fmt(buf, \"%.1f\", 3.5f); strcmp(buf, \"3.5\"); })");
 //   assert(1, g34 - 1.5141 < 0.001, "g34 - 1.5141 < 0.001");
 //   assert(1, g35 - 3.85 < 0.001, "g35 - 3.85 < 0.001");

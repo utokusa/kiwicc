@@ -4,6 +4,8 @@ kiwicc is a hobby C compilor for RISC-V.
 ## Reference
 https://www.sigbus.info/compilerbook
 
+http://port70.net/~nsz/c/c11/n1570.html
+
 https://riscv.org/technical/specifications/
 
 https://github.com/riscv/riscv-asm-manual/blob/master/riscv-asm.md

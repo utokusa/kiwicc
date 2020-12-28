@@ -16,8 +16,7 @@ static char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char *argreg[] = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 static int reg_save_area_offset[] = {-152/*a0*/, -144/*a1*/, -136/*a2*/, -128/*a3*/,
                                      -120/*a4*/, -112/*a5*/, -104/*a6*/, -96/*a7*/};
-static char *fargreg[] = {"xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"};
-
+static char *fargreg[] = {"fa0", "fa1", "fa2", "fa3", "fa4", "fa5", "fa6", "fa7"};
 static char *reg(int idx)
 {
   static char *r[] = {"s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11"};
@@ -39,7 +38,7 @@ static char *xreg(Type *ty, int idx)
 
 static char *freg(int idx)
 {
-  static char *r[] = {"xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13"};
+  static char *r[] = {"fs0", "fs1", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7", "fs8", "fs9", "fs10", "fs11"};
   if (idx < 0 || sizeof(r) / sizeof(*r) <= idx)
     error("register out of range: %d", idx);
   return r[idx];
@@ -83,12 +82,12 @@ static void load(Type *ty)
   
   if (ty->kind == TY_FLOAT)
   {
-    println("  movss (%%%s), %%%s", reg(top - 1), freg(top - 1));
+    println("  flw %s, (%s)", freg(top - 1), reg(top - 1));
     return;
   }
   if (ty->kind == TY_DOUBLE)
   {
-    println("  movsd (%%%s), %%%s", reg(top - 1), freg(top - 1));
+    println("  fld %s, (%s)", freg(top - 1), reg(top - 1));
     return;
   }
 
@@ -123,9 +122,9 @@ static void store(Type *ty)
     }
   }
   else if (ty->kind == TY_FLOAT)
-    println("  movss %%%s, (%%%s)", freg(top - 2), rd);
+    println("  fsw %s, (%s)", freg(top - 2), rd);
   else if (ty->kind == TY_DOUBLE)
-    println("  movsd %%%s, (%%%s)", freg(top - 2), rd);
+    println("  fsd %s, (%s)", freg(top - 2), rd);
   else if (sz == 1)
     println("  sb %s, (%s)", rs, rd);
   else if (sz == 2)
@@ -141,15 +140,17 @@ static void cmp_zero(Type * ty)
 {
   if (ty->kind == TY_FLOAT)
   {
-    // Set all of the single-precision floating-point values in xmm0 to zero.
-    println("  xorps %%xmm0, %%xmm0");
-    println("  ucomiss %%xmm0, %%%s", freg(--top));
+    char *fs = freg(--top);
+    char *rd = reg(top);
+    println("  fmv.s.x ft0, zero");
+    println("  feq.s %s, %s, ft0", rd, fs);
   }
   else if (ty->kind == TY_DOUBLE)
   {
-    // Set all of the single-precision floating-point values in xmm0 to zero.
-    println("  xorpd %%xmm0, %%xmm0");
-    println("  ucomisd %%xmm0, %%%s", freg(--top));
+    char *fs = freg(--top);
+    char *rd = reg(top);
+    println("  fmv.d.x ft0, zero");
+    println("  feq.d %s, %s, ft0", rd, fs);
   }
   else
   {
@@ -183,9 +184,9 @@ static void cast(Type *from, Type *to)
       return;
     
     if (to->kind == TY_DOUBLE)
-      println("  cvtss2sd %%%s, %%%s", fr, fr);
+      println("  fcvt.d.s %s, %s", fr, fr);
     else /* integer */
-      println("  cvttss2si %%%s, %%%s", fr, r);
+      println("  fcvt.l.s %s, %s, rtz", r, fr);
     return;
   }
 
@@ -195,21 +196,21 @@ static void cast(Type *from, Type *to)
       return;
     
     if (to->kind == TY_FLOAT)
-      println("  cvtsd2ss %%%s, %%%s", fr, fr);
+      println("  fcvt.s.d %s, %s", fr, fr);
     else /* integer */
-      println("  cvttsd2si %%%s, %%%s", fr, r);
+      println("  fcvt.l.d %s, %s, rtz", r, fr);
     return;
   }
 
   if (to->kind == TY_FLOAT)
   {
-    println("  cvtsi2ss %%%s, %%%s", r, fr);
+    println("  fcvt.s.l %s, %s", fr, r);
     return;
   }
 
   if (to->kind == TY_DOUBLE)
   {
-    println("  cvtsi2sd %%%s, %%%s", r, fr);
+    println("  fcvt.d.l %s, %s", fr, r);
     return;
   }
 
@@ -333,16 +334,7 @@ static void divmod(Node *node, char *rd, char *rs, char *r64, char *r32)
 }
 
 // Initialize va_list.
-/*
-https://www.uclibc.org/docs/psABI-x86_64.pdf
-typedef struct {
-  unsigned int gp_offset;
-  unsigned int fp_offset;
-  void *overflow_arg_area;
-  void *reg_save_area;
-} va_list[1];
-*/
-
+//
 // Currently we only support up to 6 arguments
 // so only initialize gp_offset and reg_save_area
 static void builtin_va_start(Node *node)
@@ -379,17 +371,25 @@ static void gen_expr(Node *node)
     if (node->ty->kind == TY_FLOAT)
     {
       float fval_float = node->fval;
-      println("  mov $%u, %%eax", *(unsigned *)(&fval_float));
-      println("  movd %%eax, %%%s", freg(top++));
+      println("  li t1, %lu", *(unsigned *)(&fval_float));
+      println("  addi sp, sp, -8");
+      println("  sw t1, (sp)");
+      println("  flw %s, (sp)", freg(top++));
+      println("  addi sp, sp, 8");
     }
     else if (node->ty->kind == TY_DOUBLE)
     {
-      println("  mov $%lu, %%rax", *(unsigned long *)(&(node->fval)));
-      println("  movq %%rax, %%%s", freg(top++));
+      println("  li t1, %lu", *(unsigned long *)(&(node->fval)));
+      println("  addi sp, sp, -8");
+      println("  sd t1, (sp)");
+      println("  fld %s, (sp)", freg(top++));
+      println("  addi sp, sp, 8");
     }
     else
+    {
       println("# gen_expr() ND_NUM");
       println("  li %s, %lu", reg(top++), node->val);
+    }
     return;
   case ND_VAR:
   case ND_MEMBER:
@@ -523,9 +523,9 @@ static void gen_expr(Node *node)
       if (is_flonum(arg->ty))
       {
         if (arg->ty->kind == TY_FLOAT)
-          println("  movss -%d(%%rbp), %%%s", arg->offset, fargreg[fp++]);
+          gen_offset_instr("flw", fargreg[fp++], "s0", -1 * arg->offset);
         else
-          println("  movsd -%d(%%rbp), %%%s", arg->offset, fargreg[fp++]);
+          gen_offset_instr("fld", fargreg[fp++], "s0", -1 * arg->offset);
         continue;
       }
 
@@ -554,9 +554,9 @@ static void gen_expr(Node *node)
     println("  addi sp, sp, 8");
 
     if (node->ty->kind == TY_FLOAT)
-      println("  movss %%xmm0, %%%s", freg(top++));
+      println("  fmv.s %s, fa0", freg(top++));
     else if (node->ty->kind == TY_DOUBLE)
-      println("  movsd %%xmm0, %%%s", freg(top++));
+      println("  fmv.d %s, fa0", freg(top++));
     else
       println("  mv %s, a0", reg(top++));
     
@@ -577,9 +577,9 @@ static void gen_expr(Node *node)
   {
   case ND_ADD:
     if (node->ty->kind == TY_FLOAT)
-      println("  addss %%%s, %%%s", fs, fd);
+      println("  fadd.s %s, %s, %s", fd, fd, fs);
     else if (node->ty->kind == TY_DOUBLE)
-      println("  addsd %%%s, %%%s", fs, fd);
+      println("  fadd.d %s, %s, %s", fd, fd, fs);
     else
       println("  add %s, %s, %s", rd, rd, rs);
     break;
@@ -590,9 +590,9 @@ static void gen_expr(Node *node)
     break;
   case ND_SUB:
     if (node->ty->kind == TY_FLOAT)
-      println("  subss %%%s, %%%s", fs, fd);
+      println("  fsub.s %s, %s, %s", fd, fd, fs);
     else if (node->ty->kind == TY_DOUBLE)
-      println("  subsd %%%s, %%%s", fs, fd);
+      println("  fsub.d %s, %s, %s", fd, fd, fs);
     else
       println("  sub %s, %s, %s", rd, rd, rs);
     break;
@@ -608,17 +608,17 @@ static void gen_expr(Node *node)
     break;
   case ND_MUL:
     if (node->ty->kind == TY_FLOAT)
-      println("  mulss %%%s, %%%s", fs, fd);
+      println("  fmul.s %s, %s, %s", fd, fd, fs);
     else if (node->ty->kind == TY_DOUBLE)
-      println("  mulsd %%%s, %%%s", fs, fd);
+      println("  fmul.d %s, %s, %s", fd, fd, fs);
     else
       println("  mul %s, %s, %s", rd, rd, rs);
     break;
   case ND_DIV:
     if (node->ty->kind == TY_FLOAT)
-      println("  divss %%%s, %%%s", fs, fd);
+      println("  fdiv.s %s, %s, %s", fd, fd, fs);
     else if (node->ty->kind == TY_DOUBLE)
-      println("  divsd %%%s, %%%s", fs, fd);
+      println("  fdiv.d %s, %s, %s", fd, fd, fs);
     else
     {
       if (node->ty->is_unsigned)
@@ -644,41 +644,37 @@ static void gen_expr(Node *node)
     return;
   case ND_EQ:
     if (node->lhs->ty->kind == TY_FLOAT)
-      println("  ucomiss %%%s, %%%s", fs, fd);
+      println("  feq.s %s, %s, %s", rd, fd, fs);
     else if (node->lhs->ty->kind == TY_DOUBLE)
-      println("  ucomisd %%%s, %%%s", fs, fd);
+      println("  feq.d %s, %s, %s", rd, fd, fs);
     else
     {
       println("  sub %s, %s, %s", rd, rd, rs);
       println("  seqz %s, %s", rd, rd);
     }
-    // println("  sete %%al");
-    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_NE:
     if (node->lhs->ty->kind == TY_FLOAT)
-      println("  ucomiss %%%s, %%%s", fs, fd);
+    {
+      println("  feq.s %s, %s, %s", rd, fd, fs);
+      println("  seqz %s, %s", rd, rd);
+    }
     else if (node->lhs->ty->kind == TY_DOUBLE)
-      println("  ucomisd %%%s, %%%s", fs, fd);
+    {
+      println("  feq.d %s, %s, %s", rd, fd, fs);
+      println("  seqz %s, %s", rd, rd);
+    }
     else
     {
       println("  sub %s, %s, %s", rd, rd, rs);
       println("  snez %s, %s", rd, rd);
     }
-    // println("  setne %%al");
-    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_LT:
     if (node->lhs->ty->kind == TY_FLOAT)
-    {
-      println("  ucomiss %%%s, %%%s", fs, fd);
-      println("  setb %%al");
-    }
+      println("  flt.s %s, %s, %s", rd, fd, fs);
     else if (node->lhs->ty->kind == TY_DOUBLE)
-    {
-      println("  ucomisd %%%s, %%%s", fs, fd);
-      println("  setb %%al");
-    }
+      println("  flt.d %s, %s, %s", rd, fd, fs);
     else
     {
       if (node->lhs->ty->is_unsigned)
@@ -686,19 +682,12 @@ static void gen_expr(Node *node)
       else
         println("  slt %s, %s, %s", rd, rd, rs);
     }
-    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_LE:
     if (node->lhs->ty->kind == TY_FLOAT)
-    {
-      println("  ucomiss %%%s, %%%s", fs, fd);
-      println("  setbe %%al");
-    }
+      println("  fle.s %s, %s, %s", rd, fd, fs);
     else if (node->lhs->ty->kind == TY_DOUBLE)
-    {
-      println("  ucomisd %%%s, %%%s", fs, fd);
-      println("  setbe %%al");
-    }
+      println("  fle.d %s, %s, %s", rd, fd, fs);
     else
     {
       if (node->lhs->ty->is_unsigned)
@@ -707,7 +696,6 @@ static void gen_expr(Node *node)
         println("  slt %s, %s, %s", rd, rs, rd);
       println("  seqz %s, %s", rd, rd);
     }
-    // println("  movzb %%al, %%%s", rd);
     break;
   case ND_SHL:
     println("  sll %s, %s, %s", rd, rd, rs);
@@ -888,7 +876,7 @@ static void gen_stmt(Node *node)
     {
       gen_expr(node->lhs);
       if (is_flonum(node->lhs->ty))
-        println("  movsd %%%s, %%xmm0", freg(--top));
+        println("  fmv.d fa0, %s", freg(--top));
       else
       {
         println("# gen_stmt() !is_flonum(node->lhs->ty)");
@@ -1040,9 +1028,9 @@ static void emit_text(Program *prog)
     {
       Var *var = param->var;
       if (var->ty->kind == TY_FLOAT)
-        println("  movss %%%s, -%d(%%rbp)", fargreg[--fp], var->offset);
+        gen_offset_instr("fsw", fargreg[--fp], "s0", -1 * var->offset);
       else if (var->ty->kind == TY_DOUBLE)
-        println("  movsd %%%s, -%d(%%rbp)", fargreg[--fp], var->offset);
+        gen_offset_instr("fsd", fargreg[--fp], "s0", -1 * var->offset);
       else
       {
         int sz = size_of(var->ty);
