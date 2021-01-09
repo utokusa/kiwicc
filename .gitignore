@@ -2,7 +2,7 @@
 *.o
 tmp*
 a.out
-kiwicc/kiwicc
+src/kiwicc
 .DS_Store
 .vscode
 core
