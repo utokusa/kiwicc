@@ -19,19 +19,19 @@ install: kiwicc-stage2
 	cp kiwicc-stage2 $(RISCV)/bin/kiwicc
 
 test: kiwicc
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests -o tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests/test_include -I./tests -o tmp.s
 	$(CC) -xc -c -o tmp2.o tests/extern.c
 	$(CC) -o tmp tmp.s tmp2.o
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
 
 test-nopic: kiwicc
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests -fno-pic -o tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests/test_include -I./tests -fno-pic -o tmp.s
 	$(CC) -xc -c -o tmp2.o tests/extern.c
 	$(CC) -o tmp tmp.s tmp2.o
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
 
 test-stage2: kiwicc-stage2
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc-stage2 tests/tests.c -I./tests  -o tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc-stage2 tests/tests.c -I./tests/test_include -I./tests -o tmp.s
 	$(CC) -xc -c -o tmp2.o tests/extern.c
 	$(CC) -static -fno-common -o tmp tmp.s tmp2.o
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp

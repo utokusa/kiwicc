@@ -1671,6 +1671,10 @@ of(char), \
 #include "test_include/include10.h" 
   assert(37, include11_var, "include11_var");
 
+#include <include12.h>
+  assert(121, INCLUDE12_M1, "INCLUDE12_M1");
+  assert(122, INCLUDE12_M2, "INCLUDE12_M2");
+
 
   
   printf("OK\n");

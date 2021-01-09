@@ -859,12 +859,17 @@ char *join_paths(char *lhs, char *rhs)
   return concat(lhs, rhs);
 }
 
-static char *search_include_paths(char *filename, Token *start)
+static char *search_include_paths(char *filename, Token *start, bool include_next)
 {
+  char *current_file_dir = dirname(strdup(start->filepath));
   // Search a file from the include paths.
   for (char **p = include_paths; *p; p++)
   {
     char *path = join_paths(*p, filename);
+    char *abs_path = rel_to_abs("/", path);
+    if (include_next && !strncmp(current_file_dir, abs_path, strlen(current_file_dir)))
+      continue;
+
     if (file_exists(path))
       return path;
   }
@@ -992,7 +997,7 @@ char *rel_to_abs(char *basePath, char *relativePath)
 }
 
 // Read an #include argument.
-static char *read_include_path(Token **rest, Token *tok)
+static char *read_include_path(Token **rest, Token *tok, bool include_next)
 {
   // Pattern 1: #include "foo.h"
   if (tok->kind == TK_STR)
@@ -1015,7 +1020,7 @@ static char *read_include_path(Token **rest, Token *tok)
     if (file_exists(filepath))
       return filepath;
     
-    return search_include_paths(filename, start);
+    return search_include_paths(filename, start, include_next);
   }
 
   // Pattern 2: #include <foo.h>
@@ -1034,7 +1039,7 @@ static char *read_include_path(Token **rest, Token *tok)
     char *filename = join_tokens(start->next, tok);
     *rest = skip_line(tok->next);
 
-    char *path = search_include_paths(filename, start);
+    char *path = search_include_paths(filename, start, include_next);
     return path;
   }
 
@@ -1044,7 +1049,7 @@ static char *read_include_path(Token **rest, Token *tok)
   if (tok->kind == TK_IDENT)
   {
     Token *tok2 = preprocess(copy_line(rest, tok));
-    return read_include_path(&tok2, tok2);
+    return read_include_path(&tok2, tok2, include_next);
   }
 
   error_tok(tok, "expected a filename");
@@ -1092,9 +1097,10 @@ static Token *preprocess2(Token *tok)
     }
 
     // #include directive
-    if (equal(tok, "include"))
+    if (equal(tok, "include") || equal(tok, "include_next"))
     {
-      char *file_path = read_include_path(&tok, tok->next);
+      bool include_next = equal(tok, "include_next");
+      char *file_path = read_include_path(&tok, tok->next, include_next);
       // Tokenize
       Token *included = tokenize_file(file_path);
       if (!included)

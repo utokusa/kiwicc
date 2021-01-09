@@ -35,10 +35,22 @@ static void add_include_path(char *path)
 static void add_default_include_paths(char *argv0)
 {
   // We expect that kiwicc-specific include files are installed
-  // to ./include relative to argv[0];
-  char *buf = calloc(1, strlen(argv0) + 10);
-  sprintf(buf, "%s/include", dirname(strdup(argv0)));
-  add_include_path(buf);
+  // to ./include relative to argv[0] (kiwicc path).
+  char *kiwicc_abs_path;
+  if (*argv0 == '/')
+  {
+    kiwicc_abs_path = argv0;
+  }
+  else
+  {
+    char cwd[PATHNAME_SIZE]; 
+    memset(cwd, '\0', PATHNAME_SIZE); 
+    getcwd(cwd, PATHNAME_SIZE);
+    kiwicc_abs_path = rel_to_abs(cwd, argv0);
+  }
+  char *kiwicc_abs_dir = dirname(strdup(kiwicc_abs_path));
+  char *kiwicc_include = rel_to_abs(kiwicc_abs_dir, "./include");
+  add_include_path(kiwicc_include); 
 
   // Add standard include paths.
   // You can get these paths by "echo | riscv64-unknown-linux-gnu-gcc -E -Wp,-v -".
@@ -90,7 +102,19 @@ static void parse_args(int argc, char **argv)
 
     if (!strncmp(argv[i], "-I", 2))
     {
-      add_include_path(argv[i] + 2);
+      char *path =argv[i] + 2;
+      // `path` is absolute path
+      if (*path == '/')
+      {
+        add_include_path(path);
+        continue;
+      }
+      // `path` is relative path
+      char cwd[PATHNAME_SIZE]; 
+      memset(cwd, '\0', PATHNAME_SIZE); 
+      getcwd(cwd, PATHNAME_SIZE);
+      char *include_path = rel_to_abs(cwd, path);
+      add_include_path(include_path);
       continue;
     }
 
