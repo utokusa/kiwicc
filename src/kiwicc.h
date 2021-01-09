@@ -10,6 +10,9 @@
 #include <strings.h>
 #include <sys/stat.h>
 #include <libgen.h>
+#include <unistd.h>
+
+#define PATHNAME_SIZE 512
 
 /*********************************************
 * ...type definitions...
@@ -46,7 +49,7 @@ struct Token
   Type *ty;       // Used if TK_NUM
 
   char *filename;   // Input filename
-  char *filepath;   // Input filepath. For debugging.
+  char *filepath;   // Input (absolute) filepath.
   char *input;      // Entire input string
   int file_no;      // File number for .loc directive
   int line_no;      // Line number
@@ -288,8 +291,6 @@ extern Type *ushort_type;
 extern Type *uint_type;
 extern Type *ulong_type;
 
-extern char *file_dir;
-
 extern char **include_paths;
 extern bool opt_fpic;
 
@@ -329,6 +330,10 @@ Token *tokenize(char *filename, int file_no, char *p);
 Token *preprocess(Token *tok);
 
 char *get_dir(char *path);
+
+char *rel_to_abs(char *basePath, char *relativePath);
+
+char *join_paths(char *lhs, char *rhs);
 
 // ********** parse.c *************
 Node *new_cast(Node *expr, Type *ty);

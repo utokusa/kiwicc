@@ -1668,6 +1668,9 @@ of(char), \
 #include "include9.h"
   assert(10, include9_var, "include9_var");
 
+#include "test_include/include10.h" 
+  assert(37, include11_var, "include11_var");
+
 
   
   printf("OK\n");

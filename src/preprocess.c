@@ -847,7 +847,7 @@ static bool file_exists(char *path)
 //
 // lhs: "example/path1/", rhs: "/path2.txt"
 // ---> join_paths(lhs, rhs) ----> "example/path1//path2.txt"
-static char *join_paths(char *lhs, char *rhs)
+char *join_paths(char *lhs, char *rhs)
 {
   char *last;
   for (char *p = lhs; *p; p++)
@@ -871,6 +871,126 @@ static char *search_include_paths(char *filename, Token *start)
   error_tok(start, "'%s': file not found", filename);
 }
 
+typedef struct Dir Dir;
+struct Dir {
+  char *name;
+  int len;
+  bool relative; // relative path or absolute path
+  Dir *next;
+  Dir *prev;
+};
+
+static Dir *parse_path(char *path)
+{
+  Dir head = {};
+  Dir *cur = &head;
+  char *p = path;
+  while (*p)
+  {
+    if (*p == '/')
+    {
+      p++;
+      continue;
+    }
+    char *q = p;
+    while (*q && *q != '/')
+      q++;
+    Dir *dir = calloc(1, sizeof(Dir));
+    dir->name = p;
+    dir->len = q - p;
+    cur->next = dir;
+    dir->prev = cur;
+    cur = dir;
+    p = q;
+  }
+  if (head.next)
+  {
+    head.next->prev = NULL;
+    head.next->relative = (*path != '/');
+  }
+  return head.next;
+}
+
+static char *dirs_to_path(Dir *dirs, bool last_slash) {
+  // Calculate lenth of path
+  int len = dirs->relative ? 0 : 1;
+  for (Dir *d = dirs; d; d = d->next)
+  {
+    len += d->len + 1; // +1 stands for '/'
+  }
+  len += 1; // for terminating 0.
+  if (last_slash)
+    len -= 1;
+  char *path = malloc(sizeof(char) * len);
+  // Fill buffer
+  char *p = path;
+  if (!dirs->relative)
+    *p++ = '/';
+  for (Dir *d = dirs; d; d = d->next)
+  {
+    memcpy(p, d->name, d->len);
+    p += d->len;
+    *p++ = '/';
+  }
+  if (last_slash)
+    p--;
+  *p = 0;
+  return path;
+}
+
+static bool has_last_slash(char *path)
+{
+  int len = strlen(path);
+  return path[len - 1] != '/';
+}
+
+char *rel_to_abs(char *basePath, char *relativePath)
+{
+  bool last_slash = has_last_slash(relativePath);
+  Dir *baseDirs = parse_path(basePath);
+  Dir *relativeDirs = parse_path(relativePath);
+  Dir *absDirs = baseDirs;
+  Dir *cur = absDirs;
+  while (cur && cur->next)
+    cur = cur->next;
+  Dir *dir = relativeDirs;
+  while (dir)
+  {
+    if (!strncmp(dir->name, ".", dir->len))
+    {
+      dir = dir->next;
+      continue;
+    }
+    if (!strncmp(dir->name, "..", dir->len))
+    {
+      assert(cur);
+      cur = cur->prev;
+      if (!cur)
+        absDirs = NULL;
+      dir = dir->next;
+      continue;
+    }
+    if (!cur)
+    {
+      absDirs = dir;
+      cur = dir;
+      dir->prev = NULL;
+      dir = dir->next;
+      continue;
+    }
+    cur->next = dir;
+    dir->prev = cur;
+    cur = cur->next;
+    dir = dir->next;
+  }
+  if (!absDirs)
+    return "/";
+  cur->next = NULL;
+  absDirs->relative = false;
+  char *absolutePath = dirs_to_path(absDirs, last_slash);
+  return absolutePath;
+}
+
 // Read an #include argument.
 static char *read_include_path(Token **rest, Token *tok)
 {
@@ -885,14 +1005,17 @@ static char *read_include_path(Token **rest, Token *tok)
     char *filename = strndup(tok->loc + 1, tok->len - 2);
     *rest = skip_line(tok->next);
 
-    // Search ./ relative to argv[0].
-    char *same_dir_path = join_paths(file_dir, filename);
-    if (file_exists(same_dir_path))
-      return same_dir_path;
+    // If `filename` is absolute path, just return it.
+    if (*filename == '/')
+      return filename;
+
+    // Search with relative path
+    char *current_dir = dirname(strdup(tok->filepath));
+    char *filepath = rel_to_abs(current_dir, filename);
+    if (file_exists(filepath))
+      return filepath;
     
     return search_include_paths(filename, start);
-    
-
   }
 
   // Pattern 2: #include <foo.h>

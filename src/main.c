@@ -1,6 +1,5 @@
 #include "kiwicc.h"
 
-char *file_dir;
 static FILE *output_file;
 static char *input_path;
 static char *output_path = "-";
@@ -99,6 +98,14 @@ static void parse_args(int argc, char **argv)
       error("unknown argument: %s", argv[i]);
 
     input_path = argv[i];
+    if (*input_path != '/')
+    {
+      // Convert relative path to to absolute path
+      char cwd[PATHNAME_SIZE]; 
+      memset(cwd, '\0', PATHNAME_SIZE); 
+      getcwd(cwd, PATHNAME_SIZE);
+      input_path = rel_to_abs(cwd, input_path);
+    } 
   }
 
   if (!input_path)
@@ -137,9 +144,6 @@ int main(int argc, char **argv)
     if (!output_file)
       error("cannot open output file: %s: %s", output_path, strerror(errno));
   }
-
-  // Get file directory
-  file_dir = get_dir(input_path);
 
   // Tokenize
   Token *token = tokenize_file(input_path);

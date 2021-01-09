@@ -14,6 +14,10 @@ kiwicc-stage2: kiwicc $(SRCS) kiwicc.h self.sh
 kiwicc-stage3: kiwicc-stage2
 	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
 
+# Install kiwicc with `sudo -E make install`
+install: kiwicc-stage2
+	cp kiwicc-stage2 $(RISCV)/bin/kiwicc
+
 test: kiwicc
 	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests -o tmp.s
 	$(CC) -xc -c -o tmp2.o tests/extern.c
@@ -58,7 +62,7 @@ tmp-gcc:
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
 tmp-gcc-x64:
-	gcc -S -O0 -o tmp.s tests/tmp_test.c
+	gcc -S -O0 -g -o tmp.s tests/tmp_test.c
 	gcc -o tmp tmp.s
 	echo './tmp; echo $$?' | sh -
 
