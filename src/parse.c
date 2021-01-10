@@ -2291,8 +2291,8 @@ static Node *new_inc_dec(Node *node, Token *tok, int addend)
                            new_add(new_unary(ND_DEREF, new_node_var(var, tok), tok),
                                    new_node_num(addend, tok), tok),
                            tok);
-  Node *expr3 = new_add(new_unary(ND_DEREF, new_node_var(var, tok), tok),
-                        new_node_num(-addend, tok), tok);
+  Node *expr3 = new_cast(new_add(new_unary(ND_DEREF, new_node_var(var, tok), tok),
+                        new_node_num(-addend, tok), tok), node->ty);
 
   return new_binary(ND_COMMA, expr1, new_binary(ND_COMMA, expr2, expr3, tok), tok);
 }

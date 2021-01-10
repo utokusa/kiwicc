@@ -1117,6 +1117,9 @@ int main()
   assert(0xffff, ({ unsigned short x = 0xffff; (int)x; }), "({ unsigned short x = 0xffff; (int)x; })");
   assert(-1, ({ typedef short T; T x = 0xffff; (int)x; }), "({unsigned T; T x = 0xffff; (int)x; })");
   assert(0xffff, ({ typedef unsigned short T; T x = 0xffff; (int)x; }), "({unsigned short T; T x = 0xffff; (int)x; })");
+  
+  assert(1, ({ char val = 0; !val--;}), "({ char val = 0; !val--;})");
+  assert(1, ({ unsigned char val = 0; !val--;}), "({ unsigned char val = 0; !val--;})");
 
   assert(4, sizeof(2147483647), "sizeof(2147483647)"); //1 << 31 - 1 = 2147483647, int
   assert(8, sizeof(2147483648), "sizeof(2147483647)"); //1 << 31     = 2147483648, long

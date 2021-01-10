@@ -340,7 +340,7 @@ static void gen_expr(Node *node)
     else
     {
       println("# gen_expr() ND_NUM");
-      println("  li %s, %lu", reg(top++), node->val);
+      println("  li %s, %ld", reg(top++), node->val);
     }
     return;
   case ND_VAR:
@@ -401,6 +401,7 @@ static void gen_expr(Node *node)
   case ND_NOT:
     println("# ND_NOT");
     gen_expr(node->lhs);
+    println("# checing %s value", reg(top - 1));
     cmp_zero(node->lhs->ty);
     println("  snez %s, %s", reg(top), reg(top));
     println("  andi %s, %s, 0xff", reg(top), reg(top));
