@@ -69,6 +69,23 @@ $ riscv64-unknown-linux-gnu-gdb kiwicc
 (gdb) target remote :1234
 ```
 
+## Example
+
+### Compile and run [2048](https://github.com/mevdschee/2048.c)
+
+```bash
+# in development environment
+
+$ make kiwicc-stage3
+$ git clone https://github.com/mevdschee/2048.c
+$ cd 2048.c
+$ qemu-riscv64 ../kiwicc-stage3 -o 2048.s 2048.c
+$ riscv64-unknown-linux-gnu-gcc -o 2048 2048.s
+$ qemu-riscv64 2048
+```
+
+
+
 ## Reference
 
 https://www.sigbus.info/compilerbook (Japanese)
