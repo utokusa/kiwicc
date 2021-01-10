@@ -1120,6 +1120,7 @@ int main()
   
   assert(1, ({ char val = 0; !val--;}), "({ char val = 0; !val--;})");
   assert(1, ({ unsigned char val = 0; !val--;}), "({ unsigned char val = 0; !val--;})");
+  assert(0, ({ unsigned char x[] = {255}; char y[10]; sprintf(y, "%d", *x); strcmp(y, "255"); }), "({ unsigned char x[] = {255}; char y[10]; sprintf(y, \"%d\", *x); strcmp(y, \"255\"); })");
 
   assert(4, sizeof(2147483647), "sizeof(2147483647)"); //1 << 31 - 1 = 2147483647, int
   assert(8, sizeof(2147483648), "sizeof(2147483647)"); //1 << 31     = 2147483648, long

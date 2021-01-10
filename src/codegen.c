@@ -54,7 +54,7 @@ static void gen_addi(char *rd, char *rs, long imm)
   println("  add %s, %s, t1", rd, rs);
 }
 
-// For `lb`, `ls`, `lw`, `ld`, `sb`, `ss`, `sw`, `sd`
+// For `lb`, `lh`, `lw`, `ld`, `sb`, `sh`, `sw`, `sd`
 static void gen_offset_instr(char *instr, char *rd, char *r1, long offset)
 {
   // If offset can be represented as sign-extended 12-bit
@@ -486,16 +486,18 @@ static void gen_expr(Node *node)
         continue;
       }
 
-      char *movop = arg->ty->is_unsigned ? "movz" : "movs";
+      char *suffix = arg->ty->is_unsigned ? "u" : "";
+      char instr[4];
       int sz = size_of(arg->ty);
       if (sz == 1)
-        gen_offset_instr("lb", argreg[gp++], "s0", -1 * arg->offset);
+        sprintf(instr, "lb%s", suffix);
       else if (sz == 2)
-        gen_offset_instr("lh", argreg[gp++], "s0", -1 * arg->offset);
+        sprintf(instr, "lh%s", suffix);
       else if (sz == 4)
-        gen_offset_instr("lw", argreg[gp++], "s0", -1 * arg->offset);
+        sprintf(instr, "lw%s", suffix);
       else
-        gen_offset_instr("ld", argreg[gp++], "s0", -1 * arg->offset);
+        sprintf(instr, "ld");
+      gen_offset_instr(instr, argreg[gp++], "s0", -1 * arg->offset);
     }
     
     println("  jalr %s", reg(--top));
