@@ -593,6 +593,15 @@ Token *tokenize(char *filename, int file_no, char *p)
       continue;
     }
 
+    // Wide character literal
+    // TODO: currently handled as normal character literal
+    if (startswith(p, "L'"))
+    {
+      cur = read_char_literal(cur, p + 1);
+      p += cur->len + 1;
+      continue;
+    }
+
     // String literal
     if (*p == '"')
     {
