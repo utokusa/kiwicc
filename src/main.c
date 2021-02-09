@@ -100,9 +100,39 @@ static void parse_args(int argc, char **argv)
       continue;
     }
 
+    if (!strcmp(argv[i], "-Wall"))
+    {
+      // ignore
+      continue;
+    }
+
+    if (!strcmp(argv[i], "-Werror"))
+    {
+      // ignore
+      continue;
+    }
+
+    if (!strncmp(argv[i], "-O", 2))
+    {
+      // ignore code generation options
+      continue;
+    }
+
+    if (!strcmp(argv[i], "-fno-omit-frame-pointer"))
+    {
+      // ignore
+      continue;
+    }
+    
+    if (!strcmp(argv[i], "-ggdb"))
+    {
+      // ignore
+      continue;
+    }
+
     if (!strncmp(argv[i], "-I", 2))
     {
-      char *path =argv[i] + 2;
+      char *path = argv[i] + 2;
       // `path` is absolute path
       if (*path == '/')
       {
