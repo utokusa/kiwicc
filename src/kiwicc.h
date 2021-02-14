@@ -291,8 +291,11 @@ extern Type *ushort_type;
 extern Type *uint_type;
 extern Type *ulong_type;
 
+extern char *output_path;
+extern char **dependencies; // for -MD option
 extern char **include_paths;
 extern bool opt_fpic;
+extern bool opt_MD;
 
 /*********************************************
 * ...function declarations...
@@ -334,6 +337,8 @@ char *get_dir(char *path);
 char *rel_to_abs(char *basePath, char *relativePath);
 
 char *join_paths(char *lhs, char *rhs);
+
+void output_dependencies();
 
 // ********** parse.c *************
 Node *new_cast(Node *expr, Type *ty);

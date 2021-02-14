@@ -58,9 +58,54 @@ static Token *copy_line(Token **rest, Token *tok);
 static Token *new_eof(Token *tok);
 static Macro *find_macro(Token *tok, Macro *macros);
 
+char **dependencies; // for -MD option
 Macro *macros = NULL;
 
 static CondIncl *cond_incl;
+
+bool find_from_str_array(char **str_arr, char *target)
+{
+  if (!str_arr)
+    return false;
+  while (*str_arr)
+  {
+    if (!strcmp(*str_arr, target))
+      return true;
+    str_arr++;
+  }
+  return false;
+}
+
+void add_dependency(char *path)
+{
+  static int len = 2;
+  if (find_from_str_array(dependencies, path))
+    return;
+  dependencies = realloc(dependencies, sizeof(char *) * len);
+  dependencies[len - 2] = path;
+  dependencies[len - 1] = NULL;
+  len++;
+}
+
+void output_dependencies()
+{
+  // Assume output_path is *.o or *.s and
+  // it will be changed to *.d
+  char *dependency_file_path = strdup(output_path);
+  char *ext = strrchr(dependency_file_path, '.');
+  *(++ext) = 'd';
+
+  FILE *dependency_file = fopen(dependency_file_path, "w");
+  fprintf(dependency_file, "%s: ", output_path);
+
+  while (*dependencies)
+  {
+    fprintf(dependency_file, "%s \\\n", *dependencies);
+    dependencies++;
+  }
+
+  fclose(dependency_file);
+}
 
 // Get file directory from full file path.
 // e.g. "foo/bar.txt" --> "foo/"
@@ -1318,6 +1363,7 @@ static void join_adjacent_string_literals(Token *tok)
 Token *preprocess(Token *tok)
 {
   init_macros();
+  add_dependency(tok->filepath);
   CondIncl *current_cond_incl = cond_incl;
   tok = preprocess2(tok);
   if (cond_incl != current_cond_incl)

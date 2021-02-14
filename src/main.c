@@ -2,12 +2,13 @@
 
 static FILE *output_file;
 static char *input_path;
-static char *output_path = "-";
+char *output_path = "-";
 
 bool opt_fpic = true;
 
 char **include_paths;
 static bool opt_E;
+bool opt_MD;
 
 void println(char *fmt, ...)
 {
@@ -130,6 +131,12 @@ static void parse_args(int argc, char **argv)
       continue;
     }
 
+    if (!strcmp(argv[i], "-MD"))
+    {
+      opt_MD = true;
+      continue;
+    }
+
     if (!strncmp(argv[i], "-I", 2))
     {
       char *path = argv[i] + 2;
@@ -206,6 +213,9 @@ int main(int argc, char **argv)
 
   // Preprocess
   token = preprocess(token);
+
+  if (opt_MD)
+    output_dependencies();
 
   // If -E is given, print out preprocessed C code as a result
   if (opt_E)
