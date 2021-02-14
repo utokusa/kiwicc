@@ -96,6 +96,9 @@ void output_dependencies()
   *(++ext) = 'd';
 
   FILE *dependency_file = fopen(dependency_file_path, "w");
+  if (!dependency_file)
+    error("-MD: cannot open %s: %s", dependency_file_path, strerror(errno));
+
   fprintf(dependency_file, "%s: ", output_path);
 
   while (*dependencies)
