@@ -14,9 +14,16 @@ kiwicc-stage2: kiwicc $(SRCS) kiwicc.h self.sh
 kiwicc-stage3: kiwicc-stage2
 	./self.sh tmp-stage3 ./kiwicc-stage2 kiwicc-stage3
 
-# Install kiwicc with `sudo -E make install`
+# Install kiwicc by running `sudo -E make install`
 install: kiwicc-stage2
 	cp kiwicc-stage2 $(RISCV)/bin/kiwicc
+	mkdir -p $(RISCV)/lib/kiwicc
+	cp -r ./include $(RISCV)/lib/kiwicc
+
+# Unstall kiwicc by running `sudo -E make uninstall`
+uninstall:
+	rm $(RISCV)/bin/kiwicc
+	rm -r $(RISCV)/lib/kiwicc/include
 
 test: kiwicc
 	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tests.c -I./tests/test_include -I./tests -o tmp.s
@@ -69,4 +76,4 @@ tmp-gcc-x64:
 clean:
 	rm -rf kiwicc kiwicc-stage* *.o *~ tmp* tests/*~ tests/*.o tests/tmp*
 
-.PHONY: test tmp-kiwicc tmp-as tmp-gcc clean
+.PHONY: test tmp-kiwicc tmp-as tmp-gcc clean install uninstall

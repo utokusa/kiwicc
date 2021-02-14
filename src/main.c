@@ -49,11 +49,18 @@ static void add_default_include_paths(char *argv0)
     getcwd(cwd, PATHNAME_SIZE);
     kiwicc_abs_path = rel_to_abs(cwd, argv0);
   }
+
+  // Add include path
+
+  // Add kiwicc specific include path (for devlopment)
   char *kiwicc_abs_dir = dirname(strdup(kiwicc_abs_path));
   char *kiwicc_include = rel_to_abs(kiwicc_abs_dir, "./include");
-  add_include_path(kiwicc_include); 
+  add_include_path(kiwicc_include);
 
-  // Add standard include paths.
+  // Add kiwicc specific include path (for installed binary)
+  add_include_path("/opt/riscv/lib/kiwicc/include");
+
+  // Add standard include paths of gcc.
   // You can get these paths by "echo | riscv64-unknown-linux-gnu-gcc -E -Wp,-v -".
   add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include");
   add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include-fixed");

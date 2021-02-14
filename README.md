@@ -43,6 +43,14 @@ $ make kiwicc-stage3
 $ make test-all
 ```
 
+## Install kiwicc
+
+```bash
+$ make install
+```
+
+
+
 ## Compile a C program for RISC-V and run it on QEMU user-mode emulation
 
 ```bash
