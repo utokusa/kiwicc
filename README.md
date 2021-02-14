@@ -84,10 +84,11 @@ $ riscv64-unknown-linux-gnu-gdb kiwicc
 ```bash
 # in development environment
 
-$ make kiwicc-stage3
+$ sudo -E make install
+$ cd /home/user
 $ git clone https://github.com/mevdschee/2048.c
 $ cd 2048.c
-$ qemu-riscv64 ../kiwicc-stage3 -o 2048.s 2048.c
+$ qemu-riscv64 /opt/riscv/bin/kiwicc -o 2048.s 2048.c
 $ riscv64-unknown-linux-gnu-gcc -o 2048 2048.s
 $ qemu-riscv64 2048
 ```
