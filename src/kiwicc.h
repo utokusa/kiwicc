@@ -9,6 +9,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <libgen.h>
 #include <unistd.h>
 

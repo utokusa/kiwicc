@@ -9,8 +9,7 @@ rm -rf $TMP
 mkdir -p $TMP
 
 kiwicc() {
-  (cd $TMP; qemu-riscv64 -L $RISCV/sysroot ../$CC ../$1 -o ${1%.c}.s -I..)
-  riscv64-unknown-linux-gnu-gcc -c -o $TMP/${1%.c}.o $TMP/${1%.c}.s
+  riscv64-unknown-linux-gnu-gcc -c -o $TMP/${1%.c}.o $1
 }
 
 kiwicc main.c

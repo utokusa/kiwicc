@@ -2,6 +2,7 @@
 
 static FILE *tmp_file;
 static char *input_path;
+// If -S option is given, the result will be wrote to stdout
 char *output_path = "-";
 static char *tmp_file_path;
 
@@ -10,6 +11,7 @@ bool opt_fpic = true;
 char **include_paths;
 static bool opt_E;
 bool opt_MD;
+static bool opt_S;
 
 void println(char *fmt, ...)
 {
@@ -88,6 +90,12 @@ static void parse_args(int argc, char **argv)
     if (!strncmp(argv[i], "-o", 2))
     {
       output_path = argv[i] + 2;
+      continue;
+    }
+
+    if (!strcmp(argv[i], "-S"))
+    {
+      opt_S = true;
       continue;
     }
 
@@ -269,21 +277,54 @@ int main(int argc, char **argv)
   // generate code
   codegen(prog);
 
-  // Write assembly to an output file.
-  fseek(tmp_file, 0, SEEK_SET);
+  // If -S if given, assermbly text is the final output.
+  if (opt_S)
+  {
+    fseek(tmp_file, 0, SEEK_SET);
 
-  FILE *out;
-  if (strcmp(output_path, "-") == 0)
-  {
-    out = stdout;
+    FILE *out;
+    if (strcmp(output_path, "-") == 0)
+    {
+      out = stdout;
+    }
+    else
+    {
+      out = fopen(output_path, "w");
+      if (!out)
+        error("cannot open output file: %s: %s", output_path, strerror(errno));
+    }
+    copy_file(tmp_file, out);
+    exit(0);
   }
-  else
+
+  // Otherwise, run the assembler to assemble our output.
+  fclose(tmp_file);
+  // If -S option not is given, the result will be wrote to "a.out"
+  if (!strcmp(output_path, "-"))
+    output_path = "a.out";
+
+  pid_t pid;
+  if ((pid = fork() == 0))
   {
-    out = fopen(output_path, "w");
-    if (!out)
-      error("cannot open output file: %s: %s", output_path, strerror(errno));
+    // Child process. Run the assembler.
+    execlp("riscv64-unknown-linux-gnu-as", "-c", "-o", output_path, tmp_file_path, (char *)0);
+    fprintf(stderr, "exec failed: as: %s", strerror(errno));
+    _exit(1); 
   }
-  copy_file(tmp_file, out);
+
+  // Wait for the child process to finish.
+  for (;;)
+  {
+    int status;
+    int w = waitpid(pid, &status, 0);
+    if (!w)
+    {
+      error("waitpid failed: %s", strerror(errno));
+      exit(1);
+    }
+    if (WIFEXITED(status))
+      break;
+  }
 
   return 0;
 }
