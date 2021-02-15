@@ -1,8 +1,9 @@
 #include "kiwicc.h"
 
-static FILE *output_file;
+static FILE *tmp_file;
 static char *input_path;
 char *output_path = "-";
+static char *tmp_file_path;
 
 bool opt_fpic = true;
 
@@ -14,8 +15,8 @@ void println(char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  vfprintf(output_file, fmt, ap);
-  fprintf(output_file, "\n");
+  vfprintf(tmp_file, fmt, ap);
+  fprintf(tmp_file, "\n");
 }
 
 static void usage(int status)
@@ -196,22 +197,36 @@ static void print_tokens(Token *tok)
   printf("\n");
 }
 
+static void copy_file(FILE *in, FILE *out)
+{
+  char buf[4096];
+  for (;;)
+  {
+    int nr = fread(buf, 1, sizeof(buf), in);
+    if (nr == 0)
+      break;
+    fwrite(buf, 1, nr, out);
+  }
+}
+
+static void cleanup()
+{
+  if (tmp_file_path)
+    unlink(tmp_file_path);
+}
+
 int main(int argc, char **argv)
 {
   add_default_include_paths(argv[0]);
   parse_args(argc, argv);
+  atexit(cleanup);
 
-  // Open the output file.
-  if (strcmp(output_path, "-") == 0)
-  {
-    output_file = stdout;
-  }
-  else
-  {
-    output_file = fopen(output_path, "w");
-    if (!output_file)
-      error("cannot open output file: %s: %s", output_path, strerror(errno));
-  }
+  // Open a tmporary output file.
+  tmp_file_path = strdup("/tmp/kiwicc-XXXXXX");
+  int fd = mkstemp(tmp_file_path);
+  if (!fd)
+    error("cannot open output file: %s: %s", tmp_file_path, strerror(errno)); 
+  tmp_file = fdopen(fd, "w");
 
   // Tokenize
   Token *token = tokenize_file(input_path);
@@ -253,6 +268,22 @@ int main(int argc, char **argv)
 
   // generate code
   codegen(prog);
+
+  // Write assembly to an output file.
+  fseek(tmp_file, 0, SEEK_SET);
+
+  FILE *out;
+  if (strcmp(output_path, "-") == 0)
+  {
+    out = stdout;
+  }
+  else
+  {
+    out = fopen(output_path, "w");
+    if (!out)
+      error("cannot open output file: %s: %s", output_path, strerror(errno));
+  }
+  copy_file(tmp_file, out);
 
   return 0;
 }
