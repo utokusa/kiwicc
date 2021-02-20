@@ -55,8 +55,8 @@ test-gcc:
 	qemu-riscv64 -L $(RISCV)/sysroot ./tmp
 
 tmp-kiwicc: kiwicc
-	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tmp_test.c -I./tests -o tmp.s
-	$(CC) -o tmp tmp.s
+	qemu-riscv64 -L $(RISCV)/sysroot ./kiwicc tests/tmp_test.c -I./tests -o tmp.o
+	$(CC) -o tmp tmp.o
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
 tmp-as:

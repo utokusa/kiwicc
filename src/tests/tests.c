@@ -1679,7 +1679,11 @@ of(char), \
   assert(121, INCLUDE12_M1, "INCLUDE12_M1");
   assert(122, INCLUDE12_M2, "INCLUDE12_M2");
 
-
+  {
+#define M16(x,y) x+y
+  int x = M16(1,
+              3);
+  }
   
   printf("OK\n");
   return 0;

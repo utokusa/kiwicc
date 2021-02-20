@@ -241,7 +241,7 @@ static Token *copy_macro_body(Token *body, Token **last)
 {
   Token head = {};
   Token *cur = &head;
-  while (body && !body->at_bol)
+  while (body && (body->kind != TK_EOF))
   {
     cur->next = copy_token(body);
     cur = cur->next;
@@ -519,7 +519,7 @@ static Token *paste(Token *lhs, Token *rhs)
   return tok;
 }
 
-// Replace func-like macro parameters with given arguments.
+// Replace func-like macro parameters in macro body with given arguments.
 static Token *subst(Token *tok, MacroArg *args)
 {
   Token head = {};
@@ -604,6 +604,7 @@ static Token *subst(Token *tok, MacroArg *args)
     continue;
   }
 
+  // Note that the last node is always TK_EOF.
   cur->next = tok;
   return head.next;
 }
