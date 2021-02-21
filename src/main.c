@@ -147,6 +147,12 @@ static void parse_args(int argc, char **argv)
       continue;
     }
 
+    if (!strcmp(argv[i], "-c"))
+    {
+      // ignore
+      continue;
+    }
+
     if (!strcmp(argv[i], "-MD"))
     {
       opt_MD = true;
