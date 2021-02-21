@@ -261,6 +261,11 @@ char *func_name()
   return __func__;
 }
 
+inline int inline_fn()
+{
+  return 3;
+}
+
 typedef void * va_list;
 
 int add_all1(int x, ...);
@@ -1684,6 +1689,8 @@ of(char), \
   int x = M16(1,
               3);
   }
+
+  assert(3, inline_fn(), "inline_fn()");
   
   printf("OK\n");
   return 0;

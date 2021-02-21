@@ -180,7 +180,7 @@ static bool is_keyword(Token *tok)
       "switch", "case", "default", "_Alignof", "_Alignas",
       "signed", "unsigned", "const",
       "volatile", "register", "restrict", "_Noreturn",
-      "float", "double"
+      "inline", "float", "double"
       };
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); ++i)

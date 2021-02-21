@@ -568,6 +568,7 @@ static bool is_typename(Token *tok)
           "volatile",
           "register",
           "_Noreturn",
+          "inline",
           "float",
           "double"
       };
@@ -641,7 +642,8 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
   while (is_typename(tok))
   {
     // Handle storage class specifiers.
-    if (equal(tok, "typedef") || equal(tok, "static") || equal(tok, "extern"))
+    if (equal(tok, "typedef") || equal(tok, "static")
+        || equal(tok, "extern") || equal(tok, "inline"))
     {
       if (!attr)
         error_tok(tok, "storage class specifier is not allowed in this context.");
@@ -652,7 +654,7 @@ static Type *typespec(Token **rest, Token *tok, VarAttr *attr)
       else
         attr->is_extern = true;
 
-      if (attr->is_typedef + attr->is_static + attr->is_extern > 1)
+      if (attr->is_typedef && attr->is_static + attr->is_extern > 1)
         error_tok(tok, "typedef and static may not be used together");
       tok = tok->next;
       continue;

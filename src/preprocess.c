@@ -1330,6 +1330,7 @@ static void init_macros()
   define_macro("linux", "1");
   define_macro("__alignof__", "_Alignof");
   define_macro("__const__", "const");
+  define_macro("__inline", "inline");
   define_macro("__inline__", "inline");
   define_macro("__restrict", "restrict");
   define_macro("__restrict__", "restrict");
