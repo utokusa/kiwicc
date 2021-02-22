@@ -344,12 +344,24 @@ static void gen_expr(Node *node)
     }
     return;
   case ND_VAR:
-  case ND_MEMBER:
-    println("# gen_expr() ND_MEMBER start");
     gen_addr(node);
     load(node->ty);
-    println("# gen_expr() ND_MEMBER end");
     return;
+  case ND_MEMBER:
+  {
+    gen_addr(node);
+    load(node->ty);
+
+    Member *mem = node->member;
+    if (mem->is_bitfield)
+    {
+      println("  li t1, %d", 64 - mem->bit_width - mem->bit_offset);
+      println("  sll %s, %s, t1", reg(top - 1), reg(top - 1));
+      println("  li t1, %d", 64 - mem->bit_width);
+      println("  srl %s, %s, t1", reg(top - 1), reg(top - 1));
+    }
+    return;
+  }
   case ND_ASSIGN:
     if (node->ty->kind == TY_ARR)
       error_tok(node->tok, "not an lvalue");
@@ -357,6 +369,27 @@ static void gen_expr(Node *node)
       error_tok(node->tok, "cannnot assign to a const variable");
     gen_expr(node->rhs);
     gen_lval(node->lhs);
+
+    if (node->lhs->kind == ND_MEMBER && node->lhs->member->is_bitfield)
+    {
+      // If the lhs is a bitfield, we need to read a value from memory
+      // and merge it with a new value.
+      Member *mem = node->lhs->member;
+      println("  mv %s, %s", reg(top), reg(top - 1));
+      top++;
+      load(mem->ty);
+
+      println("  andi %s, %s, %d", reg(top - 3), reg(top - 3), (1L << mem->bit_width) - 1);
+      println("  li t1, %d", mem->bit_offset);
+      println("  sll %s, %s, t1", reg(top - 3), reg(top - 3));
+
+      long mask = ((1L << mem->bit_width) - 1) << mem->bit_offset;
+      println(" li t1, %ld", ~mask);
+      println(" and %s, %s, t1", reg(top - 1), reg(top - 1));
+      println(" or %s, %s, %s", reg(top - 3), reg(top - 3), reg(top - 1));
+      top--;
+    }
+
     store(node->ty);
     return;
   case ND_ADDR:

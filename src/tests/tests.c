@@ -1691,6 +1691,25 @@ of(char), \
   }
 
   assert(3, inline_fn(), "inline_fn()");
+
+  assert(4, sizeof(struct {int x:1; }), "sizeof(struct {int x:1; })");
+  assert(8, sizeof(struct {long x:1; }), "sizeof(struct {long x:1; })");
+
+  struct bit1 {
+    short a;
+    char b;
+    int c : 2;
+    int d : 3;
+    int e :3;
+  };
+
+  assert(4, sizeof(struct bit1), "sizeof(struct bit1)");
+  assert(1, ({ struct bit1 x; x.a=1; x.b=2; x.c=3; x.d=3; x.e=5; x.a; }), "({ struct bit1 x; x.a=1; x.b=2; x.c=3; c.d=3; x.e=5; x.a; })");
+  assert(1, ({ struct bit1 x={1,2,3,4,5}; x.a; }), "({ struct bit1 x={1,2,3,4,5}; x.a; })");
+  assert(2, ({ struct bit1 x={1,2,3,4,5}; x.b; }), "({ struct bit1 x={1,2,3,4,5}; x.b; })");
+  assert(3, ({ struct bit1 x={1,2,3,4,5}; x.c; }), "({ struct bit1 x={1,2,3,4,5}; x.c; })");
+  assert(4, ({ struct bit1 x={1,2,3,4,5}; x.d; }), "({ struct bit1 x={1,2,3,4,5}; x.d; })");
+  assert(5, ({ struct bit1 x={1,2,3,4,5}; x.e; }), "({ struct bit1 x={1,2,3,4,5}; x.e; })");
   
   printf("OK\n");
   return 0;

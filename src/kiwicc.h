@@ -273,6 +273,11 @@ struct Member
   Token *name;
   int align;
   int offset;
+
+  // bitfield
+  int is_bitfield;
+  int bit_offset;
+  int bit_width;
 };
 
 /*********************************************
@@ -363,6 +368,8 @@ bool is_numeric(Type *ty);
 Type *copy_type(Type *ty);
 
 int align_to(int n, int align);
+
+int align_down(int n, int align);
 
 Type *pointer_to(Type *base);
 

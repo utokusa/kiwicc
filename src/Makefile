@@ -64,7 +64,7 @@ tmp-as:
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
 tmp-gcc:
-	$(CC) -S -O0 -fpic -o tmp.s tests/tmp_test.c
+	$(CC) -S -g -O0 -fpic -o tmp.s tests/tmp_test.c
 	$(CC) -o tmp tmp.s
 	echo 'qemu-riscv64 -L $(RISCV)/sysroot ./tmp; echo $$?' | sh -
 
