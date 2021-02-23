@@ -49,8 +49,6 @@ $ make test-all
 $ make install
 ```
 
-
-
 ## Compile a C program for RISC-V and run it on QEMU user-mode emulation
 
 ```bash
@@ -58,6 +56,10 @@ $ make install
 
 # compile with kiwicc
 $ qemu-riscv64 kiwicc foo.c -o tmp.s
+$ riscv64-unknown-linux-gnu-gcc tmp.s -o a.out
+
+# compile with kiwicc installed by `sudo -E make install`
+$ kiwicc foo.c -o tmp.o # binfmt_misc calls qemu-riscv64 implicitly
 $ riscv64-unknown-linux-gnu-gcc tmp.s -o a.out
 
 # compile with GCC
@@ -77,6 +79,8 @@ $ riscv64-unknown-linux-gnu-gdb kiwicc
 (gdb) target remote :1234
 ```
 
+
+
 ## Example
 
 ### Compile and run [2048](https://github.com/mevdschee/2048.c)
@@ -88,12 +92,27 @@ $ sudo -E make install
 $ cd /home/user
 $ git clone https://github.com/mevdschee/2048.c
 $ cd 2048.c
-$ qemu-riscv64 /opt/riscv/bin/kiwicc -o 2048.s 2048.c
+$ qemu-riscv64 /opt/riscv/bin/kiwicc -o 2048.s 2048.c # `kiwicc -o 2048.s 2048.c` is also OK.
 $ riscv64-unknown-linux-gnu-gcc -o 2048 2048.s
 $ qemu-riscv64 2048
 ```
 
+### Compile and run [Tree](http://mama.indstate.edu/users/ice/tree/) command
 
+```bash
+# in development environment
+
+$ sudo -E make install
+$ cd /home/user
+$ mkdir -p ./tree
+$ curl -sL --retry 3 --insecure "http://mama.indstate.edu/users/ice/tree/src/tree-1.8.0.tgz" | tar xz --no-same-owner --strip-components=1 -C ./tree
+$ cd tree
+
+# configure, build and run
+$ sed -i -e 's/^CC=gcc/CC=kiwicc/' -e 's/^CFLAGS/#CFLAGS/' -e 's/$(CC) $(LDFLAGS)/riscv64-unknown-linux-gnu-gcc $(LDFLAGS)/' Makefile
+$ make
+$ qemu-riscv64 tree
+```
 
 ## Reference
 
