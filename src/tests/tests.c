@@ -1710,6 +1710,13 @@ of(char), \
   assert(3, ({ struct bit1 x={1,2,3,4,5}; x.c; }), "({ struct bit1 x={1,2,3,4,5}; x.c; })");
   assert(4, ({ struct bit1 x={1,2,3,4,5}; x.d; }), "({ struct bit1 x={1,2,3,4,5}; x.d; })");
   assert(5, ({ struct bit1 x={1,2,3,4,5}; x.e; }), "({ struct bit1 x={1,2,3,4,5}; x.e; })");
+
+  {
+    int i = 0;
+    while (i++<10);
+
+    for (int i = 0; i < 10; i++);
+  }
   
   printf("OK\n");
   return 0;

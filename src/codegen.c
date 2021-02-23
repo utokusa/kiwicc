@@ -743,7 +743,8 @@ static void gen_stmt(Node *node)
     println(".L.begin.%d:", seq);
     gen_expr(node->cond);
     println("  beq %s, zero, .L.break.%d", reg(--top), seq);
-    gen_stmt(node->then);
+    if (node->then)
+      gen_stmt(node->then);
     println(".L.continue.%d:", seq);
     println("  jal zero, .L.begin.%d", seq);
     println(".L.break.%d:", seq);
@@ -791,7 +792,8 @@ static void gen_stmt(Node *node)
       println("  beq %s, zero, .L.break.%d", reg(--top), seq);
     }
     println("# for then start");
-    gen_stmt(node->then);
+    if (node->then)
+      gen_stmt(node->then);
     println("# for then end");
     println(".L.continue.%d:", seq);
     println("# for inc start");

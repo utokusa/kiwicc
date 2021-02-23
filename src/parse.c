@@ -1462,6 +1462,12 @@ static Node *stmt(Token **rest, Token *tok)
     node->cond = expr(&tok, tok);
     tok = skip(tok, ")");
 
+    if (equal(tok, ";"))
+    {
+      *rest = skip(tok, ";");
+      return node;
+    }
+
     node->then = stmt(&tok, tok);
     *rest = tok;
     return node;
@@ -1507,7 +1513,10 @@ static Node *stmt(Token **rest, Token *tok)
       node->inc = expr_stmt(&tok, tok);
     tok = skip(tok, ")");
 
-    node->then = stmt(&tok, tok);
+    if (equal(tok, ";"))
+      tok = skip(tok, ";");
+    else
+      node->then = stmt(&tok, tok);
 
     leave_scope();
     *rest = tok;
