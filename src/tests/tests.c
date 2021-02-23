@@ -273,6 +273,10 @@ int add_all3(int x, int y, int z, ...);
 float add_float(float x, float y);
 double add_double(double x, double y);
 
+int comma_sep_fn1(int), comma_sep_fn2(int);
+int comma_sep_fn1(int x) { return x * 1; }
+int comma_sep_fn2(int x) { return x * 2; }
+
 int sprintf(char *buf, char *fmt, ...);
 int vsprintf(char *buf, char *fmt, ...);
 
@@ -1717,6 +1721,9 @@ of(char), \
 
     for (int i = 0; i < 10; i++);
   }
+
+  assert(2, comma_sep_fn1(2), "comma_sep_fn1(2)");
+  assert(4, comma_sep_fn2(2), "comma_sep_fn2(2)");
   
   printf("OK\n");
   return 0;

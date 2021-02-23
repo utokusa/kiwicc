@@ -413,12 +413,24 @@ Program *parse(Token *tok)
     // Function
     if (ty->kind == TY_FUNC)
     {
-      current_fn = new_gvar(get_ident(ty->name), ty, attr.is_static, false);
-      if (!equal(tok, ";"))
-        cur = cur->next = funcdef(&tok, start);
-      else
-        tok = tok->next;
+      for (;;)
+      {
+        current_fn = new_gvar(get_ident(ty->name), ty, attr.is_static, false);
+        if (equal(tok, ";"))
+        {
+          tok = tok->next;
+          break;
+        }
+        if (equal(tok, ","))
+        {
+          tok = skip(tok, ",");
+          ty = declarator(&tok, tok, basety);
+          continue;
+        }
 
+        cur = cur->next = funcdef(&tok, start);
+        break;
+      }
       continue;
     }
 
