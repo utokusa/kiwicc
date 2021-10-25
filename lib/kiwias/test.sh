@@ -14,3 +14,12 @@ else
     exit 1
 fi
 
+cat <<EOF | riscv64-unknown-linux-gnu-as -o tmp.o -
+	.text
+	.globl	main
+main:
+	li	a0, 42
+	jr	ra
+EOF
+
+cmp out.o tmp.o
