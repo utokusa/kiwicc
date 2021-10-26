@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 unsigned short data[] = {
-    0x457f, 0x464c, 0x0102, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
+    0x0102, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0001, 0x00f3, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x00f8, 0x0000, 0x0000, 0x0000,
     0x0004, 0x0000, 0x0040, 0x0000, 0x0000, 0x0040, 0x0007, 0x0006,
@@ -48,12 +48,42 @@ unsigned short data[] = {
     0x0000, 0x0000, 0x0000, 0x0000
 };
 
+
+
+static char *output_path = "out.o";
+static FILE *out_file;
+
+// ------------
+//  ELF header
+// ------------
+
+#define SIZEOF_ELF_HEADER 0x40
+
+
+void gen_elf_header() {
+    static unsigned char elf_header[SIZEOF_ELF_HEADER];
+    // Magic number
+    // 0x7F followed by ELF(45 4c 46) in ASCII
+    elf_header[0] = 0x7f;
+    elf_header[1] = 0x45;
+    elf_header[2] = 0x4c;
+    elf_header[3] = 0x46;
+
+    // TODO: Handle all elf header contents
+
+    fwrite(&elf_header, 4, 1, out_file);
+}
+
+
 int main() {
-    FILE* fs = fopen("out.o", "wb"); 
-    if (fs == NULL) {
+    out_file = fopen(output_path, "wb"); 
+    if (out_file == NULL) {
         fputs("Failed to open file\n", stderr);
         exit(EXIT_FAILURE);
     }
-    fwrite(&data, sizeof(data), 1, fs); // Adjust data size using magic number
+
+    gen_elf_header();
+
+    fwrite(&data, sizeof(data), 1, out_file); // Adjust data size using magic number
     return 0;
 }

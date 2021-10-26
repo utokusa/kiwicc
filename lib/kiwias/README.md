@@ -31,6 +31,7 @@ echo $?
 - hexdump (can be installed by apt install bsdmainutils)
 ```bash
 objdump -s tmp.o
+hexdump -v -C tmp.o
 ```
 
 ## reference
