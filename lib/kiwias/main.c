@@ -135,6 +135,13 @@ void gen_elf_header() {
 
 }
 
+// ----------------------
+//  Program header table
+// ----------------------
+
+void gen_program_header_table() {
+    // Currently it does nothing
+}
 
 int main() {
     out_file = fopen(output_path, "wb"); 
@@ -144,6 +151,7 @@ int main() {
     }
 
     gen_elf_header();
+    gen_program_header_table();
 
     fwrite(&data, sizeof(data), 1, out_file); // Adjust data size using magic number
     return 0;
