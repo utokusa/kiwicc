@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 unsigned short data[] = {
-    0x0513, 0x02a0, 0x8067, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0003, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0003, 0x0002,
@@ -143,6 +143,17 @@ void gen_program_header_table() {
     // Currently it does nothing
 }
 
+// ----------------------
+// .text section 
+// ----------------------
+unsigned char text_section_data[] = {
+    0x13, 0x05, 0xa0, 0x02, 0x67, 0x80, 0x00, 0x00
+};
+
+void gen_text_section() {
+    fwrite(&text_section_data, sizeof(text_section_data), 1, out_file); 
+}
+
 int main() {
     out_file = fopen(output_path, "wb"); 
     if (out_file == NULL) {
@@ -152,7 +163,8 @@ int main() {
 
     gen_elf_header();
     gen_program_header_table();
+    gen_text_section();
 
-    fwrite(&data, sizeof(data), 1, out_file); // Adjust data size using magic number
+    fwrite(&data, sizeof(data), 1, out_file); 
     return 0;
 }
