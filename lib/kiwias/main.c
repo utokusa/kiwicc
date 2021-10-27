@@ -2,10 +2,6 @@
 #include <stdlib.h>
 
 unsigned short data[] = {
-    0x0102, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0001, 0x00f3, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x00f8, 0x0000, 0x0000, 0x0000,
-    0x0004, 0x0000, 0x0040, 0x0000, 0x0000, 0x0040, 0x0007, 0x0006,
     0x0513, 0x02a0, 0x8067, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
     0x0000, 0x0000, 0x0003, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -59,19 +55,84 @@ static FILE *out_file;
 
 #define SIZEOF_ELF_HEADER 0x40
 
+#define OFFSET_EI_MAG0 0x00
+#define OFFSET_EI_MAG1 0x01
+#define OFFSET_EI_MAG2 0x02
+#define OFFSET_EI_MAG3 0x03
+#define OFFSET_EI_CLASS 0x04
+#define OFFSET_EI_DATA 0x05
+#define OFFSET_EI_VERSION 0x06
+#define OFFSET_EI_OSABI 0x07
+#define OFFSET_EI_ABIVERSION 0x08
+#define OFFSET_EI_PAD 0x09
+
+typedef struct {
+    unsigned char e_ident[0x10];
+    unsigned short e_type;
+    unsigned short e_machine;
+    unsigned int e_version;
+    unsigned long e_entry;
+    unsigned long e_phoff;
+    unsigned long e_shoff;
+    unsigned int e_flag;
+    unsigned short e_ehsize;
+    unsigned short e_phentsize;
+    unsigned short e_phnum;
+    unsigned short e_shentisize;
+    unsigned short e_shnum;
+    unsigned short e_shstrndx;
+
+} ElfHeader;
 
 void gen_elf_header() {
-    static unsigned char elf_header[SIZEOF_ELF_HEADER];
+    ElfHeader elf_header;
+
     // Magic number
     // 0x7F followed by ELF(45 4c 46) in ASCII
-    elf_header[0] = 0x7f;
-    elf_header[1] = 0x45;
-    elf_header[2] = 0x4c;
-    elf_header[3] = 0x46;
+    elf_header.e_ident[OFFSET_EI_MAG0] = 0x7f;
+    elf_header.e_ident[OFFSET_EI_MAG1] = 0x45;
+    elf_header.e_ident[OFFSET_EI_MAG2] = 0x4c;
+    elf_header.e_ident[OFFSET_EI_MAG3] = 0x46;
+    
+    elf_header.e_ident[OFFSET_EI_CLASS] = 2; // 64-bit
+    elf_header.e_ident[OFFSET_EI_DATA] = 1; // little endian
+    elf_header.e_ident[OFFSET_EI_VERSION] = 1; // original version of elf
+    elf_header.e_ident[OFFSET_EI_OSABI] = 0; // Unix - System V
+    elf_header.e_ident[OFFSET_EI_ABIVERSION] = 0;
+    elf_header.e_ident[OFFSET_EI_PAD] = 0; // Currently not used in ELF
+    elf_header.e_ident[OFFSET_EI_PAD + 1] = 0;
+    elf_header.e_ident[OFFSET_EI_PAD + 2] = 0;
+    elf_header.e_ident[OFFSET_EI_PAD + 3] = 0;
+    elf_header.e_ident[OFFSET_EI_PAD + 4] = 0;
+    elf_header.e_ident[OFFSET_EI_PAD + 5] = 0;
+    elf_header.e_ident[OFFSET_EI_PAD + 6] = 0;
 
-    // TODO: Handle all elf header contents
+    elf_header.e_type = 1; // REL (RElocatable file)
+    elf_header.e_machine = 0xf3; // RISC-v
+    elf_header.e_version = 1; // original version of ELF
+    // Entry point address
+    elf_header.e_entry = 0x0;
+    // Start of program headers
+    elf_header.e_phoff = 0; // Current output doesn't have program header
+    // Start of section headers
+    elf_header.e_shoff = 248;
+    // Flags
+    elf_header.e_flag = 0x4;
+    // Size of this header
+    elf_header.e_ehsize = 64; // byte
+    // Size of program headers
+    elf_header.e_phentsize = 0; // byte
+    // Number of progrem headers
+    elf_header.e_phnum = 0;
+    // Size of section headers
+    elf_header.e_shentisize = 64; // byte
+    // Number of section headers
+    elf_header.e_shnum = 7;
+    // Section header string rtable index
+    elf_header.e_shstrndx = 6;
 
-    fwrite(&elf_header, 4, 1, out_file);
+    fwrite(&elf_header, sizeof(elf_header), 1, out_file);
+
 }
 
 
