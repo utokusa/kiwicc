@@ -1,22 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned short data[] = {
-    0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0003, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0003, 0x0002,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0003, 0x0003, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0010, 0x0001,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x6d00, 0x6961, 0x006e, 0x2e00, 0x7973, 0x746d, 0x6261, 0x2e00,
-    0x7473, 0x7472, 0x6261, 0x2e00, 0x6873, 0x7473, 0x7472, 0x6261,
-    0x2e00, 0x6574, 0x7478, 0x2e00, 0x6164, 0x6174, 0x2e00, 0x7362,
-    0x0073, 0x0000, 0x0000, 0x0000
-};
-
-
 
 static char *output_path = "out.o";
 static FILE *out_file;
@@ -127,6 +111,77 @@ void gen_text_section() {
     fwrite(&text_section_data, sizeof(text_section_data), 1, out_file); 
 }
 
+// ----------------------
+// .data section 
+// ----------------------
+void gen_data_section() {
+    // Currently it does nothing
+}
+
+// ----------------------
+// .bss section 
+// ----------------------
+void gen_bss_section() {
+    // Currently it does nothing
+}
+
+// ----------------------
+// .symtab section 
+// ----------------------
+
+unsigned short symtab_section_data[] = {
+    0x0000, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0003, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0003, 0x0002,
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0003, 0x0003, 0x0000, 0x0000, 0x0000, 0x0000,
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0010, 0x0001,
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+};
+
+void gen_symtab_section() {
+    fwrite(&symtab_section_data, sizeof(symtab_section_data), 1, out_file); 
+}
+
+// ----------------------
+// .strtab section 
+// ----------------------
+
+unsigned short strtab_section_data[] = {
+    0x6d00, 0x6961, 0x006e
+};
+
+void gen_strtab_section() {
+    fwrite(&strtab_section_data, sizeof(strtab_section_data), 1, out_file); 
+}
+
+// ----------------------
+// .shstrtab section 
+// ----------------------
+unsigned short shstrtab_section_data[] = {
+    0x2e00, 0x7973, 0x746d, 0x6261, 0x2e00,
+    0x7473, 0x7472, 0x6261, 0x2e00, 0x6873, 0x7473, 0x7472, 0x6261,
+    0x2e00, 0x6574, 0x7478, 0x2e00, 0x6164, 0x6174, 0x2e00, 0x7362,
+    0x0073
+};
+
+void gen_shstrtab_section() {
+    fwrite(&shstrtab_section_data, sizeof(shstrtab_section_data), 1, out_file); 
+}
+
+// ------------------------------------
+// Padding before section header table 
+// ------------------------------------
+unsigned short padding_before_section_header_data[] = {
+    0x0000, 0x0000, 0x0000
+};
+
+void add_padding_before_section_header() {
+    // TODO: Add padding dynamically
+    fwrite(&padding_before_section_header_data, sizeof(padding_before_section_header_data), 1, out_file); 
+}
+
 // ---------------------
 // Section header table
 // ---------------------
@@ -201,9 +256,12 @@ int main() {
     gen_elf_header();
     gen_program_header_table();
     gen_text_section();
-
-    fwrite(&data, sizeof(data), 1, out_file); 
-    
+    gen_data_section();
+    gen_bss_section();
+    gen_symtab_section();
+    gen_strtab_section();
+    gen_shstrtab_section();
+    add_padding_before_section_header(); 
     gen_section_header_table();
 
     return 0;
