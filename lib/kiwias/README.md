@@ -29,9 +29,12 @@ echo $?
 - readelf
 - objdump
 - hexdump (can be installed by apt install bsdmainutils)
+- cmp
 ```bash
 objdump -s tmp.o
+objdump -s -j .data tmp.o
 hexdump -v -C tmp.o
+cmp -l out.o tmp.o
 ```
 
 ## reference
