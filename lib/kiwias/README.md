@@ -34,7 +34,9 @@ echo $?
 objdump -s tmp.o
 objdump -s -j .data tmp.o
 hexdump -v -C tmp.o
+xxd tmp.0
 cmp -l out.o tmp.o
+diff <(xxd out.o) <(xxd tmp.o)
 ```
 
 ## reference
