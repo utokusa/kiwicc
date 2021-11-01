@@ -1,9 +1,35 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
+#include <stdbool.h>
+#include <stdarg.h>
 
 static char *output_path = "out.o";
 static FILE *out_file;
+
+
+typedef struct Node Node;
+struct Node {
+    int value;
+};
+
+Node *nodes;
+
+// ------------
+//  Utility
+// ------------
+// Report error
+// Take the same arguments as printf()
+void error(char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
 
 // ------------
 //  ELF header
@@ -103,11 +129,24 @@ void gen_program_header_table() {
 // .text section 
 // ----------------------
 
+Node *nodes;
 unsigned char text_section_data[] = {
-    0x13, 0x05, 0xa0, 0x02, 0x67, 0x80, 0x00, 0x00
+    0x13, 0x05, 0x00, 0x00, 0x67, 0x80, 0x00, 0x00
 };
 
 void gen_text_section() {
+    int value = nodes->value;
+    // Say, value = 0x123
+    // x1 = 1, x2 = 2, x3 = 3
+    // We change b1, b2 from  0x00, 0x00 to 0x30, 0x12
+    unsigned char *pb1 = text_section_data + 2;
+    unsigned char *pb2 = text_section_data + 3;
+    unsigned char x1 = value >> 8;
+    unsigned char x2 = (value - (x1 << 8)) >> 4;
+    unsigned char x3 = (value - (x1 << 8) - (x2 << 4));
+    *pb1 = x3 << 4;
+    *pb2 = (x1 << 4) + x2;
+
     fwrite(&text_section_data, sizeof(text_section_data), 1, out_file); 
 }
 
@@ -243,10 +282,166 @@ void gen_section_header_table() {
     fwrite(&section_header_entries, sizeof(section_header_entries), 1, out_file);
 }
 
+
+// ----------------------
+// Parser
+// ----------------------
+
+// TODO: remove duplication
+// Return the contents of a given file.
+static char *read_file(char *path)
+{
+  FILE *fp;
+
+  
+  if (strcmp(path, "-") == 0)
+  {
+    // By convention, read from stdin if a given filename is "-".
+    fp = stdin;
+  }
+  else
+  {
+    fp = fopen(path, "r");
+    if (!fp)
+      return NULL;
+  }
+
+  int buflen = 4096;
+  int nread = 0;
+  char *buf = malloc(buflen);
+
+  // Read the entire file.
+  for (;;)
+  {
+    int end = buflen - 2; // extra 2 bytes for the trailing "\n\0"
+    int n = fread(buf + nread, 1, end - nread, fp);
+    if (n == 0)
+      break;
+    nread += n;
+    if (nread == end)
+    {
+      buflen *= 2;
+      buf = realloc(buf, buflen);
+    }
+  }
+
+  if (fp != stdin)
+    fclose(fp);
+
+  // Canonicalize the last line by appending "\n"
+  // if it does not end with a newline.
+  if (nread == 0 || buf[nread - 1] != '\n')
+    buf[nread++] = '\n';
+  buf[nread] = '\0';
+  return buf;
+}
+
+
+static bool startswith(char *tgt, char *ref)
+{
+  return strncmp(tgt, ref, strlen(ref)) == 0;
+}
+
+char *skip(char *p, char *target) {
+    char *cur = target;
+    while (*cur && *p && *cur == *p) {
+        cur++;
+        p++;
+    }
+    if (*cur)
+        error("expected %s", target);
+    return p;
+}
+
+int skip_integer(char **rest, char *p) {
+    char *end = p;
+    while (*end && *end >= '0' && *end <= '9')
+        end++;
+    // 123
+    // 0123
+    // p  e
+    char *num_str = strndup(p, end - p);
+    int value = atoi(num_str);
+    *rest = end;
+    return value;
+}
+
+Node parse_statement(char *p) {
+    Node node;
+    // Accept only li for now.
+    p = skip(p, "li a0, ");
+    int value = skip_integer(&p, p);
+    p = skip(p, "\n");
+    node.value = value;
+    return node;
+}
+
+Node parse_asm(char *path) {
+    char *p = read_file(path);
+    if (!p)
+        error("Empty input or file not found");
+
+    Node node;
+    while (*p) {
+        // Scan a line
+        while (*p && *p != '\n') {
+            if (*p == ' ') {
+                p++;
+                continue;
+            }
+            if (startswith(p, "li")) {
+                node = parse_statement(p);
+                break;
+            }
+            p++;
+        }
+
+        if (!*p)
+            break;
+        p++;
+    }
+
+    return node;
+}
+
 // ----------------------
 // Main
 // ----------------------
-int main() {
+
+static char *input_path;
+
+static void usage(int status) {
+
+    fprintf(stderr, "kiwias [ -o <path> ] <file>\n");
+    exit(status);
+}
+
+static void parse_args(int argc, char **argv) {
+    for (int i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "--help"))
+            usage(0);
+        
+        if (!strcmp(argv[i], "-o")) {
+            if (!argv[++i])
+                usage(1);
+            output_path = argv[i];
+            continue;
+        }
+
+        input_path = argv[i];
+        if (*input_path != '-' && *input_path != '/')
+        {
+            // TOOD: Convert relative path to absolute path.
+        } 
+    }
+    if (!input_path)
+        error("No input");
+}
+
+int main(int argc, char **argv) {
+    parse_args(argc, argv);
+    Node node = parse_asm(input_path);
+    nodes = &node;
     out_file = fopen(output_path, "wb"); 
     if (out_file == NULL) {
         fputs("Failed to open file\n", stderr);

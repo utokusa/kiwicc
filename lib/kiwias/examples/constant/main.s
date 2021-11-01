@@ -1,5 +1,5 @@
-	.text
-	.globl	main
+    .text
+    .globl main
 main:
-	li	a0, 42
-	jr	ra
+    li a0, 42
+    jri ra
