@@ -6,7 +6,7 @@ cat <<EOF | qemu-riscv64 ./kiwias -
     .text
     .globl main
 main:
-    li a0, 42
+    addi a0, zero, 42
     jr ra
 EOF
 riscv64-unknown-linux-gnu-ld -dynamic-linker /opt/riscv/sysroot/lib/ld-linux-riscv64-lp64d.so.1 /opt/riscv/sysroot/usr/lib/crt1.o out.o -lc /opt/riscv/sysroot/usr/lib/crtn.o
@@ -21,11 +21,11 @@ else
 fi
 
 cat <<EOF | riscv64-unknown-linux-gnu-as -o tmp.o -
-	.text
-	.globl	main
+    .text
+    .globl main
 main:
-	li	a0, 42
-	jr	ra
+    addi a0, zero, 42
+    jr ra
 EOF
 
 # Compare the object files using cmp command
@@ -51,7 +51,7 @@ cmp_with_as <<EOF
     .text
     .globl main
 main:
-    li a0, 42
+    addi a0, zero, 42
     jr ra
 EOF
 
@@ -59,6 +59,7 @@ cmp_with_as <<EOF
     .text
     .globl main
 main:
-    li a0, 291
+    addi a0, zero, 291
     jr ra
 EOF
+

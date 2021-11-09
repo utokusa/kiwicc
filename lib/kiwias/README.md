@@ -31,8 +31,9 @@ echo $?
 - hexdump (can be installed by apt install bsdmainutils)
 - cmp
 ```bash
-objdump -s tmp.o
-objdump -s -j .data tmp.o
+riscv64-unknown-linux-gnu-objdump -s tmp.o
+riscv64-unknown-linux-gnu-objdump -s -j .data tmp.o
+riscv64-unknown-linux-gnu-objdump -d -Mno-aliases tmp.o
 hexdump -v -C tmp.o
 xxd tmp.0
 cmp -l out.o tmp.o

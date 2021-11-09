@@ -368,8 +368,8 @@ int skip_integer(char **rest, char *p) {
 
 Node parse_statement(char *p) {
     Node node;
-    // Accept only li for now.
-    p = skip(p, "li a0, ");
+    // Accept only `add a0, zero, ` for now.
+    p = skip(p, "addi a0, zero, ");
     int value = skip_integer(&p, p);
     p = skip(p, "\n");
     node.value = value;
@@ -389,7 +389,7 @@ Node parse_asm(char *path) {
                 p++;
                 continue;
             }
-            if (startswith(p, "li")) {
+            if (startswith(p, "addi")) {
                 node = parse_statement(p);
                 break;
             }

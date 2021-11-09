@@ -1,5 +1,5 @@
     .text
     .globl main
 main:
-    li a0, 42
-    jri ra
+    addi a0, zero, 42
+    jr ra
