@@ -134,6 +134,22 @@ unsigned char text_section_data[] = {
     0x13, 0x05, 0x00, 0x00, 0x67, 0x80, 0x00, 0x00
 };
 
+
+/*
+ * ## Output of hexdump
+ * 0:   02a00513                addi    a0,zero,42
+ * This is in little endian.
+ *
+ * ## print(bin(02a00513)) with python
+ * 0b10101000000000010100010011 in binary
+ * It matches with the way that RISC-V manual uses.
+ *
+ * 
+ * ## Output of xxd
+ * 00000040: 1305 a002
+ * It outputs bytes one by one.
+ *
+ */
 void gen_text_section() {
     int value = nodes->value;
     // Say, value = 0x123
