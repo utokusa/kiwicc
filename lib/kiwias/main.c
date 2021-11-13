@@ -148,6 +148,41 @@ struct ITypeInst {
 };
 typedef struct ITypeInst ITypeInst;
 
+typedef enum {
+    REG_ZERO = 0,
+    REG_RA,
+    REG_SP,
+    REG_GP,
+    REG_TP,
+    REG_T0,
+    REG_T1,
+    REG_T2,
+    REG_SO_FP,
+    REG_S1,
+    REG_A0,
+    REG_A1,
+    REG_A2,
+    REG_A3,
+    REG_A4,
+    REG_A5,
+    REG_A6,
+    REG_A7,
+    REG_S2,
+    REG_S3,
+    REG_S4,
+    REG_S5,
+    REG_S6,
+    REG_S7,
+    REG_S8,
+    REG_S9,
+    REG_S10,
+    REG_S11,
+    REG_T3,
+    REG_T4,
+    REG_T5,
+    REG_T6
+} Register;
+
 unsigned signed_int_12bit(int x) {
     if (x < 0) {
         x = ~(-x);
@@ -207,9 +242,9 @@ void gen_text_section() {
                 // Currently only accept `addi a0, zero, xxxx`
                 ITypeInst node = {
                     signed_int_12bit(cur->value),
-                    0b00000,
+                    REG_ZERO,
                     0b000,
-                    0b01010,
+                    REG_A0,
                     0b0010011
                 };
                 output_i_type_inst(&node);
@@ -227,9 +262,9 @@ void gen_text_section() {
                 // imm          rs1       rd    opecode
                 ITypeInst node = {
                     signed_int_12bit(0),
-                    0b00001,
+                    REG_RA,
                     0b000,
-                    0b00000,
+                    REG_ZERO,
                     0b1100111
                 };
                 output_i_type_inst(&node);
