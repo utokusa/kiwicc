@@ -63,3 +63,18 @@ main:
     jr ra
 EOF
 
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    addi a0, zero, -1
+    jr ra
+EOF
+
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    addi a0, zero, -2
+    jr ra
+EOF

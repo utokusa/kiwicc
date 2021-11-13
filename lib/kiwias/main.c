@@ -149,7 +149,10 @@ struct ITypeInst {
 typedef struct ITypeInst ITypeInst;
 
 unsigned signed_int_12bit(int x) {
-    // TODO: handle negative numbers
+    if (x < 0) {
+        x = ~(-x);
+        x = (x + 1) & 0b111111111111;
+    }
     return x;
 }
 
@@ -451,7 +454,7 @@ bool equal(char *p, char *target) {
 
 int skip_integer(char **rest, char *p) {
     char *end = p;
-    while (*end && *end >= '0' && *end <= '9')
+    while (*end && (*end == '-' || (*end >= '0' && *end <= '9')))
         end++;
     // 123
     // 0123
