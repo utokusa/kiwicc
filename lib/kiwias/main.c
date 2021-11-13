@@ -130,20 +130,72 @@ void gen_program_header_table() {
 // ----------------------
 
 Node *nodes;
+// Only half of .text section data
 unsigned char text_section_data[] = {
-    0x13, 0x05, 0x00, 0x00, 0x67, 0x80, 0x00, 0x00
+    0x67, 0x80, 0x00, 0x00
 };
 
+struct ITypeInst {
+    unsigned imm: 12;
+    unsigned rs1: 5;
+    unsigned funct3: 3;
+    unsigned rd: 5;
+    unsigned opecode: 7;
+};
+typedef struct ITypeInst ITypeInst;
+
+unsigned signed_int_12bit(int x) {
+    // TODO: handle negative numbers
+    return x;
+}
+
+
+unsigned reverse_bytes(unsigned bytes) {
+    unsigned ret = 0;
+    for (int i = 0; i < 32; i+=8) {
+        unsigned char byte = (bytes >> i) & 0xff;
+        ret |= byte << (32 - 8 - i);
+    }
+    return ret;
+}
+
+void output_i_type_inst(ITypeInst *inst) {
+    // fwrite(inst, sizeof(*inst), 1, out_file);
+    unsigned data = 0;
+    unsigned mask;
+
+    mask = 0b11111111111100000000000000000000;
+    data = data | (mask & ((inst->imm) << 20));
+
+    mask = 0b00000000000011111000000000000000;
+    data = data | (mask & ((inst->rs1) << 15));
+
+    mask = 0b00000000000000000111000000000000;
+    data = data | (mask & ((inst->funct3) << 12));
+
+    mask = 0b00000000000000000000111110000000;
+    data = data | (mask & ((inst->rd) << 7));
+
+    mask = 0b00000000000000000000000001111111;
+    data = data | (mask & inst->opecode);
+
+    fwrite(&data, sizeof(data), 1, out_file);
+}
 
 /*
  * ## Output of hexdump
  * 0:   02a00513                addi    a0,zero,42
  * This is in little endian.
  *
- * ## print(bin(02a00513)) with python
- * 0b10101000000000010100010011 in binary
+ * ## print(format(0x02a00513, '#034b')) with python
+ * 0b00000010101000000000010100010011 in binary
  * It matches with the way that RISC-V manual uses.
  *
+ *
+ * 000000101010|00000|000|01010|0010011
+ * imm          rs1       rd    opecode
+ *
+ * 00000010|10100000|00000101|00010011 
  * 
  * ## Output of xxd
  * 00000040: 1305 a002
@@ -152,17 +204,15 @@ unsigned char text_section_data[] = {
  */
 void gen_text_section() {
     int value = nodes->value;
-    // Say, value = 0x123
-    // x1 = 1, x2 = 2, x3 = 3
-    // We change b1, b2 from  0x00, 0x00 to 0x30, 0x12
-    unsigned char *pb1 = text_section_data + 2;
-    unsigned char *pb2 = text_section_data + 3;
-    unsigned char x1 = value >> 8;
-    unsigned char x2 = (value - (x1 << 8)) >> 4;
-    unsigned char x3 = (value - (x1 << 8) - (x2 << 4));
-    *pb1 = x3 << 4;
-    *pb2 = (x1 << 4) + x2;
-
+    ITypeInst node = {
+        signed_int_12bit(value),
+        0b00000,
+        0b000,
+        0b01010,
+        0b0010011
+    };
+    output_i_type_inst(&node);
+    
     fwrite(&text_section_data, sizeof(text_section_data), 1, out_file); 
 }
 
