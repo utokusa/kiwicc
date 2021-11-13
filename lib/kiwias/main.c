@@ -8,9 +8,14 @@
 static char *output_path = "out.o";
 static FILE *out_file;
 
+typedef enum {
+    INST_ADDI,
+    INST_JR,
+} NodeKind;
 
 typedef struct Node Node;
 struct Node {
+    NodeKind kind;
     int value;
     Node *next;
 };
@@ -131,11 +136,9 @@ void gen_program_header_table() {
 // ----------------------
 
 Node *nodes;
-// Only half of .text section data
-unsigned char text_section_data[] = {
-    0x67, 0x80, 0x00, 0x00
-};
 
+// About the type of instruction, see "2.3 Immediate Encoding Variants" of following.
+// https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
 struct ITypeInst {
     unsigned imm: 12;
     unsigned rs1: 5;
@@ -173,7 +176,7 @@ void output_i_type_inst(ITypeInst *inst) {
 }
 
 /*
- * ## Output of hexdump
+ * ## Output of objdump
  * 0:   02a00513                addi    a0,zero,42
  * This is in little endian.
  *
@@ -193,19 +196,45 @@ void output_i_type_inst(ITypeInst *inst) {
  *
  */
 void gen_text_section() {
-    // addi a0, zero, xxxx
-    int value = nodes->value;
-    ITypeInst node = {
-        signed_int_12bit(value),
-        0b00000,
-        0b000,
-        0b01010,
-        0b0010011
-    };
-    output_i_type_inst(&node);
-   
-    // jr ra 
-    fwrite(&text_section_data, sizeof(text_section_data), 1, out_file); 
+    Node *cur = nodes;
+    while (cur) {
+        switch (cur->kind) {
+            case INST_ADDI:
+            {
+                // Currently only accept `addi a0, zero, xxxx`
+                ITypeInst node = {
+                    signed_int_12bit(cur->value),
+                    0b00000,
+                    0b000,
+                    0b01010,
+                    0b0010011
+                };
+                output_i_type_inst(&node);
+            }
+            break;
+            case INST_JR:
+            {
+                // Currently only accepts `jr ra`.
+                // It will be translated to `jalr zero, ra, 0`
+                
+                // result of riscv64-unknown-linux-gnu-objdump -d -Mno-aliases xxxx.o
+                // 4:   00008067                jalr    zero,0(ra)
+                // It's 0b00000000000000001000000001100111 in binary
+                // 000000000000|00001|000|00000|1100111
+                // imm          rs1       rd    opecode
+                ITypeInst node = {
+                    signed_int_12bit(0),
+                    0b00001,
+                    0b000,
+                    0b00000,
+                    0b1100111
+                };
+                output_i_type_inst(&node);
+            }
+            break;
+        } 
+        cur = cur->next;
+    }
 }
 
 // ----------------------
@@ -411,6 +440,15 @@ char *skip(char *p, char *target) {
     return p;
 }
 
+bool equal(char *p, char *target) {
+    char *cur = target;
+    while (*cur && *p && *cur == *p) {
+        cur++;
+        p++;
+    }
+    return !(*cur);
+}
+
 int skip_integer(char **rest, char *p) {
     char *end = p;
     while (*end && *end >= '0' && *end <= '9')
@@ -426,11 +464,18 @@ int skip_integer(char **rest, char *p) {
 
 Node *parse_statement(char *p) {
     Node *node = calloc(1, sizeof(Node));
-    // Accept only `add a0, zero, ` for now.
-    p = skip(p, "addi a0, zero, ");
-    int value = skip_integer(&p, p);
-    p = skip(p, "\n");
-    node->value = value;
+    // Accept only `add a0, zero, xxxx` or `jr ra` for now.
+    if (equal(p, "addi a0, zero, ")) {
+        p = skip(p, "addi a0, zero, ");
+        int value = skip_integer(&p, p);
+        p = skip(p, "\n");
+        node->kind = INST_ADDI;
+        node->value = value;
+    }
+    else if (equal(p, "jr ra")) {
+        p = skip(p, "jr ra");
+        node->kind = INST_JR;
+    }
     return node;
 }
 
@@ -448,7 +493,8 @@ Node *parse_asm(char *path) {
                 p++;
                 continue;
             }
-            if (startswith(p, "addi")) {
+            if (startswith(p, "addi ") ||
+                startswith(p, "jr ")) {
                 cur->next = parse_statement(p);
                 cur = cur->next;
                 break;
