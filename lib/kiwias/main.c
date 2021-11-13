@@ -12,6 +12,7 @@ static FILE *out_file;
 typedef struct Node Node;
 struct Node {
     int value;
+    Node *next;
 };
 
 Node *nodes;
@@ -192,6 +193,7 @@ void output_i_type_inst(ITypeInst *inst) {
  *
  */
 void gen_text_section() {
+    // addi a0, zero, xxxx
     int value = nodes->value;
     ITypeInst node = {
         signed_int_12bit(value),
@@ -201,7 +203,8 @@ void gen_text_section() {
         0b0010011
     };
     output_i_type_inst(&node);
-    
+   
+    // jr ra 
     fwrite(&text_section_data, sizeof(text_section_data), 1, out_file); 
 }
 
@@ -421,22 +424,23 @@ int skip_integer(char **rest, char *p) {
     return value;
 }
 
-Node parse_statement(char *p) {
-    Node node;
+Node *parse_statement(char *p) {
+    Node *node = calloc(1, sizeof(Node));
     // Accept only `add a0, zero, ` for now.
     p = skip(p, "addi a0, zero, ");
     int value = skip_integer(&p, p);
     p = skip(p, "\n");
-    node.value = value;
+    node->value = value;
     return node;
 }
 
-Node parse_asm(char *path) {
+Node *parse_asm(char *path) {
     char *p = read_file(path);
     if (!p)
         error("Empty input or file not found");
 
-    Node node;
+    Node head;
+    Node *cur = &head;
     while (*p) {
         // Scan a line
         while (*p && *p != '\n') {
@@ -445,7 +449,8 @@ Node parse_asm(char *path) {
                 continue;
             }
             if (startswith(p, "addi")) {
-                node = parse_statement(p);
+                cur->next = parse_statement(p);
+                cur = cur->next;
                 break;
             }
             p++;
@@ -456,7 +461,7 @@ Node parse_asm(char *path) {
         p++;
     }
 
-    return node;
+    return head.next;
 }
 
 // ----------------------
@@ -495,8 +500,7 @@ static void parse_args(int argc, char **argv) {
 
 int main(int argc, char **argv) {
     parse_args(argc, argv);
-    Node node = parse_asm(input_path);
-    nodes = &node;
+    nodes = parse_asm(input_path);
     out_file = fopen(output_path, "wb"); 
     if (out_file == NULL) {
         fputs("Failed to open file\n", stderr);
