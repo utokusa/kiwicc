@@ -9,8 +9,8 @@ static char *output_path = "out.o";
 static FILE *out_file;
 
 typedef enum {
-    INST_ADDI,
-    INST_JR,
+    ND_INST_ADDI,
+    ND_INST_JR,
 } NodeKind;
 
 typedef struct Node Node;
@@ -199,7 +199,7 @@ void gen_text_section() {
     Node *cur = nodes;
     while (cur) {
         switch (cur->kind) {
-            case INST_ADDI:
+            case ND_INST_ADDI:
             {
                 // Currently only accept `addi a0, zero, xxxx`
                 ITypeInst node = {
@@ -212,7 +212,7 @@ void gen_text_section() {
                 output_i_type_inst(&node);
             }
             break;
-            case INST_JR:
+            case ND_INST_JR:
             {
                 // Currently only accepts `jr ra`.
                 // It will be translated to `jalr zero, ra, 0`
@@ -469,12 +469,12 @@ Node *parse_statement(char *p) {
         p = skip(p, "addi a0, zero, ");
         int value = skip_integer(&p, p);
         p = skip(p, "\n");
-        node->kind = INST_ADDI;
+        node->kind = ND_INST_ADDI;
         node->value = value;
     }
     else if (equal(p, "jr ra")) {
         p = skip(p, "jr ra");
-        node->kind = INST_JR;
+        node->kind = ND_INST_JR;
     }
     return node;
 }
