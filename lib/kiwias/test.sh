@@ -63,6 +63,15 @@ main:
     jr ra
 EOF
 
+# Test max signed 12-bit integer
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    addi a0, zero, 2047
+    jr ra
+EOF
+
 cmp_with_as <<EOF
     .text
     .globl main
