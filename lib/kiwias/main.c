@@ -149,18 +149,7 @@ unsigned signed_int_12bit(int x) {
     return x;
 }
 
-
-unsigned reverse_bytes(unsigned bytes) {
-    unsigned ret = 0;
-    for (int i = 0; i < 32; i+=8) {
-        unsigned char byte = (bytes >> i) & 0xff;
-        ret |= byte << (32 - 8 - i);
-    }
-    return ret;
-}
-
 void output_i_type_inst(ITypeInst *inst) {
-    // fwrite(inst, sizeof(*inst), 1, out_file);
     unsigned data = 0;
     unsigned mask;
 
