@@ -19,6 +19,8 @@ unsigned long symtab_section_offset = 0;
 typedef enum {
     ND_INST_ADDI,
     ND_INST_JR,
+    ND_INST_ADD,
+    ND_INST_SUB,
 } NodeKind;
 
 typedef struct Node Node;
@@ -27,6 +29,7 @@ struct Node {
     Node *next;
     int imm;
     unsigned rs1;
+    unsigned rs2;
     unsigned rd;
 };
 
@@ -150,6 +153,16 @@ Node *nodes;
 
 // About the type of instruction, see "2.3 Immediate Encoding Variants" of following.
 // https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
+struct RTypeInst {
+    unsigned funct7: 7;
+    unsigned rs2: 5;
+    unsigned rs1: 5;
+    unsigned funct3: 3;
+    unsigned rd: 5;
+    unsigned opecode: 7;
+};
+typedef struct RTypeInst RTypeInst;
+
 struct ITypeInst {
     unsigned imm: 12;
     unsigned rs1: 5;
@@ -224,6 +237,30 @@ void output_i_type_inst(ITypeInst *inst) {
     fwrite(&data, sizeof(data), 1, out_file);
 }
 
+void output_r_type_inst(RTypeInst *inst) {
+    unsigned data = 0;
+    unsigned mask;
+
+    mask = 0b11111110000000000000000000000000;
+    data = data | (mask & ((inst->funct7) << 25));
+    
+    mask = 0b00000001111100000000000000000000;
+    data = data | (mask & ((inst->rs2) << 20));
+
+    mask = 0b00000000000011111000000000000000;
+    data = data | (mask & ((inst->rs1) << 15));
+
+    mask = 0b00000000000000000111000000000000;
+    data = data | (mask & ((inst->funct3) << 12));
+
+    mask = 0b00000000000000000000111110000000;
+    data = data | (mask & ((inst->rd) << 7));
+
+    mask = 0b00000000000000000000000001111111;
+    data = data | (mask & inst->opecode);
+
+    fwrite(&data, sizeof(data), 1, out_file);
+}
 /*
  * ## Output of objdump
  * 0:   02a00513                addi    a0,zero,42
@@ -252,7 +289,6 @@ void gen_text_section() {
         switch (cur->kind) {
             case ND_INST_ADDI:
             {
-                // Currently only accept `addi a0, zero, xxxx`
                 ITypeInst node = {
                     signed_int_12bit(cur->imm),
                     cur->rs1,
@@ -261,6 +297,32 @@ void gen_text_section() {
                     0b0010011
                 };
                 output_i_type_inst(&node);
+            }
+            break;
+            case ND_INST_ADD:
+            {
+                RTypeInst node = {
+                    0b0000000,
+                    cur->rs2,
+                    cur->rs1,
+                    0b000,
+                    cur->rd,
+                    0b0110011
+                }; 
+                output_r_type_inst(&node);
+            }
+            break;
+            case ND_INST_SUB:
+            {
+                RTypeInst node = {
+                    0b0100000,
+                    cur->rs2,
+                    cur->rs1,
+                    0b000,
+                    cur->rd,
+                    0b0110011
+                }; 
+                output_r_type_inst(&node);
             }
             break;
             case ND_INST_JR:
@@ -531,7 +593,7 @@ char *skip_space(char *p) {
     return p; 
 }
 
-char *skip_conmma_and_ignore_space(char *p) {
+char *skip_comma_and_ignore_space(char *p) {
     bool found_comma = false;
     while (*p && (isspace(*p) || *p == ',')) {
         if (*p == ',') {
@@ -712,19 +774,49 @@ Node *parse_statement(char *p) {
         p = skip(p, "addi");
         p = skip_space(p);
         node->rd = skip_register(&p, p);
-        p = skip_conmma_and_ignore_space(p);
+        p = skip_comma_and_ignore_space(p);
         node->rs1 = skip_register(&p, p);
-        p = skip_conmma_and_ignore_space(p);
+        p = skip_comma_and_ignore_space(p);
         int imm_value = skip_integer(&p, p);
+        // TODO: allow tailing spaces
         p = skip(p, "\n");
         node->kind = ND_INST_ADDI;
         node->imm = imm_value;
+    }
+    else if (startswith(p, "add ")) {
+        p = skip(p, "add");
+        p = skip_space(p);
+        node->rd = skip_register(&p, p);
+        p = skip_comma_and_ignore_space(p);
+        node->rs1 = skip_register(&p, p);
+        p = skip_comma_and_ignore_space(p);
+        node->rs2 = skip_register(&p, p);
+        p = skip(p, "\n");
+        node->kind = ND_INST_ADD;
+    }
+    else if (startswith(p, "sub ")) {
+        p = skip(p, "sub");
+        p = skip_space(p);
+        node->rd = skip_register(&p, p);
+        p = skip_comma_and_ignore_space(p);
+        node->rs1 = skip_register(&p, p);
+        p = skip_comma_and_ignore_space(p);
+        node->rs2 = skip_register(&p, p);
+        p = skip(p, "\n");
+        node->kind = ND_INST_SUB;
     }
     else if (startswith(p, "jr ra")) {
         p = skip(p, "jr ra");
         node->kind = ND_INST_JR;
     }
     return node;
+}
+
+bool is_instruction(char *p) {
+    return startswith(p, "addi ") ||
+        startswith(p, "jr ") ||
+        startswith(p, "add ") ||
+        startswith(p, "sub ");
 }
 
 Node *parse_asm(char *path) {
@@ -741,8 +833,7 @@ Node *parse_asm(char *path) {
                 p++;
                 continue;
             }
-            if (startswith(p, "addi ") ||
-                startswith(p, "jr ")) {
+            if (is_instruction(p)) {
                 cur->next = parse_statement(p);
                 cur = cur->next;
                 break;

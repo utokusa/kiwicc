@@ -120,3 +120,23 @@ main:
     addi x10, x11, 3
     jr ra
 EOF
+
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    addi t1, zero, 1
+    addi a1, zero, 42
+    add a0, a1, t1
+    jr ra
+EOF
+
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    addi t1, zero, 1
+    addi a1, zero, 42
+    sub a0, a1, t1
+    jr ra
+EOF
