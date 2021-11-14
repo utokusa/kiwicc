@@ -4,9 +4,17 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 static char *output_path = "out.o";
 static FILE *out_file;
+
+#define INIT_VAL 0
+
+unsigned long text_section_offset = 0;
+unsigned long text_section_size = 0;
+unsigned long symtab_section_offset = 0;
+
 
 typedef enum {
     ND_INST_ADDI,
@@ -16,8 +24,10 @@ typedef enum {
 typedef struct Node Node;
 struct Node {
     NodeKind kind;
-    int value;
     Node *next;
+    int imm;
+    unsigned rs1;
+    unsigned rd;
 };
 
 Node *nodes;
@@ -103,7 +113,8 @@ void gen_elf_header() {
     // Start of program headers
     elf_header.e_phoff = 0; // Current output doesn't have program header
     // Start of section headers
-    elf_header.e_shoff = 248;
+    // It will be overwritten later
+    elf_header.e_shoff = 0;
     // Flags
     elf_header.e_flag = 0x4;
     // Size of this header
@@ -157,7 +168,7 @@ typedef enum {
     REG_T0,
     REG_T1,
     REG_T2,
-    REG_SO_FP,
+    REG_S0_FP,
     REG_S1,
     REG_A0,
     REG_A1,
@@ -234,6 +245,8 @@ void output_i_type_inst(ITypeInst *inst) {
  *
  */
 void gen_text_section() {
+    text_section_offset = ftell(out_file);
+
     Node *cur = nodes;
     while (cur) {
         switch (cur->kind) {
@@ -241,10 +254,10 @@ void gen_text_section() {
             {
                 // Currently only accept `addi a0, zero, xxxx`
                 ITypeInst node = {
-                    signed_int_12bit(cur->value),
-                    REG_ZERO,
+                    signed_int_12bit(cur->imm),
+                    cur->rs1,
                     0b000,
-                    REG_A0,
+                    cur->rd,
                     0b0010011
                 };
                 output_i_type_inst(&node);
@@ -273,6 +286,8 @@ void gen_text_section() {
         } 
         cur = cur->next;
     }
+ 
+    text_section_size = ftell(out_file) - text_section_offset;
 }
 
 // ----------------------
@@ -305,6 +320,11 @@ unsigned short symtab_section_data[] = {
 };
 
 void gen_symtab_section() {
+    // .symtab should be aligned to 8 bytes
+    long pos = ftell(out_file);
+    fseek(out_file, pos % 8, SEEK_CUR);
+    
+    symtab_section_offset = ftell(out_file);
     fwrite(&symtab_section_data, sizeof(symtab_section_data), 1, out_file); 
 }
 
@@ -347,8 +367,24 @@ void add_padding_before_section_header() {
 }
 
 // ---------------------
+// Fix ELF Header
+// ---------------------
+
+void fix_elf_header() {
+    long cur_pos = ftell(out_file);
+    // Fix section header's offset
+    long offset_to_e_shoff = 0x28;
+    fseek(out_file, offset_to_e_shoff, SEEK_SET);
+    fwrite(&cur_pos, sizeof(cur_pos), 1, out_file);
+
+    fseek(out_file, cur_pos, SEEK_SET);
+}
+
+
+// ---------------------
 // Section header table
 // ---------------------
+
 typedef struct {
    unsigned int name;
    unsigned int type;
@@ -392,18 +428,27 @@ enum SectionHeaderNameValues
     SH_NAME_SHSTRTAB = 0x11
 };
 
-
 static SectionHeaderEntry section_header_entries[] = {
     {SH_NAME_NULL, SH_TYPE_NULL, SH_FLAG_NULL, 0, 0, 0, 0, 0, 0, 0},
-    {SH_NAME_TEXT, SH_TYPE_PROGBITS, SH_FLAG_AX, 0, 0x40, 8, 0, 0, 4, 0},
-    {SH_NAME_DATA, SH_TYPE_PROGBITS, SH_FLAG_WA, 0, 0x48, 0, 0, 0, 1, 0},
-    {SH_NAME_BSS, SH_TYPE_NOBITS, SH_FLAG_WA, 0, 0x48, 0, 0, 0, 1, 0},
-    {SH_NAME_SYMTAB, SH_TYPE_SYMTAB, SH_FLAG_NULL, 0, 0x48, 0x78, 5, 4, 8, 0x18},
-    {SH_NAME_STRTAB, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, 0xc0, 0x6, 0, 0, 1, 0},
-    {SH_NAME_SHSTRTAB, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, 0xc6, 0x002c, 0, 0, 1, 0}
+    {SH_NAME_TEXT, SH_TYPE_PROGBITS, SH_FLAG_AX, 0, INIT_VAL, INIT_VAL, 0, 0, 4, 0},
+    {SH_NAME_DATA, SH_TYPE_PROGBITS, SH_FLAG_WA, 0, INIT_VAL, 0, 0, 0, 1, 0},
+    {SH_NAME_BSS, SH_TYPE_NOBITS, SH_FLAG_WA, 0, INIT_VAL, 0, 0, 0, 1, 0},
+    {SH_NAME_SYMTAB, SH_TYPE_SYMTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x78, 5, 4, 8, 0x18},
+    {SH_NAME_STRTAB, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x6, 0, 0, 1, 0},
+    {SH_NAME_SHSTRTAB, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x002c, 0, 0, 1, 0}
 };
 
-void gen_section_header_table() { 
+void gen_section_header_table() {
+    // Update temporary values
+    section_header_entries[1].offset = text_section_offset;
+    section_header_entries[1].size = text_section_size;
+    unsigned long next_offset = text_section_offset + text_section_size;
+    section_header_entries[2].offset = next_offset;
+    section_header_entries[3].offset = next_offset;
+    section_header_entries[4].offset = symtab_section_offset;
+    section_header_entries[5].offset = symtab_section_offset + section_header_entries[5 - 1].size;
+    section_header_entries[6].offset = section_header_entries[6 - 1].offset + section_header_entries[6 - 1].size;
+
     fwrite(&section_header_entries, sizeof(section_header_entries), 1, out_file);
 }
 
@@ -478,13 +523,25 @@ char *skip(char *p, char *target) {
     return p;
 }
 
-bool equal(char *p, char *target) {
-    char *cur = target;
-    while (*cur && *p && *cur == *p) {
-        cur++;
+char *skip_space(char *p) {
+    if (!isspace(*p))
+        error("expected space at %s", p);
+    while (isspace(*p))
+        p++;
+    return p; 
+}
+
+char *skip_conmma_and_ignore_space(char *p) {
+    bool found_comma = false;
+    while (*p && (isspace(*p) || *p == ',')) {
+        if (*p == ',') {
+            found_comma = true;
+        }
         p++;
     }
-    return !(*cur);
+    if (!found_comma)
+        error("expected commma at %s", p);
+    return p;
 }
 
 int skip_integer(char **rest, char *p) {
@@ -500,17 +557,170 @@ int skip_integer(char **rest, char *p) {
     return value;
 }
 
+unsigned skip_register(char **rest, char *p) {
+   if (startswith(p, "zero")) {
+       *rest = skip(p, "zero");
+       return REG_ZERO;
+   }
+   else if (startswith(p, "ra")) {
+       *rest = skip(p, "ra");
+       return REG_RA;
+   }
+   else if (startswith(p, "sp")) {
+       *rest = skip(p, "sp");
+       return REG_SP;
+   }
+   else if (startswith(p, "gp")) {
+       *rest = skip(p, "gp");
+       return REG_GP;
+   }
+   else if (startswith(p, "tp")) {
+       *rest = skip(p, "tp");
+       return REG_TP;
+   }
+   else if (startswith(p, "t0")) {
+       *rest = skip(p, "t0");
+       return REG_T0;
+   }
+   else if (startswith(p, "t1")) {
+       *rest = skip(p, "t1");
+       return REG_T1;
+   }
+   else if (startswith(p, "t2")) {
+       *rest = skip(p, "t2");
+       return REG_T2;
+   }
+   else if (startswith(p, "s0")) {
+       *rest = skip(p, "s0");
+       return REG_S0_FP;
+   }
+   else if (startswith(p, "fp")) {
+       *rest = skip(p, "fp");
+       return REG_S0_FP;
+   }
+   else if (startswith(p, "s1")) {
+       *rest = skip(p, "s1");
+       return REG_S1;
+   }
+   else if (startswith(p, "a0")) {
+       *rest = skip(p, "a0");
+       return REG_A0;
+   }
+   else if (startswith(p, "a1")) {
+       *rest = skip(p, "a1");
+       return REG_A1;
+   }
+   else if (startswith(p, "a2")) {
+       *rest = skip(p, "a2");
+       return REG_A2;
+   }
+   else if (startswith(p, "a3")) {
+       *rest = skip(p, "a3");
+       return REG_A3;
+   }
+   else if (startswith(p, "a4")) {
+       *rest = skip(p, "a4");
+       return REG_A4;
+   }
+   else if (startswith(p, "a5")) {
+       *rest = skip(p, "a5");
+       return REG_A5;
+   }
+   else if (startswith(p, "a6")) {
+       *rest = skip(p, "a6");
+       return REG_A6;
+   }
+   else if (startswith(p, "a7")) {
+       *rest = skip(p, "a7");
+       return REG_A7;
+   }
+   else if (startswith(p, "s2")) {
+       *rest = skip(p, "s2");
+       return REG_S2;
+   }
+   else if (startswith(p, "s3")) {
+       *rest = skip(p, "s3");
+       return REG_S3;
+   }
+   else if (startswith(p, "s4")) {
+       *rest = skip(p, "s4");
+       return REG_S4;
+   }
+   else if (startswith(p, "s5")) {
+       *rest = skip(p, "s5");
+       return REG_S5;
+   }
+   else if (startswith(p, "s6")) {
+       *rest = skip(p, "s6");
+       return REG_S6;
+   }
+   else if (startswith(p, "s7")) {
+       *rest = skip(p, "s7");
+       return REG_S7;
+   }
+   else if (startswith(p, "S8")) {
+       *rest = skip(p, "s8");
+       return REG_S8;
+   }
+   else if (startswith(p, "s9")) {
+       *rest = skip(p, "s9");
+       return REG_S9;
+   }
+   else if (startswith(p, "s10")) {
+       *rest = skip(p, "s10");
+       return REG_S10;
+   }
+   else if (startswith(p, "s11")) {
+       *rest = skip(p, "s11");
+       return REG_S11;
+   }
+   else if (startswith(p, "t3")) {
+       *rest = skip(p, "t3");
+       return REG_T3;
+   }
+   else if (startswith(p, "t4")) {
+       *rest = skip(p, "t4");
+       return REG_T4;
+   }
+   else if (startswith(p, "t5")) {
+       *rest = skip(p, "t5");
+       return REG_T5;
+   }
+   else if (startswith(p, "t6")) {
+       *rest = skip(p, "t6");
+       return REG_T6;
+   }
+   else if (startswith(p, "x")) {
+       p = skip(p, "x");
+       unsigned num = (unsigned)(skip_integer(rest, p));
+       if (num > 31) {
+           error("unknown register name x%d at %s", num, p);
+           exit(1);
+       }
+       return num;
+   }
+   else {
+       error("unknown register name at %s", p);
+       exit(1); // Just to avoid warning
+   }
+}
+
 Node *parse_statement(char *p) {
     Node *node = calloc(1, sizeof(Node));
-    // Accept only `add a0, zero, xxxx` or `jr ra` for now.
-    if (equal(p, "addi a0, zero, ")) {
-        p = skip(p, "addi a0, zero, ");
-        int value = skip_integer(&p, p);
+    // Accept only `addi ...` or `jr ra` for now.
+    if (startswith(p, "addi ")) {
+        p = skip(p, "addi");
+        p = skip_space(p);
+        node->rd = skip_register(&p, p);
+        p = skip_conmma_and_ignore_space(p);
+        node->rs1 = skip_register(&p, p);
+        p = skip_conmma_and_ignore_space(p);
+        int imm_value = skip_integer(&p, p);
         p = skip(p, "\n");
         node->kind = ND_INST_ADDI;
-        node->value = value;
+        node->imm = imm_value;
     }
-    else if (equal(p, "jr ra")) {
+    else if (startswith(p, "jr ra")) {
         p = skip(p, "jr ra");
         node->kind = ND_INST_JR;
     }
@@ -593,13 +803,16 @@ int main(int argc, char **argv) {
 
     gen_elf_header();
     gen_program_header_table();
+    
     gen_text_section();
+
     gen_data_section();
     gen_bss_section();
     gen_symtab_section();
     gen_strtab_section();
     gen_shstrtab_section();
     add_padding_before_section_header(); 
+    fix_elf_header();
     gen_section_header_table();
 
     return 0;

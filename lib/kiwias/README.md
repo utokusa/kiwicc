@@ -35,7 +35,8 @@ riscv64-unknown-linux-gnu-objdump -s tmp.o
 riscv64-unknown-linux-gnu-objdump -s -j .data tmp.o
 riscv64-unknown-linux-gnu-objdump -d -Mno-aliases tmp.o
 hexdump -v -C tmp.o
-xxd tmp.0
+xxd tmp.o
+xxd -c 4 tmp.o # with column length 4 bypte
 cmp -l out.o tmp.o
 diff <(xxd out.o) <(xxd tmp.o)
 ```
