@@ -65,9 +65,9 @@ static void add_default_include_paths(char *argv0)
 
   // Add standard include paths of gcc.
   // You can get these paths by "echo | riscv64-unknown-linux-gnu-gcc -E -Wp,-v -".
-  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include");
-  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/include-fixed");
-  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/10.2.0/../../../../riscv64-unknown-linux-gnu/include");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/11.1.0/include");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/11.1.0/include-fixed");
+  add_include_path("/opt/riscv/lib/gcc/riscv64-unknown-linux-gnu/11.1.0/../../../../riscv64-unknown-linux-gnu/include");
   add_include_path("/opt/riscv/sysroot/usr/include");
   
 }

@@ -12,7 +12,7 @@ RUN apt install -y autoconf automake autotools-dev curl libmpc-dev libmpfr-dev \
   libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils \
   bc zlib1g-dev libexpat-dev
 RUN apt install -y git
-RUN git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
+RUN git clone --recursive https://github.com/riscv/riscv-gnu-toolchain -b 2021.09.21 # riscv64-unknown-linux-gnu-gcc 11.1.0
 RUN apt install -y python3
 RUN cd riscv-gnu-toolchain && ./configure --prefix=/opt/riscv && make linux
 
@@ -32,7 +32,10 @@ RUN cd qemu-5.2.0/build/ && \
 ENV QEMU_LD_PREFIX=$RISCV/sysroot
 
 # Additional
-RUN apt install -y sudo vim gcc make binutils libc6-dev gdb
+RUN apt install -y sudo gcc make binutils libc6-dev gdb
+
+# Somehow got 404. So commented it out for now.
+# Run apt install -y sudo vim
 
 RUN adduser --disabled-password --gecos '' user
 RUN echo 'user ALL=(root) NOPASSWD:ALL' > /etc/sudoers.d/user
