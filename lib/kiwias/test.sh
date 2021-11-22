@@ -140,3 +140,12 @@ main:
     sub a0, a1, t1
     jr ra
 EOF
+
+# cmp_with_as <<EOF
+#     .text
+#     .globl main
+# main:
+#     la t1, i
+#     jr ra
+# EOF
+

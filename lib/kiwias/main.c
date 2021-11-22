@@ -21,6 +21,7 @@ typedef enum {
     ND_INST_JR,
     ND_INST_ADD,
     ND_INST_SUB,
+    ND_INST_LA,
 } NodeKind;
 
 typedef struct Node Node;
@@ -31,6 +32,7 @@ struct Node {
     unsigned rs1;
     unsigned rs2;
     unsigned rd;
+    char *symbol;
 };
 
 Node *nodes;
@@ -172,6 +174,13 @@ struct ITypeInst {
 };
 typedef struct ITypeInst ITypeInst;
 
+struct UTypeInst {
+    unsigned imm: 20;
+    unsigned rd: 5;
+    unsigned opecode: 7;
+};
+typedef struct UTypeInst UTypeInst;
+
 typedef enum {
     REG_ZERO = 0,
     REG_RA,
@@ -261,6 +270,23 @@ void output_r_type_inst(RTypeInst *inst) {
 
     fwrite(&data, sizeof(data), 1, out_file);
 }
+
+void output_u_type_inst(UTypeInst *inst) {
+    unsigned data = 0;
+    unsigned mask;
+
+    mask = 0b11111111111111111111000000000000;
+    data = data | (mask & ((inst->imm) << 12));
+
+    mask = 0b00000000000000000000111110000000;
+    data = data | (mask & ((inst->rd) << 7));
+
+    mask = 0b00000000000000000000000001111111;
+    data = data | (mask & inst->opecode);
+
+    fwrite(&data, sizeof(data), 1, out_file);
+}
+
 /*
  * ## Output of objdump
  * 0:   02a00513                addi    a0,zero,42
@@ -345,6 +371,26 @@ void gen_text_section() {
                 output_i_type_inst(&node);
             }
             break;
+            case ND_INST_LA:
+            {
+                // It will be transtated to `auipc rd, symbol[31:12]; addi rd, rd, symbol[31:12]`
+                UTypeInst node_auipc = {
+                    0, // Temporary value. It will be replaced by linker
+                    cur->rd,
+                    0b0010111
+                };
+                output_u_type_inst(&node_auipc);
+
+                ITypeInst node_addi = {
+                    0, // Temporary value. It will be replaced by linker
+                    cur->rd,
+                    0b000,
+                    cur->rd,
+                    0b0010011
+                };
+                output_i_type_inst(&node_addi);
+            }
+            break;
         } 
         cur = cur->next;
     }
@@ -419,13 +465,11 @@ void gen_shstrtab_section() {
 // ------------------------------------
 // Padding before section header table 
 // ------------------------------------
-unsigned short padding_before_section_header_data[] = {
-    0x0000, 0x0000, 0x0000
-};
-
 void add_padding_before_section_header() {
-    // TODO: Add padding dynamically
-    fwrite(&padding_before_section_header_data, sizeof(padding_before_section_header_data), 1, out_file); 
+    // Section header table should be aligned to 8 bytes
+    long pos = ftell(out_file);
+    int padding_size = pos % 8 ? 8 - (pos % 8) : 0;
+    fseek(out_file, padding_size, SEEK_CUR);
 }
 
 // ---------------------
@@ -619,6 +663,24 @@ int skip_integer(char **rest, char *p) {
     return value;
 }
 
+static bool is_alpha(char c) { 
+  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+static bool is_alnum(char c) {
+  return is_alpha(c) || isdigit(c);
+}
+
+char *skip_symbol(char **rest, char *p) {
+    // TODO: I didn't investigate the accurate spec of symbol
+    char *end = p;
+    while (*end && is_alnum(*end))
+        end++;
+    char *symbol_str = strndup(p, end - p);
+    *rest = end;
+    return symbol_str;
+}
+
 unsigned skip_register(char **rest, char *p) {
    if (startswith(p, "zero")) {
        *rest = skip(p, "zero");
@@ -769,7 +831,7 @@ unsigned skip_register(char **rest, char *p) {
 
 Node *parse_statement(char *p) {
     Node *node = calloc(1, sizeof(Node));
-    // Accept only `addi ...` or `jr ra` for now.
+    // Accept only limited instructions for now.
     if (startswith(p, "addi ")) {
         p = skip(p, "addi");
         p = skip_space(p);
@@ -805,6 +867,16 @@ Node *parse_statement(char *p) {
         p = skip(p, "\n");
         node->kind = ND_INST_SUB;
     }
+    else if (startswith(p, "la ")) {
+        // ex: la t1, global_symbol
+        p = skip(p, "la");
+        p = skip_space(p);
+        node->rd = skip_register(&p, p);
+        p = skip_comma_and_ignore_space(p);
+        node->symbol = skip_symbol(&p, p);
+        p = skip(p, "\n");
+        node->kind = ND_INST_LA;
+    }
     else if (startswith(p, "jr ra")) {
         p = skip(p, "jr ra");
         node->kind = ND_INST_JR;
@@ -816,7 +888,8 @@ bool is_instruction(char *p) {
     return startswith(p, "addi ") ||
         startswith(p, "jr ") ||
         startswith(p, "add ") ||
-        startswith(p, "sub ");
+        startswith(p, "sub ") ||
+        startswith(p, "la ");
 }
 
 Node *parse_asm(char *path) {
@@ -902,7 +975,7 @@ int main(int argc, char **argv) {
     gen_symtab_section();
     gen_strtab_section();
     gen_shstrtab_section();
-    add_padding_before_section_header(); 
+    add_padding_before_section_header();
     fix_elf_header();
     gen_section_header_table();
 

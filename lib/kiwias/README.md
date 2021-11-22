@@ -33,7 +33,7 @@ echo $?
 ```bash
 riscv64-unknown-linux-gnu-objdump -s tmp.o
 riscv64-unknown-linux-gnu-objdump -s -j .data tmp.o
-riscv64-unknown-linux-gnu-objdump -d -Mno-aliases tmp.o
+riscv64-unknown-linux-gnu-objdump -dr -t -Mno-aliases tmp.o
 hexdump -v -C tmp.o
 xxd tmp.o
 xxd -c 4 tmp.o # with column length 4 bypte
