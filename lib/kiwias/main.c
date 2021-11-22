@@ -416,15 +416,34 @@ void gen_bss_section() {
 // .symtab section 
 // ----------------------
 
-unsigned short symtab_section_data[] = {
-    0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0003, 0x0001, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0003, 0x0002,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0003, 0x0003, 0x0000, 0x0000, 0x0000, 0x0000,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 0x0010, 0x0001,
-    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+// Based on Elf64_Sym
+typedef struct {
+   unsigned st_name;
+   unsigned char st_info;
+   unsigned char st_other;
+   unsigned short st_shndx;
+   unsigned long st_value;
+   unsigned long st_size;
+} Elf64Symbol;
+
+// st_info
+typedef enum {
+    INFO_NOTYPE_LOCAL = 0,
+    INFO_SECTION_LOCAL = 3,
+    INFO_NOTYPE_GLOBAL = 0x10,
+} StInfoValue;
+
+// st_other is for visibility
+typedef enum {
+    VIS_DEFAULT = 0,
+} StOtherValue;
+
+Elf64Symbol symtab_section_data[] = {
+    {0, INFO_NOTYPE_LOCAL, VIS_DEFAULT, 0, 0, 0},
+    {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 1, 0, 0}, // .text
+    {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 2, 0, 0}, // .data
+    {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 3, 0, 0}, // .bss
+    {1, INFO_NOTYPE_GLOBAL, VIS_DEFAULT, 1, 0, 0}, // main
 };
 
 void gen_symtab_section() {
@@ -441,26 +460,42 @@ void gen_symtab_section() {
 // .strtab section 
 // ----------------------
 
-unsigned short strtab_section_data[] = {
-    0x6d00, 0x6961, 0x006e
+// unsigned char strtab_section_data[] = {
+//     '\0', 'm', 'a', 'i', 'n', '\0'
+// };
+
+char *strtab_section_strings[] = {
+    "",
+    "main"
 };
 
 void gen_strtab_section() {
-    fwrite(&strtab_section_data, sizeof(strtab_section_data), 1, out_file); 
+    // fwrite(&strtab_section_data, sizeof(strtab_section_data), 1, out_file); 
+    int n = sizeof(strtab_section_strings) / sizeof(strtab_section_strings[0]);
+    for (int i = 0; i < n; i++) {
+        fwrite(strtab_section_strings[i], strlen(strtab_section_strings[i]) + 1, 1, out_file);
+    }
 }
 
 // ----------------------
 // .shstrtab section 
 // ----------------------
-unsigned short shstrtab_section_data[] = {
-    0x2e00, 0x7973, 0x746d, 0x6261, 0x2e00,
-    0x7473, 0x7472, 0x6261, 0x2e00, 0x6873, 0x7473, 0x7472, 0x6261,
-    0x2e00, 0x6574, 0x7478, 0x2e00, 0x6164, 0x6174, 0x2e00, 0x7362,
-    0x0073
+
+char *shstrtab_section_strings[] = {
+    "",
+    ".symtab",
+    ".strtab",
+    ".shstrtab",
+    ".text",
+    ".data",
+    ".bss"
 };
 
 void gen_shstrtab_section() {
-    fwrite(&shstrtab_section_data, sizeof(shstrtab_section_data), 1, out_file); 
+    int n = sizeof(shstrtab_section_strings) / sizeof(shstrtab_section_strings[0]);
+    for (int i = 0; i < n; i++) {
+        fwrite(shstrtab_section_strings[i], strlen(shstrtab_section_strings[i]) + 1, 1, out_file);
+    }
 }
 
 // ------------------------------------
