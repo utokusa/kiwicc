@@ -430,7 +430,8 @@ unsigned short symtab_section_data[] = {
 void gen_symtab_section() {
     // .symtab should be aligned to 8 bytes
     long pos = ftell(out_file);
-    fseek(out_file, pos % 8, SEEK_CUR);
+    int padding_size = pos % 8 ? 8 - (pos % 8) : 0;
+    fseek(out_file, padding_size, SEEK_CUR);
     
     symtab_section_offset = ftell(out_file);
     fwrite(&symtab_section_data, sizeof(symtab_section_data), 1, out_file); 
