@@ -39,6 +39,11 @@ xxd tmp.o
 xxd -c 4 tmp.o # with column length 4 bypte
 cmp -l out.o tmp.o
 diff <(xxd out.o) <(xxd tmp.o)
+
+# debugging kiwias with gdb
+$ riscv64-unknown-linux-gnu-gdb kiwias
+(gdb) shell qemu-riscv64 -g 1234 ./kiwias examples/use_la/main.s -o tmp.o &
+(gdb) target remote :1234
 ```
 
 ## reference

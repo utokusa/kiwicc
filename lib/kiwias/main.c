@@ -13,7 +13,18 @@ static FILE *out_file;
 
 unsigned long text_section_offset = 0;
 unsigned long text_section_size = 0;
+unsigned long rela_text_section_offset = 0;
+unsigned long rela_text_section_size = 0;
+unsigned long data_section_offset = 0;
+unsigned long data_section_size = 0;
+unsigned long bss_section_offset = 0;
+unsigned long bss_section_size = 0;
 unsigned long symtab_section_offset = 0;
+unsigned long symtab_section_size = 0;
+unsigned long strtab_section_offset = 0;
+unsigned long strtab_section_size = 0;
+unsigned long shstrtab_section_offset = 0;
+unsigned long shstrtab_section_size = 0;
 
 
 typedef enum {
@@ -33,10 +44,73 @@ struct Node {
     unsigned rs2;
     unsigned rd;
     char *symbol;
+    long pos;
 };
 
 Node *nodes;
 
+
+typedef struct Symbol Symbol;
+struct Symbol {
+    char *name;
+    Symbol *next;
+};
+
+Symbol *symbols;
+
+bool find_symbol(char *name) {
+    Symbol *cur = symbols;
+    while (cur) {
+       if (!strcmp(name, cur->name)) {
+           return true;
+       }
+       cur = cur->next;
+    }
+    return false;
+}
+
+void add_symbol(char *name) {
+    name = strdup(name);
+    Symbol *cur = symbols;
+    if (!cur) {
+        symbols = calloc(1, sizeof(Symbol));
+        symbols->name = name;
+        return;
+    }
+    while (cur->next) {
+        cur = cur->next;
+    }
+    cur->next = calloc(1, sizeof(Symbol));
+    cur->next->name = name;
+}
+
+typedef struct Relocation Relocation;
+struct Relocation {
+    unsigned long pos;
+    char *name;
+    Relocation *next;
+    unsigned symtab_index_symbol;  // e.g. i
+    unsigned symtab_index_local_label; // .L0
+};
+
+Relocation *relocations;
+
+void add_relocation(unsigned long pos, char *name) {
+    name = strdup(name);
+    Relocation *cur = relocations;
+    if (!cur) {
+        relocations = calloc(1, sizeof(Relocation));
+        relocations->name = name;
+        relocations->pos = pos;
+        return;
+    }
+    while (cur->next) {
+        cur = cur->next;
+    }
+    cur->next = calloc(1, sizeof(Relocation));
+    cur->next->name = name;
+    cur->next->pos = pos;
+}
 // ------------
 //  Utility
 // ------------
@@ -402,14 +476,18 @@ void gen_text_section() {
 // .data section 
 // ----------------------
 void gen_data_section() {
-    // Currently it does nothing
+    data_section_offset = ftell(out_file);
+    // Do something
+    data_section_size = ftell(out_file) - data_section_offset;
 }
 
 // ----------------------
 // .bss section 
 // ----------------------
 void gen_bss_section() {
-    // Currently it does nothing
+    bss_section_offset = ftell(out_file);
+    // Do something
+    bss_section_size = ftell(out_file) - bss_section_offset;
 }
 
 // ----------------------
@@ -438,43 +516,190 @@ typedef enum {
     VIS_DEFAULT = 0,
 } StOtherValue;
 
-Elf64Symbol symtab_section_data[] = {
-    {0, INFO_NOTYPE_LOCAL, VIS_DEFAULT, 0, 0, 0},
-    {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 1, 0, 0}, // .text
-    {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 2, 0, 0}, // .data
-    {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 3, 0, 0}, // .bss
-    {1, INFO_NOTYPE_GLOBAL, VIS_DEFAULT, 1, 0, 0}, // main
-};
+// sh_info for .symtab's section header entry
+// One greater than the symbol table index of the last local symbol (binding STB_LOCAL).
+// http://www.skyfree.org/linux/references/ELF_Format.pdf
+unsigned sh_info_for_symtab = INIT_VAL;
+
+
+unsigned index_in_strtab(char *name);
+
+void update_relocation(char *name, int idx) {
+    Relocation *cur = relocations;
+    while (cur) {
+        if (!strcmp(cur->name, name)) {
+            cur->symtab_index_symbol = idx;
+        }
+        cur = cur->next;
+    }
+}
+
+void align_file(FILE *f, int align_to) {
+    long pos = ftell(f);
+    int padding_size = pos % align_to ? align_to - (pos % align_to) : 0;
+    fseek(f, padding_size, SEEK_CUR);
+}
 
 void gen_symtab_section() {
     // .symtab should be aligned to 8 bytes
-    long pos = ftell(out_file);
-    int padding_size = pos % 8 ? 8 - (pos % 8) : 0;
-    fseek(out_file, padding_size, SEEK_CUR);
+    
+    align_file(out_file, 8);
+    symtab_section_offset = ftell(out_file);
+
     
     symtab_section_offset = ftell(out_file);
-    fwrite(&symtab_section_data, sizeof(symtab_section_data), 1, out_file); 
+    int idx = 0;
+
+    Elf64Symbol init_symbol = {0, INFO_NOTYPE_LOCAL, VIS_DEFAULT, 0, 0, 0};
+    fwrite(&init_symbol, sizeof(Elf64Symbol), 1, out_file);
+    idx++;
+
+    Elf64Symbol text_symbol = {0, INFO_SECTION_LOCAL, VIS_DEFAULT, 1, 0, 0};
+    fwrite(&text_symbol, sizeof(Elf64Symbol), 1, out_file);
+    idx++;
+
+    bool rela_exists = relocations;
+    Elf64Symbol data_symbol = {0, INFO_SECTION_LOCAL, VIS_DEFAULT, rela_exists? 3 : 2, 0, 0};
+    fwrite(&data_symbol, sizeof(Elf64Symbol), 1, out_file);
+    idx++;
+
+    Elf64Symbol bss_symbol = {0, INFO_SECTION_LOCAL, VIS_DEFAULT, rela_exists? 4 : 3, 0, 0};
+    fwrite(&bss_symbol, sizeof(Elf64Symbol), 1, out_file);
+    idx++;
+
+    if (relocations) {
+        Relocation *cur = relocations;
+        while (cur) {
+            // Output .L0
+            // strtab's data is necessary here
+            Elf64Symbol symbol = {index_in_strtab(".L0 "), INFO_NOTYPE_LOCAL, VIS_DEFAULT, 1, cur->pos, 0};
+            fwrite(&symbol, sizeof(Elf64Symbol), 1, out_file);
+            cur->symtab_index_local_label = idx;
+            idx++;
+            cur = cur->next;
+        }
+    }
+    sh_info_for_symtab = idx;
+    Elf64Symbol main_symbol = {index_in_strtab("main"), INFO_NOTYPE_GLOBAL, VIS_DEFAULT, 1, 0, 0};
+    fwrite(&main_symbol, sizeof(Elf64Symbol), 1, out_file);
+    idx++;
+
+    if (symbols) {
+        Symbol *cur = symbols;
+        while (cur) {
+            // Output global variables which are not defined in the file.
+            unsigned name_index_in_strtab = index_in_strtab(cur->name);
+            Elf64Symbol symbol = {name_index_in_strtab, INFO_NOTYPE_GLOBAL, VIS_DEFAULT, 0, 0, 0};
+            fwrite(&symbol, sizeof(Elf64Symbol), 1, out_file);
+            update_relocation(cur->name, idx);
+            idx++;
+            cur = cur->next;
+        }
+    }
+    symtab_section_size = ftell(out_file) - symtab_section_offset;
 }
 
 // ----------------------
 // .strtab section 
 // ----------------------
 
-// unsigned char strtab_section_data[] = {
-//     '\0', 'm', 'a', 'i', 'n', '\0'
-// };
-
-char *strtab_section_strings[] = {
-    "",
-    "main"
+typedef struct StrtabRecord StrtabRecord;
+struct StrtabRecord {
+    char *name;
+    StrtabRecord *next;
 };
 
-void gen_strtab_section() {
-    // fwrite(&strtab_section_data, sizeof(strtab_section_data), 1, out_file); 
-    int n = sizeof(strtab_section_strings) / sizeof(strtab_section_strings[0]);
-    for (int i = 0; i < n; i++) {
-        fwrite(strtab_section_strings[i], strlen(strtab_section_strings[i]) + 1, 1, out_file);
+StrtabRecord init_strtab_record = {"", NULL};
+
+StrtabRecord *strtab_records = &init_strtab_record;
+
+void add_strtab_record(char *name) {
+    name = strdup(name);
+    StrtabRecord * cur = strtab_records;
+    if (!cur) {
+        strtab_records = calloc(1, sizeof(StrtabRecord));
+        strtab_records->name = name;
+        return;
     }
+    while (cur->next) {
+        cur = cur->next;
+    }
+    cur->next = calloc(1, sizeof(StrtabRecord));
+    cur->next->name = name;
+}
+
+void prepare_strtab_records() {
+    if (symbols)
+        add_strtab_record(".L0 ");
+    add_strtab_record("main");
+    Symbol *cur = symbols;
+    while (cur) {
+        add_strtab_record(cur->name);
+        cur = cur->next;
+    }
+}
+
+unsigned index_in_strtab(char *name) {
+    unsigned long idx = 0;
+    StrtabRecord *cur = strtab_records;
+    while (cur) {
+        if (!strcmp(name, cur->name))
+            return idx;
+        idx += strlen(cur->name) + 1;
+        cur = cur->next;
+    }
+    // Internal error
+    error("strtab record %s not found", name);
+    exit(1);
+}
+
+void gen_strtab_section() {
+    strtab_section_offset = ftell(out_file);
+    StrtabRecord *cur = strtab_records;
+    while (cur) {
+        fwrite(cur->name, strlen(cur->name) + 1, 1, out_file);
+        cur = cur->next;
+    }
+    strtab_section_size = ftell(out_file) - strtab_section_offset;
+}
+
+// ----------------------
+// .rela.text section 
+// ----------------------
+
+// Based on Elf64_Rela
+typedef struct Elf64Relocation Elf64Relocation;
+struct Elf64Relocation {
+    unsigned long r_offset;
+    unsigned r_type; // part of r_info of Elf64_Rela
+    unsigned r_symtab_idx; // part of r_info of Elf64_Rela
+    unsigned long r_addend;
+};
+
+void gen_rela_text_section() {
+
+    Relocation *cur = relocations;
+    if (cur)    
+        align_file(out_file, 8);
+
+    rela_text_section_offset = ftell(out_file);
+    while (cur) {
+      // Currently assumes that relocation is made only by la instruction  
+      Elf64Relocation rela_symbol = {cur->pos, 0x17, cur->symtab_index_symbol, 0};
+      fwrite(&rela_symbol, sizeof(Elf64Relocation), 1, out_file);
+      
+      Elf64Relocation rela_symbol_relax = {cur->pos, 0x33, 0, 0};
+      fwrite(&rela_symbol_relax, sizeof(Elf64Relocation), 1, out_file);
+
+      Elf64Relocation rela_local_label = {cur->pos + 4, 0x18, cur->symtab_index_local_label, 0};
+      fwrite(&rela_local_label, sizeof(Elf64Relocation), 1, out_file);
+      
+      Elf64Relocation rela_local_label_relax = {cur->pos + 4, 0x33, 0, 0};
+      fwrite(&rela_local_label_relax, sizeof(Elf64Relocation), 1, out_file);
+
+      cur = cur->next;
+    }
+    rela_text_section_size = ftell(out_file) - rela_text_section_offset;
 }
 
 // ----------------------
@@ -491,11 +716,38 @@ char *shstrtab_section_strings[] = {
     ".bss"
 };
 
+char *rela_text_section_name = ".rela.text";
+
+unsigned find_idx_in_shstrtab(char *name) {
+    unsigned idx = 0;
+    int n = sizeof(shstrtab_section_strings) / sizeof(shstrtab_section_strings[0]);
+    for (int i = 0; i < n; i++) {
+        char *cur = shstrtab_section_strings[i];
+        if (!strcmp(name, cur)) {
+            return idx;
+        }
+        // handle irregular pattern
+        if (!strcmp(cur, ".rela.text") && !strcmp(name, ".text")) {
+            return idx + 5;
+        }
+        idx += strlen(cur) + 1;
+    }
+    error("%s not found in shstrtab", name);
+    exit(1);
+}
+
 void gen_shstrtab_section() {
+    shstrtab_section_offset = ftell(out_file);
+
+    if (relocations) {
+        shstrtab_section_strings[4/*index of .text*/] = rela_text_section_name;
+    }
     int n = sizeof(shstrtab_section_strings) / sizeof(shstrtab_section_strings[0]);
     for (int i = 0; i < n; i++) {
         fwrite(shstrtab_section_strings[i], strlen(shstrtab_section_strings[i]) + 1, 1, out_file);
     }
+
+    shstrtab_section_size = ftell(out_file) - shstrtab_section_offset;
 }
 
 // ------------------------------------
@@ -503,9 +755,7 @@ void gen_shstrtab_section() {
 // ------------------------------------
 void add_padding_before_section_header() {
     // Section header table should be aligned to 8 bytes
-    long pos = ftell(out_file);
-    int padding_size = pos % 8 ? 8 - (pos % 8) : 0;
-    fseek(out_file, padding_size, SEEK_CUR);
+    align_file(out_file, 8);
 }
 
 // ---------------------
@@ -518,6 +768,18 @@ void fix_elf_header() {
     long offset_to_e_shoff = 0x28;
     fseek(out_file, offset_to_e_shoff, SEEK_SET);
     fwrite(&cur_pos, sizeof(cur_pos), 1, out_file);
+
+    long offset_to_e_shnum = 0x3c;
+    long offset_to_e_shstrndx = 0x3e;
+    if (relocations) {
+        unsigned short new_e_shnum_val = 8;
+        fseek(out_file, offset_to_e_shnum, SEEK_SET);
+        fwrite(&new_e_shnum_val, sizeof(new_e_shnum_val), 1, out_file);
+
+        unsigned short new_e_shstrndx_val = 7;
+        fseek(out_file, offset_to_e_shstrndx, SEEK_SET);
+        fwrite(&new_e_shstrndx_val, sizeof(new_e_shstrndx_val), 1, out_file);
+    }
 
     fseek(out_file, cur_pos, SEEK_SET);
 }
@@ -548,6 +810,7 @@ enum SectionHeaderTypeValues
     SH_TYPE_PROGBITS = 1,
     SH_TYPE_SYMTAB = 2,
     SH_TYPE_STRTAB = 3,
+    SH_TYPE_RELA = 4,
     SH_TYPE_NOBITS =  8
 };
 
@@ -556,42 +819,64 @@ enum SectionHeaderFlagsValues
 {
     SH_FLAG_NULL = 0,
     SH_FLAG_WA = 3,
-    SH_FLAG_AX = 6
+    SH_FLAG_AX = 6,
+    SH_FLAG_I = 0x40,
 };
 
-enum SectionHeaderNameValues
-{
-    SH_NAME_NULL = 0,
-    SH_NAME_TEXT = 0x1b,
-    SH_NAME_DATA = 0x21,
-    SH_NAME_BSS = 0x27,
-    SH_NAME_SYMTAB = 0x01,
-    SH_NAME_STRTAB = 0x09,
-    SH_NAME_SHSTRTAB = 0x11
-};
-
-static SectionHeaderEntry section_header_entries[] = {
-    {SH_NAME_NULL, SH_TYPE_NULL, SH_FLAG_NULL, 0, 0, 0, 0, 0, 0, 0},
-    {SH_NAME_TEXT, SH_TYPE_PROGBITS, SH_FLAG_AX, 0, INIT_VAL, INIT_VAL, 0, 0, 4, 0},
-    {SH_NAME_DATA, SH_TYPE_PROGBITS, SH_FLAG_WA, 0, INIT_VAL, 0, 0, 0, 1, 0},
-    {SH_NAME_BSS, SH_TYPE_NOBITS, SH_FLAG_WA, 0, INIT_VAL, 0, 0, 0, 1, 0},
-    {SH_NAME_SYMTAB, SH_TYPE_SYMTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x78, 5, 4, 8, 0x18},
-    {SH_NAME_STRTAB, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x6, 0, 0, 1, 0},
-    {SH_NAME_SHSTRTAB, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x002c, 0, 0, 1, 0}
-};
+SectionHeaderEntry sh_null = {INIT_VAL, SH_TYPE_NULL, SH_FLAG_NULL, 0, 0, 0, 0, 0, 0, 0};
+SectionHeaderEntry sh_text = {INIT_VAL, SH_TYPE_PROGBITS, SH_FLAG_AX, 0, INIT_VAL, INIT_VAL, 0, 0, 4, 0};
+SectionHeaderEntry sh_rela_text = {INIT_VAL, SH_TYPE_RELA, SH_FLAG_I, 0, INIT_VAL, INIT_VAL, 5, 1, 8, 0x18};
+SectionHeaderEntry sh_data = {INIT_VAL, SH_TYPE_PROGBITS, SH_FLAG_WA, 0, INIT_VAL, 0, 0, 0, 1, 0};
+SectionHeaderEntry sh_bss = {INIT_VAL, SH_TYPE_NOBITS, SH_FLAG_WA, 0, INIT_VAL, 0, 0, 0, 1, 0};
+SectionHeaderEntry sh_symtab = {INIT_VAL, SH_TYPE_SYMTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x78, 5, 4, 8, 0x18};
+SectionHeaderEntry sh_strtab = {INIT_VAL, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x6, 0, 0, 1, 0};
+SectionHeaderEntry sh_shstrtab = {INIT_VAL, SH_TYPE_STRTAB, SH_FLAG_NULL, 0, INIT_VAL, 0x002c, 0, 0, 1, 0};
 
 void gen_section_header_table() {
     // Update temporary values
-    section_header_entries[1].offset = text_section_offset;
-    section_header_entries[1].size = text_section_size;
-    unsigned long next_offset = text_section_offset + text_section_size;
-    section_header_entries[2].offset = next_offset;
-    section_header_entries[3].offset = next_offset;
-    section_header_entries[4].offset = symtab_section_offset;
-    section_header_entries[5].offset = symtab_section_offset + section_header_entries[5 - 1].size;
-    section_header_entries[6].offset = section_header_entries[6 - 1].offset + section_header_entries[6 - 1].size;
 
-    fwrite(&section_header_entries, sizeof(section_header_entries), 1, out_file);
+    fwrite(&sh_null, sizeof(SectionHeaderEntry), 1, out_file);
+
+    sh_text.offset = text_section_offset;
+    sh_text.size = text_section_size;
+    sh_text.name = find_idx_in_shstrtab(".text");
+    fwrite(&sh_text, sizeof(SectionHeaderEntry), 1, out_file);
+
+    if (relocations) {
+        sh_rela_text.offset = rela_text_section_offset;
+        sh_rela_text.size = rela_text_section_size;
+        sh_rela_text.name = find_idx_in_shstrtab(".rela.text");
+        fwrite(&sh_rela_text, sizeof(SectionHeaderEntry), 1, out_file);
+    }
+    sh_data.offset = data_section_offset;
+    sh_data.size = data_section_size;
+    sh_data.name = find_idx_in_shstrtab(".data");
+    fwrite(&sh_data, sizeof(SectionHeaderEntry), 1, out_file);
+
+    sh_bss.offset = bss_section_offset;
+    sh_bss.size = bss_section_size;
+    sh_bss.name = find_idx_in_shstrtab(".bss");
+    fwrite(&sh_bss, sizeof(SectionHeaderEntry), 1, out_file);
+
+    sh_symtab.offset = symtab_section_offset;
+    sh_symtab.size = symtab_section_size;
+    sh_symtab.name = find_idx_in_shstrtab(".symtab");
+    sh_symtab.info = sh_info_for_symtab;
+    if (relocations) {
+        // TODO: This logic should be wrong
+        sh_symtab.link = 6;
+    }
+    fwrite(&sh_symtab, sizeof(SectionHeaderEntry), 1, out_file);
+
+    sh_strtab.offset = strtab_section_offset;
+    sh_strtab.size = strtab_section_size;
+    sh_strtab.name = find_idx_in_shstrtab(".strtab");
+    fwrite(&sh_strtab, sizeof(SectionHeaderEntry), 1, out_file);
+
+    sh_shstrtab.offset = shstrtab_section_offset;
+    sh_shstrtab.size = shstrtab_section_size; 
+    sh_shstrtab.name = find_idx_in_shstrtab(".shstrtab");
+    fwrite(&sh_shstrtab, sizeof(SectionHeaderEntry), 1, out_file);
 }
 
 
@@ -714,6 +999,8 @@ char *skip_symbol(char **rest, char *p) {
         end++;
     char *symbol_str = strndup(p, end - p);
     *rest = end;
+    if (!find_symbol(symbol_str))
+        add_symbol(symbol_str);
     return symbol_str;
 }
 
@@ -865,8 +1152,13 @@ unsigned skip_register(char **rest, char *p) {
    }
 }
 
+
+int instruction_size = 4;
+unsigned long cur_pos = 0;
+
 Node *parse_statement(char *p) {
     Node *node = calloc(1, sizeof(Node));
+    node->pos = cur_pos;
     // Accept only limited instructions for now.
     if (startswith(p, "addi ")) {
         p = skip(p, "addi");
@@ -880,6 +1172,7 @@ Node *parse_statement(char *p) {
         p = skip(p, "\n");
         node->kind = ND_INST_ADDI;
         node->imm = imm_value;
+        cur_pos += instruction_size;
     }
     else if (startswith(p, "add ")) {
         p = skip(p, "add");
@@ -891,6 +1184,7 @@ Node *parse_statement(char *p) {
         node->rs2 = skip_register(&p, p);
         p = skip(p, "\n");
         node->kind = ND_INST_ADD;
+        cur_pos += instruction_size;
     }
     else if (startswith(p, "sub ")) {
         p = skip(p, "sub");
@@ -902,6 +1196,7 @@ Node *parse_statement(char *p) {
         node->rs2 = skip_register(&p, p);
         p = skip(p, "\n");
         node->kind = ND_INST_SUB;
+        cur_pos += instruction_size;
     }
     else if (startswith(p, "la ")) {
         // ex: la t1, global_symbol
@@ -910,12 +1205,15 @@ Node *parse_statement(char *p) {
         node->rd = skip_register(&p, p);
         p = skip_comma_and_ignore_space(p);
         node->symbol = skip_symbol(&p, p);
+        add_relocation(node->pos, node->symbol);
         p = skip(p, "\n");
         node->kind = ND_INST_LA;
+        cur_pos += instruction_size * 2;
     }
     else if (startswith(p, "jr ra")) {
         p = skip(p, "jr ra");
         node->kind = ND_INST_JR;
+        cur_pos += instruction_size;
     }
     return node;
 }
@@ -1008,8 +1306,11 @@ int main(int argc, char **argv) {
 
     gen_data_section();
     gen_bss_section();
+
+    prepare_strtab_records();
     gen_symtab_section();
     gen_strtab_section();
+    gen_rela_text_section();
     gen_shstrtab_section();
     add_padding_before_section_header();
     fix_elf_header();

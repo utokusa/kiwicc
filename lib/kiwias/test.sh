@@ -38,7 +38,7 @@ function cmp_with_as() {
     echo "$input"
     echo "$input" | riscv64-unknown-linux-gnu-as -o tmp_expected.o -
     echo "$input" | qemu-riscv64 ./kiwias -
-    if ! diff <(xxd -b tmp_expected.o) <(xxd -b out.o)
+    if ! diff <(xxd tmp_expected.o) <(xxd out.o)
     then
         echo [Error] The contents of the object files are different
         echo ---------[Actual]------------
@@ -141,11 +141,20 @@ main:
     jr ra
 EOF
 
-# cmp_with_as <<EOF
-#     .text
-#     .globl main
-# main:
-#     la t1, i
-#     jr ra
-# EOF
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    la t1, global_symbol
+    jr ra
+EOF
 
+cmp_with_as <<EOF
+    .text
+    .globl main
+main:
+    la t1, global_symbol1
+    la t2, global_symbol1
+    la t3, global_symbol2
+    jr ra
+EOF
